@@ -43,6 +43,42 @@ std::vector<Line> PointsGeometry::findHyperplanes() const {
     return hyperplanes;
 }
 
+void PointsGeometry::distinguishVeldkampLines(std::pair<std::vector<Line>, std::vector<Line>>& lines) const {
+    // lines.first = exc lines
+    // lines.second = proj lines
+    size_t firstsz = lines.first.size();
+    for (size_t i = 0; i < firstsz; ++i) {
+        bool notYetFound = true;
+        for (size_t j = 0, secondsz = lines.second.size(); j < secondsz; ++j) {
+            if (lines.first[i].intersects(lines.second[j]).size() == 1) {
+                // swap the exc line at the end to pop and put in proj later.
+                // lines.first.size() - firstsz is the number of lines to exchange from the end of exc lines.
+                std::swap(lines.first[i--], lines.first[--firstsz]); // notice the post and pre decrementation.
+                notYetFound = false;
+                break;
+            }
+        }
+
+        if (notYetFound) {
+            for (size_t j = i + 1; j < firstsz; ++j) {
+                if (lines.first[i].intersects(lines.first[j]).size() == 1) {
+                    // both needs to be exchanged.
+                    std::swap(lines.first[j], lines.first[--firstsz]); // j before i since j > i (no need to decrement j).
+                    std::swap(lines.first[i--], lines.first[--firstsz]);
+                    break;
+                }
+            }
+        }
+    }
+
+    size_t nbExchangesRequired = lines.first.size() - firstsz;
+    lines.second.reserve(nbExchangesRequired);
+    for (size_t i = nbExchangesRequired; --i;) { // reverse loop stylz
+        lines.second.push_back(lines.first[firstsz + i - 1]);
+    }
+    lines.first.erase(lines.first.begin() + firstsz, lines.first.end());
+}
+
 bool PointsGeometry::isHyperplane(const Line& potentialHyperplane) const {
     for (const Line& line : lines) {
         Line intersect = potentialHyperplane.intersects(line);
