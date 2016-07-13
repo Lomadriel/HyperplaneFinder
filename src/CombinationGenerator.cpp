@@ -15,7 +15,7 @@ void CombinationGenerator::initialize(const int n, const int k, const unsigned l
 
     m_vecCurrCombination.clear();
 
-    for(unsigned int i = 0; i < k; i++) {
+    for (unsigned int i = 0; i < k; i++) {
         m_vecCurrCombination.push_back(i);
     }
 }

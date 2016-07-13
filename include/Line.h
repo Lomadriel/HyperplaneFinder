@@ -8,6 +8,8 @@ class Line {
 public:
     Line(const std::vector<unsigned int>& points);
 
+    Line(const std::initializer_list<unsigned int>& points);
+
     Line(std::vector<unsigned int>&& points);
 
     Line(const Line& line) = default;

@@ -6,6 +6,10 @@ Line::Line(const std::vector<unsigned int>& points)
     : points(points) {
 }
 
+Line::Line(const std::initializer_list<unsigned int>& points)
+    : points(points) {
+}
+
 Line::Line(std::vector<unsigned int>&& points)
     : points(std::move(points)) {
 }

@@ -165,6 +165,62 @@ std::vector<Line> PointsGeometry::findVeldkampLines(const std::vector<Line>& vel
     return veldkampLines;
 }
 
+std::pair<std::vector<Line>, std::vector<Line>> PointsGeometry::findVeldkampLinesD4(const std::vector<Line>& veldkampPoints) const {
+    std::vector<Line> veldkampLineExc; // veldkamp lines supposed exceptional
+    std::vector<Line> veldkampLineProj; // veldkamp lines projected
+
+    CombinationGenerator gen;
+    gen.initialize(static_cast<unsigned int>(veldkampPoints.size()), 2);
+
+    std::vector<unsigned int> currentCombination;
+
+    while (!gen.isFinished()) {
+        currentCombination = gen.nextCombination();
+
+        std::vector<Line> core;
+        const Line& h1 = veldkampPoints[currentCombination[0]];
+        const Line& h2 = veldkampPoints[currentCombination[1]];
+        const Line& intersection12 = h1.intersects(h2);
+
+        for (const Line& veldkampPoint : veldkampPoints) {
+            const Line& intersection10 = h1.intersects(veldkampPoint);
+            const Line& intersection20 = h2.intersects(veldkampPoint);
+
+            if (intersection12 == intersection10 && intersection12 == intersection20 && intersection10 == intersection20) {
+                core.push_back(veldkampPoint);
+            }
+        }
+
+        CombinationGenerator gen2;
+        gen2.initialize(static_cast<unsigned int>(veldkampPoints.size()), 2);
+        std::vector<unsigned int> currentCombination2;
+
+        while (!gen.isFinished()) {
+            currentCombination2 = gen.nextCombination();
+
+            const Line& ha = veldkampPoints[currentCombination2[0]];
+            const Line& hb = veldkampPoints[currentCombination2[1]];
+            const Line& intersectionAB = ha.intersects(hb);
+
+            if (intersection12 == intersectionAB) {
+                if (core.size() == 2) {
+                    veldkampLineProj.push_back(std::move(Line({currentCombination[0],
+                                                               currentCombination[1],
+                                                               currentCombination2[0],
+                                                               currentCombination2[1]})));
+                } else {
+                    veldkampLineExc.push_back(std::move(Line({currentCombination[0],
+                                                               currentCombination[1],
+                                                               currentCombination2[0],
+                                                               currentCombination2[1]})));
+                }
+            }
+        }
+    }
+
+    return std::make_pair(std::move(veldkampLineExc), std::move(veldkampLineProj));
+};
+
 Line PointsGeometry::computeComplementHyperplane(const Line& h1,
                                                  const Line& h2,
                                                  const std::vector<unsigned int>& elements1) const {

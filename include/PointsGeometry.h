@@ -40,7 +40,7 @@ public:
     std::vector<Line> findHyperplanes() const;
 
     static std::vector<Line> computeCartesianProduct(const std::vector<Line>& geometry,
-                                                     unsigned int numberOfPoints,
+                                                     const unsigned int numberOfPoints,
                                                      const Line& line);
 
     std::vector<Line> computeHyperplanes() const;
@@ -52,7 +52,7 @@ public:
 
     std::vector<Line> findVeldkampLines(const std::vector<Line>& veldkampPoints) const;
 
-    //std::pair<std::vector<Line>, std::vector<Line>> findVeldkampLinesD4(const std::vector<Line>& veldkampPoints) const;
+    std::pair<std::vector<Line>, std::vector<Line>> findVeldkampLinesD4(const std::vector<Line>& veldkampPoints) const;
 
 private:
     bool isHyperplane(const Line& potentialHyperplane) const;
