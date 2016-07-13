@@ -40,6 +40,8 @@ public:
 
     Line unions(const Line& line) const;
 
+    Line complementSymmetricDifference(const std::vector<unsigned int> set, const Line& line) const;
+
     bool isInclude(const Line& line) const;
 
     /* Operators */

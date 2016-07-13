@@ -151,7 +151,7 @@ std::vector<Line> PointsGeometry::findVeldkampLines(const std::vector<Line>& vel
         currentCombination = gen.nextCombination();
         const Line& h1 = veldkampPoints[currentCombination[0]];
         const Line& h2 = veldkampPoints[currentCombination[1]];
-        const Line& hyperplane = computeComplementHyperplane(h1, h2, elements);
+        const Line& hyperplane = h1.complementSymmetricDifference(elements, h2);
 
         unsigned int index3 =
                 std::lower_bound(veldkampPoints.begin(), veldkampPoints.end(), hyperplane) - veldkampPoints.begin();

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 
 #include <Line.h>
 #include <PointsGeometry.h>
@@ -17,6 +18,8 @@ int main() {
 
     PointsGeometry geometry(9, std::move(lines));
 
+    auto begin = chrono::high_resolution_clock::now();
+
     std::vector<Line> hyperplanes = geometry.findHyperplanes();
     cout << hyperplanes.size() << endl;
     std::sort(hyperplanes.begin(), hyperplanes.end());
@@ -27,6 +30,11 @@ int main() {
     std::vector<Line> hyperplanesX3 = geometry.computeHyperplanes();
     cout << hyperplanesX3.size() << endl;
     std::sort(hyperplanesX3.begin(), hyperplanesX3.end());
+
+    auto end = chrono::high_resolution_clock::now();
+    auto dur = end - begin;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
+    cout << "Time: " << ms << endl;
 
     return 0;
 }

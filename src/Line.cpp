@@ -67,13 +67,9 @@ Line Line::addScalar(const unsigned int scalar) const {
 Line Line::intersects(const Line& line) const {
     std::vector<unsigned int> pts;
 
-    unsigned int point;
-    for (unsigned int i = 0; i < line.size(); ++i) {
-        point = line.getPoint(i);
-        if (contains(point)) {
-            pts.push_back(point);
-        }
-    }
+    std::set_intersection(points.begin(), points.end(),
+                          line.points.begin(), line.points.end(),
+                          std::back_inserter(pts));
 
     return Line(std::move(pts));
 }
@@ -81,15 +77,24 @@ Line Line::intersects(const Line& line) const {
 Line Line::unions(const Line& line) const {
     std::vector<unsigned int> pts = points;
 
-    unsigned int point;
-    for (unsigned int i = 0; i < line.size(); ++i) {
-        point = line.getPoint(i);
-        if (std::find(pts.begin(), pts.end(), point) != pts.end()) {
-            pts.push_back(point);
-        }
-    }
+    std::set_union(points.begin(), points.end(), line.points.begin(), line.points.end(), std::back_inserter(pts));
 
     return Line(std::move(pts));
+}
+
+Line Line::complementSymmetricDifference(const std::vector<unsigned int> set, const Line& line) const {
+    std::vector<unsigned int> symmetric_difference;
+    std::vector<unsigned int> complement_symmetric_difference;
+
+    std::set_symmetric_difference(points.begin(), points.end(),
+                                  line.points.begin(), line.points.end(),
+                                  std::back_inserter(symmetric_difference));
+
+    std::set_difference(set.begin(), set.end(),
+                        symmetric_difference.begin(), symmetric_difference.end(),
+                        std::back_inserter(complement_symmetric_difference));
+
+    return Line(std::move(complement_symmetric_difference));
 }
 
 bool Line::isInclude(const Line& line) const {
