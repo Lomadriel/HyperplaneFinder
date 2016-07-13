@@ -54,6 +54,8 @@ public:
 
     //std::pair<std::vector<Line>, std::vector<Line>> findVeldkampLinesD4(const std::vector<Line>& veldkampPoints) const;
 
+    void distinguishVeldkampLines(std::pair<std::vector<Line>, std::vector<Line>>& lines) const;
+
 private:
     bool isHyperplane(const Line& potentialHyperplane) const;
 
