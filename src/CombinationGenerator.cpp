@@ -23,13 +23,13 @@ void CombinationGenerator::initialize(const int n, const int k, const unsigned l
 unsigned long long CombinationGenerator::computeBinomialCoefficient(int n, int k) {
     assert(n > k && n > 1);
 
-    if(k > n - k) {
+    if (k > n - k) {
         k = n - k;
     }
 
     unsigned long long c = 1;
 
-    for(int i = 1; i < k+1; i++) {
+    for (int i = 1; i < k+1; i++) {
         c *= n - (k - i);
         c /= i;
     }
@@ -37,28 +37,28 @@ unsigned long long CombinationGenerator::computeBinomialCoefficient(int n, int k
     return c;
 }
 
-unsigned long long CombinationGenerator::getNumLeft() {
+unsigned long long CombinationGenerator::getNumLeft() const {
     return m_iNumLeft;
 }
 
 bool CombinationGenerator::isFinished() const {
-    return m_iNumLeft == 0 ;
+    return m_iNumLeft == 0;
 }
 
 std::vector<unsigned int> CombinationGenerator::nextCombination() {
-    if(m_iNumLeft == m_iNumCombinations) {
+    if (m_iNumLeft == m_iNumCombinations) {
         m_iNumLeft -= 1;
         return m_vecCurrCombination;
     }
 
     int i = k - 1;
-    while(m_vecCurrCombination[i] == n - k + i) {
+    while (m_vecCurrCombination[i] == n - k + i) {
         i--;
     }
 
     m_vecCurrCombination[i] += 1;
 
-    for(int j = i; j < k; j++) {
+    for (int j = i; j < k; j++) {
         m_vecCurrCombination[j] = m_vecCurrCombination[i] + j - i;
     }
 

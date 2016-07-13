@@ -16,7 +16,7 @@ public:
 
     static unsigned long long computeBinomialCoefficient(int n, int k);
 
-    unsigned long long getNumLeft();
+    unsigned long long getNumLeft() const;
 
     bool isFinished() const;
 
