@@ -201,7 +201,8 @@ std::vector<Line> PointsGeometry::findVeldkampLines(const std::vector<Line>& vel
     return veldkampLines;
 }
 
-std::pair<std::vector<Line>, std::vector<Line>> PointsGeometry::findVeldkampLinesD4(const std::vector<Line>& veldkampPoints) const {
+std::pair<std::vector<Line>, std::vector<Line>> PointsGeometry::findVeldkampLinesP4(
+        const std::vector<Line>& veldkampPoints) const {
     std::vector<Line> veldkampLineExc; // veldkamp lines supposed exceptional
     std::vector<Line> veldkampLineProj; // veldkamp lines projected
 
@@ -213,42 +214,46 @@ std::pair<std::vector<Line>, std::vector<Line>> PointsGeometry::findVeldkampLine
     while (!gen.isFinished()) {
         currentCombination = gen.nextCombination();
 
-        std::vector<Line> core;
+        std::vector<std::pair<Line, unsigned int>> sameCore;
         const Line& h1 = veldkampPoints[currentCombination[0]];
         const Line& h2 = veldkampPoints[currentCombination[1]];
         const Line& intersection12 = h1.intersects(h2);
 
-        for (const Line& veldkampPoint : veldkampPoints) {
-            const Line& intersection10 = h1.intersects(veldkampPoint);
-            const Line& intersection20 = h2.intersects(veldkampPoint);
+        for (unsigned int i = 0; i < veldkampPoints.size(); ++i) {
+            const Line& intersection1i = h1.intersects(veldkampPoints[i]);
+            const Line& intersection2i = h2.intersects(veldkampPoints[i]);
 
-            if (intersection12 == intersection10 && intersection12 == intersection20 && intersection10 == intersection20) {
-                core.push_back(veldkampPoint);
+            if (intersection12 == intersection1i
+                && intersection12 == intersection2i
+                && intersection1i == intersection2i) {
+                sameCore.push_back(std::make_pair(veldkampPoints[i], i));
             }
         }
 
         CombinationGenerator gen2;
-        gen2.initialize(static_cast<unsigned int>(veldkampPoints.size()), 2);
+        gen2.initialize(static_cast<unsigned int>(sameCore.size()), 2);
         std::vector<unsigned int> currentCombination2;
 
-        while (!gen.isFinished()) {
-            currentCombination2 = gen.nextCombination();
+        while (!gen2.isFinished()) {
+            currentCombination2 = gen2.nextCombination();
 
-            const Line& ha = veldkampPoints[currentCombination2[0]];
-            const Line& hb = veldkampPoints[currentCombination2[1]];
+            const Line& ha = sameCore[currentCombination2[0]].first;
+            const Line& hb = sameCore[currentCombination2[1]].first;
             const Line& intersectionAB = ha.intersects(hb);
 
             if (intersection12 == intersectionAB) {
-                if (core.size() == 2) {
-                    veldkampLineProj.push_back(std::move(Line({currentCombination[0],
-                                                               currentCombination[1],
-                                                               currentCombination2[0],
-                                                               currentCombination2[1]})));
-                } else {
-                    veldkampLineExc.push_back(std::move(Line({currentCombination[0],
-                                                               currentCombination[1],
-                                                               currentCombination2[0],
-                                                               currentCombination2[1]})));
+                Line line = Line({currentCombination[0],
+                                 currentCombination[1],
+                                 sameCore[currentCombination2[0]].second,
+                                 sameCore[currentCombination2[1]].second});
+
+                if (std::find(veldkampLineExc.begin(), veldkampLineExc.end(), line) == veldkampLineExc.end()
+                        && std::find(veldkampLineProj.begin(), veldkampLineProj.end(), line) == veldkampLineProj.end()) {
+                    if (sameCore.size() == 2) {
+                        veldkampLineProj.push_back(std::move(line));
+                    } else {
+                        veldkampLineExc.push_back(std::move(line));
+                    }
                 }
             }
         }

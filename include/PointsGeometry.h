@@ -52,7 +52,7 @@ public:
 
     std::vector<Line> findVeldkampLines(const std::vector<Line>& veldkampPoints) const;
 
-    std::pair<std::vector<Line>, std::vector<Line>> findVeldkampLinesD4(const std::vector<Line>& veldkampPoints) const;
+    std::pair<std::vector<Line>, std::vector<Line>> findVeldkampLinesP4(const std::vector<Line>& veldkampPoints) const;
 
     void distinguishVeldkampLines(std::pair<std::vector<Line>, std::vector<Line>>& lines) const;
 

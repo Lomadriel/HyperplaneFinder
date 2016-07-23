@@ -21,7 +21,7 @@ void CombinationGenerator::initialize(const int n, const int k, const unsigned l
 }
 
 unsigned long long CombinationGenerator::computeBinomialCoefficient(int n, int k) {
-    assert(n > k && n > 1);
+    assert(n >= k && n > 1);
 
     if (k > n - k) {
         k = n - k;

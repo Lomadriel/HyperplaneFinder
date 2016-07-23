@@ -4,14 +4,17 @@
 
 Line::Line(const std::vector<unsigned int>& points)
     : points(points) {
+    std::sort(this->points.begin(), this->points.end());
 }
 
 Line::Line(const std::initializer_list<unsigned int>& points)
     : points(points) {
+    std::sort(this->points.begin(), this->points.end());
 }
 
 Line::Line(std::vector<unsigned int>&& points)
     : points(std::move(points)) {
+    std::sort(this->points.begin(), this->points.end());
 }
 
 
