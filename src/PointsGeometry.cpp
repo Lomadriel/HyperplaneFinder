@@ -73,8 +73,8 @@ void PointsGeometry::distinguishVeldkampLines(std::pair<std::vector<Line>, std::
 
     size_t nbExchangesRequired = lines.first.size() - firstsz;
     lines.second.reserve(nbExchangesRequired);
-    for (size_t i = nbExchangesRequired; --i;) { // reverse loop stylz
-        lines.second.push_back(lines.first[firstsz + i - 1]);
+    for (size_t i = nbExchangesRequired; i--;) { // reverse loop stylz
+        lines.second.push_back(lines.first[firstsz + i]);
     }
     lines.first.erase(lines.first.begin() + firstsz, lines.first.end());
 }
