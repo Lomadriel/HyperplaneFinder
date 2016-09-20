@@ -39,7 +39,6 @@ std::vector<Line> PointsGeometry::findHyperplanes() const {
             }
         }
     }
-
     return hyperplanes;
 }
 
@@ -48,26 +47,18 @@ void PointsGeometry::distinguishVeldkampLines(std::pair<std::vector<Line>, std::
     // lines.second = proj lines
     size_t firstsz = lines.first.size();
     for (size_t i = 0; i < firstsz; ++i) {
-        bool notYetFound = true;
+        bool trulyExceptional = false;
         for (size_t j = 0, secondsz = lines.second.size(); j < secondsz; ++j) {
-            if (lines.first[i].intersects(lines.second[j]).size() == 1) {
-                // swap the exc line at the end to pop and put in proj later.
-                // lines.first.size() - firstsz is the number of lines to exchange from the end of exc lines.
-                std::swap(lines.first[i--], lines.first[--firstsz]); // notice the post and pre decrementation.
-                notYetFound = false;
+            if (lines.first[i].intersects(lines.second[j]).size() > 1) {
+                trulyExceptional = true; // this exceptional line is truly exceptional.
                 break;
             }
         }
 
-        if (notYetFound) {
-            for (size_t j = i + 1; j < firstsz; ++j) {
-                if (lines.first[i].intersects(lines.first[j]).size() == 1) {
-                    // both needs to be exchanged.
-                    std::swap(lines.first[j], lines.first[--firstsz]); // j before i since j > i (no need to decrement j).
-                    std::swap(lines.first[i--], lines.first[--firstsz]);
-                    break;
-                }
-            }
+        if (!trulyExceptional) { // this line is simply a projective one finally...
+            // swap the exc line at the end to pop and put in proj later.
+            // lines.first.size() - firstsz is the number of lines to exchange from the end of exc lines.
+            std::swap(lines.first[i--], lines.first[--firstsz]); // notice the post and pre decrementation.
         }
     }
 
