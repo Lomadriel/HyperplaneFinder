@@ -47,7 +47,7 @@ const std::vector<unsigned int>& Line::getPoints() const {
 }
 
 Line Line::addLine(const Line& line) const {
-    std::vector<unsigned int> pts;
+    std::vector<unsigned int> pts(this->points);
 
     for (unsigned int i = 0; i < line.size(); ++i) {
         pts.push_back(line.getPoint(i));
