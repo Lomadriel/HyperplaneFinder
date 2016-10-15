@@ -100,8 +100,8 @@ std::vector<Line> PointsGeometry::computeCartesianProduct(const std::vector<Line
     }
 
     std::vector<unsigned int> pts;
-    pts.reserve(line.size());
     for (unsigned int i = 0; i < numberOfPoints; ++i) {
+        pts.reserve(line.size());
         for (unsigned int j = 0; j < line.size(); ++j) {
             pts[j] = i + j * numberOfPoints;
         }
