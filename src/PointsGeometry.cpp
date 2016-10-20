@@ -294,22 +294,14 @@ void PointsGeometry::distinguishVeldkampLines(std::pair<std::vector<Line>, std::
             }
         }
 
+        // still not truly exceptional.
         if (!trulyExceptional) { // this line is simply a projective one finally...
-            // swap the exc line at the end to pop and put in proj later.
-            // lines.first.size() - firstsz is the number of lines to exchange from the end of exc lines.
+            // swap the exc line at the end to pop and put in proj.
             std::swap(lines.first[i--], lines.first[--firstsz]); // notice the post and pre decrementation.
+            lines.second.push_back(lines.first.back());          
+            lines.first.erase(lines.first.end() - 1, lines.first.end());
         }
     }
-
-    /*size_t nbExchangesRequired = lines.first.size() - firstsz;
-    lines.second.reserve(nbExchangesRequired);
-    for (size_t i = nbExchangesRequired; i--;) { // reverse loop stylz
-        lines.second.push_back(lines.first[firstsz + i]);
-    }*/
-
-    std::move(lines.first.begin() + firstsz, lines.first.end(), std::back_inserter(lines.second));
-
-    lines.first.erase(lines.first.begin() + firstsz, lines.first.end());
 }
 
 Line PointsGeometry::computeComplementHyperplane(const Line& h1,
