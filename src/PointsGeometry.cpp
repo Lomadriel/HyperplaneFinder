@@ -1,9 +1,11 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <thread>
 
 #include <CombinationGenerator.h>
 #include <PointsGeometry.h>
+#include <future>
 
 PointsGeometry::PointsGeometry(const unsigned int numberOfPoints,
                                const std::vector<Line>& lines)
@@ -277,6 +279,37 @@ std::pair<std::vector<Line>, std::vector<Line>> PointsGeometry::findVeldkampLine
     }
 
     return std::make_pair(std::move(veldkampLineExc), std::move(veldkampLineProj));
+}
+
+void PointsGeometry::distinguishVeldkampLines(std::pair<std::vector<Line>, std::vector<Line>>& lines) const {
+    // lines.first = exc lines
+    // lines.second = proj lines
+    size_t firstsz = lines.first.size();
+    for (size_t i = 0; i < firstsz; ++i) {
+        bool trulyExceptional = false;
+        for (size_t j = 0, secondsz = lines.second.size(); j < secondsz; ++j) {
+            if (lines.first[i].intersects(lines.second[j]).size() > 1) {
+                trulyExceptional = true; // this exceptional line is truly exceptional.
+                break;
+            }
+        }
+
+        if (!trulyExceptional) { // this line is simply a projective one finally...
+            // swap the exc line at the end to pop and put in proj later.
+            // lines.first.size() - firstsz is the number of lines to exchange from the end of exc lines.
+            std::swap(lines.first[i--], lines.first[--firstsz]); // notice the post and pre decrementation.
+        }
+    }
+
+    /*size_t nbExchangesRequired = lines.first.size() - firstsz;
+    lines.second.reserve(nbExchangesRequired);
+    for (size_t i = nbExchangesRequired; i--;) { // reverse loop stylz
+        lines.second.push_back(lines.first[firstsz + i]);
+    }*/
+
+    std::move(lines.first.begin() + firstsz, lines.first.end(), std::back_inserter(lines.second));
+
+    lines.first.erase(lines.first.begin() + firstsz, lines.first.end());
 }
 
 Line PointsGeometry::computeComplementHyperplane(const Line& h1,

@@ -59,6 +59,8 @@ public:
 
     void distinguishVeldkampLines(std::pair<std::vector<Line>, std::vector<Line>>& lines) const;
 
+    std::vector<Entry> makeTable(const std::vector<Line>& hyperplanes) const;
+
 private:
     bool isHyperplane(const Line& potentialHyperplane) const;
 
