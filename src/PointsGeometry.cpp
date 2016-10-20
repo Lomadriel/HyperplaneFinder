@@ -42,34 +42,6 @@ std::vector<Line> PointsGeometry::findHyperplanes() const {
     return hyperplanes;
 }
 
-void PointsGeometry::distinguishVeldkampLines(std::pair<std::vector<Line>, std::vector<Line>>& lines) const {
-    // lines.first = exc lines
-    // lines.second = proj lines
-    size_t firstsz = lines.first.size();
-    for (size_t i = 0; i < firstsz; ++i) {
-        bool trulyExceptional = false;
-        for (size_t j = 0, secondsz = lines.second.size(); j < secondsz; ++j) {
-            if (lines.first[i].intersects(lines.second[j]).size() > 1) {
-                trulyExceptional = true; // this exceptional line is truly exceptional.
-                break;
-            }
-        }
-
-        if (!trulyExceptional) { // this line is simply a projective one finally...
-            // swap the exc line at the end to pop and put in proj later.
-            // lines.first.size() - firstsz is the number of lines to exchange from the end of exc lines.
-            std::swap(lines.first[i--], lines.first[--firstsz]); // notice the post and pre decrementation.
-        }
-    }
-
-    size_t nbExchangesRequired = lines.first.size() - firstsz;
-    lines.second.reserve(nbExchangesRequired);
-    for (size_t i = nbExchangesRequired; i--;) { // reverse loop stylz
-        lines.second.push_back(lines.first[firstsz + i]);
-    }
-    lines.first.erase(lines.first.begin() + firstsz, lines.first.end());
-}
-
 bool PointsGeometry::isHyperplane(const Line& potentialHyperplane) const {
     for (const Line& line : lines) {
         Line intersect = potentialHyperplane.intersects(line);
@@ -166,6 +138,60 @@ std::vector<Line> PointsGeometry::computeHyperplanes(const std::vector<Line>& ve
     return hyperplanes;
 }
 
+std::vector<Line> PointsGeometry::computeHyperplanesD4(const std::vector<Line>& veldkampPoints,
+                                                     const std::vector<Line>& veldkampLines) const {
+    std::vector<Line> hyperplanes;
+
+    for (int i = static_cast<int>(veldkampLines.size()); i--;) {
+        std::vector<Line> hypers = getHyperplanes(veldkampPoints, veldkampLines[i]);
+        std::vector<std::vector<Line>> permutations = computePermutations(hypers);
+
+        for (const std::vector<Line>& permutation : permutations) {
+            Line hyperplane = permutation[0].addScalar(0 * static_cast<unsigned int>(elements.size()));
+            for (int j = 1; j < permutation.size(); ++j) {
+                Line shifted = permutation[j].addScalar(j * static_cast<unsigned int>(elements.size()));
+                hyperplane = hyperplane.addLine(shifted);
+            }
+            hyperplanes.push_back(hyperplane);
+        }
+    }
+
+    Line fullGeometry(elements);
+
+
+    for (auto i = veldkampPoints.size(); i--;) {
+        Line hyperplane = veldkampPoints[i];
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(2 * static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(fullGeometry.addScalar(3 * static_cast<unsigned int>(elements.size())));
+
+        hyperplanes.push_back(hyperplane);
+
+        hyperplane = veldkampPoints[i];
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(fullGeometry.addScalar(2 * static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(3 * static_cast<unsigned int>(elements.size())));
+
+        hyperplanes.push_back(hyperplane);
+
+        hyperplane = veldkampPoints[i];
+        hyperplane = hyperplane.addLine(fullGeometry.addScalar(static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(2 * static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(3 * static_cast<unsigned int>(elements.size())));
+
+        hyperplanes.push_back(hyperplane);
+
+        hyperplane = fullGeometry;
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(2 * static_cast<unsigned int>(elements.size())));
+        hyperplane = hyperplane.addLine(veldkampPoints[i].addScalar(3 * static_cast<unsigned int>(elements.size())));
+
+        hyperplanes.push_back(hyperplane);
+    }
+
+    return hyperplanes;
+}
+
 std::vector<Line> PointsGeometry::findVeldkampLines(const std::vector<Line>& veldkampPoints) const {
     std::vector<Line> veldkampLines;
 
@@ -251,7 +277,7 @@ std::pair<std::vector<Line>, std::vector<Line>> PointsGeometry::findVeldkampLine
     }
 
     return std::make_pair(std::move(veldkampLineExc), std::move(veldkampLineProj));
-};
+}
 
 Line PointsGeometry::computeComplementHyperplane(const Line& h1,
                                                  const Line& h2,
@@ -334,11 +360,51 @@ PointsGeometry::Entry PointsGeometry::getEntry(const std::vector<Line> &lines,
     return entry;
 }
 
+std::vector<PointsGeometry::Entry> PointsGeometry::makeTable(const std::vector<Line>& veldkampPoints) const {
+    std::vector<Entry> result;
+
+    std::function<std::vector<Entry>(int)> compute = [&veldkampPoints, this](int a) -> std::vector<Entry> {
+        std::vector<Entry> entries;
+
+        for (int i = a; i < veldkampPoints.size(); i += 8) {
+            PointsGeometry::Entry entry = this->getEntry(veldkampPoints, veldkampPoints[i]);
+
+            std::vector<PointsGeometry::Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+            if (it == entries.end()) {
+                entry.count = 1;
+                entries.push_back(entry);
+            } else {
+                int index = it - entries.begin();
+                entries[index].count += 1;
+            }
+
+            if (i > 0 && i % 1000 == 0) {
+                std::cout << "Thread: " << a << ", " << i << " lines maked" << std::endl;
+                break;
+            }
+        }
+        return entries;
+        };
+
+    std::array<std::future<std::vector<Entry>>, 8> threadResult;
+    for (int i = 0; i < threadResult.size(); ++i) {
+        threadResult[i] = std::async(compute, i);
+    }
+
+    std::array<std::vector<Entry>, 8> finalResult;
+    for (int i = 0; i < threadResult.size(); ++i) {
+        finalResult[i] = threadResult[i].get();
+    }
+
+    return result;
+}
+
+
 std::vector<std::vector<Line>> PointsGeometry::computePermutations(const std::vector<Line>& veldkampLines) {
     std::vector<std::vector<Line>> permutations{veldkampLines};
     std::vector<Line> pickupList(veldkampLines);
 
-    int idx[pickupList.size() + 1];
+    int* idx = new int[pickupList.size() + 1];
     for (int i = 0; i < pickupList.size() + 1; ++i) {
         idx[i] = i;
     }
@@ -358,6 +424,9 @@ std::vector<std::vector<Line>> PointsGeometry::computePermutations(const std::ve
         }
 
     }
+
+    delete[] idx;
+
     return permutations;
 }
 

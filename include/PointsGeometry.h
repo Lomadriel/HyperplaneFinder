@@ -50,6 +50,9 @@ public:
     std::vector<Line> computeHyperplanes(const std::vector<Line>& veldkampPoints,
                                          const std::vector<Line>& veldkampLines) const;
 
+    std::vector<Line> computeHyperplanesD4(const std::vector<Line>& veldkampPoints,
+                                         const std::vector<Line>& veldkampLines) const;
+
     std::vector<Line> findVeldkampLines(const std::vector<Line>& veldkampPoints) const;
 
     std::pair<std::vector<Line>, std::vector<Line>> findVeldkampLinesP4(const std::vector<Line>& veldkampPoints) const;
