@@ -1,5 +1,8 @@
 #include <algorithm>
+#include <fstream>
+#include <iterator>
 
+#include <Tokenizer.h>
 #include <Line.h>
 
 Line::Line(const std::vector<unsigned int>& points)
@@ -49,20 +52,16 @@ const std::vector<unsigned int>& Line::getPoints() const {
 Line Line::addLine(const Line& line) const {
     std::vector<unsigned int> pts(this->points);
 
-    for (unsigned int i = 0; i < line.size(); ++i) {
-        pts.push_back(line.getPoint(i));
-    }
+    pts.reserve(pts.size() + line.points.size());
+    pts.insert(pts.end(), line.points.cbegin(), line.points.cend());
 
     return Line(std::move(pts));
 }
 
 Line Line::addScalar(const unsigned int scalar) const {
-    std::vector<unsigned int> pts;
-    pts.reserve(points.size());
+    std::vector<unsigned int> pts(this->points);
 
-    for (unsigned int i = 0; i < size(); ++i) {
-        pts.push_back(getPoint(i) + scalar);
-    }
+    std::transform(pts.begin(), pts.end(), pts.begin(), std::bind2nd(std::plus<unsigned int>(), scalar));
 
     return Line(std::move(pts));
 }
@@ -139,7 +138,7 @@ bool Line::operator>(const Line& rhs) const {
 
 bool Line::operator<(const Line& rhs) const {
     return operator>(rhs);
-};
+}
 
 bool Line::operator<=(const Line& rhs) const {
     return !operator>(rhs);
@@ -157,8 +156,24 @@ std::ostream &operator<<(std::ostream &os, const Line& line) {
             os << ", ";
         }
     }
+    //std::copy(line.points.cbegin(), line.points.cend(), std::ostream_iterator<char>(os, ", "));
 
     os << "}";
 
     return os;
+}
+
+std::ifstream& operator>>(std::ifstream& in, Line& h) {
+    std::string buffer;
+    std::getline(in, buffer, '\n');
+
+    std::vector<std::string> tokens;
+
+    tokenize(buffer, tokens, {"Line={, }"});
+
+    for (auto& token : tokens) {
+        h.points.push_back(static_cast<unsigned int>(std::stoul(token)));
+    }
+
+    return in;
 }

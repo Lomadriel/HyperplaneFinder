@@ -6,6 +6,8 @@
 
 class Line {
 public:
+    Line() = default;
+
     Line(const std::vector<unsigned int>& points);
 
     Line(const std::initializer_list<unsigned int>& points);
@@ -16,7 +18,7 @@ public:
 
     Line(Line&& line) = default;
 
-    virtual ~Line() = default;
+    ~Line() = default;
 
     std::vector<unsigned int>::size_type size() const;
 
@@ -58,10 +60,16 @@ public:
     bool operator<=(const Line& rhs) const;
 
     bool operator>=(const Line& rhs) const;
+
 private:
+    friend std::ostream& operator<<(std::ostream& out, const Line& line);
+    friend std::ifstream& operator>>(std::ifstream& in, Line& line);
+
     std::vector<unsigned int> points;
 };
 
-std::ostream &operator<<(std::ostream &os, const Line& line);
+std::ostream& operator<<(std::ostream& os, const Line& line);
+
+std::ifstream& operator>>(std::ifstream& in, Line& line);
 
 #endif //HYPERPLANEFINDERD4_LINE_H
