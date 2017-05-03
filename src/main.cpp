@@ -18,15 +18,13 @@ int main() {
 	auto vPoints0 = geometry.findHyperplanes();
 	auto vLines = geometry.findVeldkampLinesDimension4(vPoints0);
 	geometry.distinguishVeldkampLines(vLines, vPoints0, geometry1);
-	geometry.distinguishVeldkampLines(vLines, vPoints0, geometry1);
 	auto vPoints = geometry.computeHyperplanes(vPoints0, vLines.second);
 
-	//std::cout << geometry.getEntry(std::bitset<16>("0001000100011111"));
 	auto vLines2 = geometry1.findVeldkampLinesDimension4(vPoints);
 	geometry1.distinguishVeldkampLines(vLines2, vPoints, geometry2);
 
 	auto vPoints2 = geometry1.computeHyperplanes(vPoints, vLines2.second);
-	auto entries = geometry2.makeTable(vPoints2);
+	auto entries = geometry2.makeTable(vPoints2, geometry1);
 
 	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,
 	                                              const segre::Entry& b) {

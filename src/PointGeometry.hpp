@@ -8,7 +8,8 @@
 #include <functional>
 #include <algorithm>
 #include <utility>
-#include <unordered_map>
+#include <map>
+#include <iostream>
 
 #include <CombinationGenerator.hpp>
 
@@ -59,7 +60,7 @@ namespace segre {
 	public:
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
-		std::unordered_map<unsigned int, unsigned int> pointsOfOrder;
+		std::map<unsigned int, unsigned int> pointsOfOrder;
 		size_t count;
 	};
 
@@ -118,8 +119,7 @@ namespace segre {
 			return true;
 		}
 
-		std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>> findVeldkampLinesDimension4(
-				const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
+		std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>> findVeldkampLinesDimension4(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
 			std::vector<std::vector<unsigned int>> supposedExceptional;
 			std::vector<std::vector<unsigned int>> projectiveLines;
 
@@ -181,52 +181,19 @@ namespace segre {
 
 		void distinguishVeldkampLines(std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>& vLines,
 		                              const std::vector<std::bitset<NbrPoints>>& vPoints,
-		                              PointGeometry<Dimension + 1, NbrPointsPerLine, math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension)> nextGeometry) {
+		                              const PointGeometry<Dimension + 1, NbrPointsPerLine, math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension)>& nextGeometry) const {
 			std::vector<size_t> toRemove;
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
-			constexpr size_t NewTensorSize = math::pow(2UL, Dimension + 1);
 
 			for (size_t index = 0; index < vLines.first.size(); ++index) {
-				bool isProjective = false;
-
 				std::bitset<NewNbrPoints> hyperplane;
 				for (size_t i = 0; i < vLines.first[index].size(); ++i) {
 					hyperplane |= copyBitset<NewNbrPoints>(vPoints[vLines.first[index][i]]) <<= (i * NbrPoints);
 				}
 
-
 				auto matrix = nextGeometry.buildMatrix(hyperplane);
 
-				for (size_t i = 0; i < NewTensorSize; ++i) {
-					if (matrix[i][i] == 0) {
-						size_t k = i;
-						while (k < matrix.size() && matrix[k][i] == 0) {
-							++k;
-						}
-
-						if (k != matrix.size()) {
-							std::swap(matrix[i], matrix[k]);
-						} else {
-							isProjective = true;
-							break;
-						}
-					}
-
-					if (matrix[i][i] == 2) {
-						for (size_t j = 0; j < NewTensorSize; ++j) {
-							matrix[i][j] = (matrix[i][j] * 2) % 3;
-						}
-					}
-
-					for (size_t j = i + 1; j < matrix.size(); ++j) {
-						unsigned int aij = matrix[j][i];
-						for (size_t k = i; k < NewTensorSize; ++k) {
-							matrix[j][k] = (6 + matrix[j][k] - aij * matrix[i][k]) % 3;
-						}
-					}
-				}
-
-				if (isProjective) {
+				if (getRank(matrix) < math::pow(2UL, Dimension + 1)) {
 					toRemove.push_back(index);
 				}
 			}
@@ -237,6 +204,52 @@ namespace segre {
 
 				toRemove.pop_back();
 			}
+		}
+
+		size_t getRank(const std::vector<std::array<unsigned int, math::pow(2UL, Dimension + 1)>>& matrix) const {
+			size_t rank = math::pow(2UL, Dimension + 1);
+
+			for (size_t i = 0; i < math::pow(2UL, Dimension + 1); ++i) {
+				if (matrix[i][i] == 0) {
+					size_t k = i;
+					while (k < matrix.size() && matrix[k][i] == 0) {
+						++k;
+					}
+
+					if (k != matrix.size()) {
+						std::swap(matrix[i], matrix[k]);
+					} else {
+						rank = i;
+						break;
+					}
+				}
+
+				if (matrix[i][i] == 2) {
+					for (size_t j = 0; j < math::pow(2UL, Dimension + 1); ++j) {
+						matrix[i][j] = (matrix[i][j] * 2) % 3;
+					}
+				}
+
+				for (size_t j = i + 1; j < matrix.size(); ++j) {
+					unsigned int aij = matrix[j][i];
+					for (size_t k = i; k < math::pow(2UL, Dimension + 1); ++k) {
+						matrix[j][k] = (6 + matrix[j][k] - aij * matrix[i][k]) % 3;
+					}
+				}
+			}
+
+			if (rank != math::pow(2UL, Dimension + 1)) {
+				for (size_t i = rank + 1; i < math::pow(2UL, Dimension + 1); ++i) {
+					for (size_t k = 0; matrix[i].size(); ++i) {
+						if (matrix[i][k] != 0) {
+							++rank;
+							break;
+						}
+					}
+				}
+			}
+
+			return rank;
 		}
 
 		decltype(auto) computeHyperplanes(const std::vector<std::bitset<NbrPoints>>& veldkampPoints, const std::vector<std::vector<unsigned int>>& pVLines) {
@@ -400,7 +413,8 @@ namespace segre {
 			return entry;
 		}
 
-		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints) const noexcept {
+		template <typename T>
+		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const T& prevGeometry) const noexcept {
 			std::vector<Entry> entries;
 
 			for (const auto& vPoint : vPoints) {
@@ -450,9 +464,9 @@ namespace segre {
 		   ", Ls: " << entry.nbrLines <<
 		   ", Order={";
 
-		for(auto iterator = entry.pointsOfOrder.begin(); iterator != entry.pointsOfOrder.end();) {
+		for(auto iterator = entry.pointsOfOrder.cbegin(); iterator != entry.pointsOfOrder.cend();) {
 			os << iterator->first << "=" << iterator->second;
-			if (++iterator != entry.pointsOfOrder.end()) {
+			if (++iterator != entry.pointsOfOrder.cend()) {
 				os << ", ";
 			}
 		}
