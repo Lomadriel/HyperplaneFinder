@@ -191,9 +191,7 @@ namespace segre {
 					hyperplane |= copyBitset<NewNbrPoints>(vPoints[vLines.first[index][i]]) <<= (i * NbrPoints);
 				}
 
-				auto matrix = nextGeometry.buildMatrix(hyperplane);
-
-				if (getRank(matrix) < math::pow(2UL, Dimension + 1)) {
+				if (getRank(nextGeometry.buildMatrix(hyperplane)) < math::pow(2UL, Dimension + 1)) {
 					toRemove.push_back(index);
 				}
 			}
@@ -206,7 +204,7 @@ namespace segre {
 			}
 		}
 
-		size_t getRank(const std::vector<std::array<unsigned int, math::pow(2UL, Dimension + 1)>>& matrix) const {
+		size_t getRank(std::vector<std::array<unsigned int, math::pow(2UL, Dimension + 1)>>&& matrix) const {
 			size_t rank = math::pow(2UL, Dimension + 1);
 
 			for (size_t i = 0; i < math::pow(2UL, Dimension + 1); ++i) {
@@ -413,8 +411,7 @@ namespace segre {
 			return entry;
 		}
 
-		template <typename T>
-		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const T& prevGeometry) const noexcept {
+		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints) const noexcept {
 			std::vector<Entry> entries;
 
 			for (const auto& vPoint : vPoints) {

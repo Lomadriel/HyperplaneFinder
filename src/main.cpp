@@ -24,7 +24,8 @@ int main() {
 	geometry1.distinguishVeldkampLines(vLines2, vPoints, geometry2);
 
 	auto vPoints2 = geometry1.computeHyperplanes(vPoints, vLines2.second);
-	auto entries = geometry2.makeTable(vPoints2, geometry1);
+	auto entries = geometry2.makeTable(vPoints2);
+	//auto entries = geometry1.makeTable(vPoints);
 
 	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,
 	                                              const segre::Entry& b) {
