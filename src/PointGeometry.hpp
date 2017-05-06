@@ -238,8 +238,8 @@ namespace segre {
 
 			if (rank != math::pow(2UL, Dimension + 1)) {
 				for (size_t i = rank + 1; i < math::pow(2UL, Dimension + 1); ++i) {
-					for (size_t k = 0; matrix[i].size(); ++i) {
-						if (matrix[i][k] != 0) {
+					for (size_t k = 0; k < matrix.size(); ++k) {
+						if (matrix[k][i] != 0) {
 							++rank;
 							break;
 						}
