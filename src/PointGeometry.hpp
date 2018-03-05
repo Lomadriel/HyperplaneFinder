@@ -57,7 +57,6 @@ namespace segre {
 
 		friend std::ostream& operator<<(std::ostream &os, const Entry& entry);
 
-	public:
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
 		std::map<unsigned int, unsigned int> pointsOfOrder;
@@ -105,11 +104,12 @@ namespace segre {
 		bool isHyperplane(const std::bitset<NbrPoints>& potentialHyperplane) const noexcept {
 			for (const auto& line : m_lines) {
 				auto intersection = line & potentialHyperplane;
-				if (intersection.count() == 0) {
+				auto intersectionSize = intersection.count();
+				if (intersectionSize == 0) {
 					return false;
 				}
 
-				if (intersection.count() > 1) {
+				if (intersectionSize > 1) {
 					if ((line & potentialHyperplane) != line) { // Test if line is included in potentialHyperplane.
 						return false;
 					}
@@ -119,7 +119,8 @@ namespace segre {
 			return true;
 		}
 
-		std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>> findVeldkampLinesDimension4(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
+		std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>
+		findVeldkampLinesDimension4(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
 			std::vector<std::vector<unsigned int>> supposedExceptional;
 			std::vector<std::vector<unsigned int>> projectiveLines;
 
@@ -195,6 +196,8 @@ namespace segre {
 					toRemove.push_back(index);
 				}
 			}
+
+			vLines.second.reserve(vLines.second.size() + toRemove.size());
 
 			while (!toRemove.empty()) {
 				vLines.second.push_back(vLines.first[toRemove.back()]);
@@ -322,11 +325,16 @@ namespace segre {
 
 			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result;
 
-			for (size_t i = 0; i < NbrPointsPerLine; ++i) {
-				for (size_t j = 0; j < NbrLines; ++j) {
-					result[i * NbrLines + j] = copyBitset<NewNbrPoints>(m_lines[j]) <<= NbrPoints * i;
+			std::generate(result.begin(), result.end(), [this, i = 0, j = 0] () mutable -> auto {
+				auto bitset = copyBitset<NewNbrPoints>(m_lines[j]) <<= static_cast<long unsigned int>(NbrPoints * i);
+				++j;
+				if (j % NbrLines == 0) {
+					j = 0;
+					++i;
 				}
-			}
+
+				return bitset;
+			});
 
 			for (size_t i = 0; i < NbrPoints; ++i) {
 				std::bitset<NewNbrPoints> line;
@@ -468,9 +476,7 @@ namespace segre {
 			}
 		}
 
-		os << "}";
-
-		os << ", Crd: " << entry.count << '}';
+		os << "}, Crd: " << entry.count << '}';
 
 		return os;
 	}
