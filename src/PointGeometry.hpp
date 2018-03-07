@@ -14,8 +14,8 @@
 #include <CombinationGenerator.hpp>
 
 namespace math {
-	template <typename T>
-	inline constexpr T pow(T base, T exponent) {
+	template <typename T, typename U>
+	inline constexpr T pow(T base, U exponent) {
 		return exponent == 0 ? 1 : base * pow(base, exponent-1);
 	}
 }
@@ -326,7 +326,7 @@ namespace segre {
 			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result;
 
 			std::generate(result.begin(), result.end(), [this, i = 0, j = 0] () mutable -> auto {
-				auto bitset = copyBitset<NewNbrPoints>(m_lines[j]) <<= static_cast<long unsigned int>(NbrPoints * i);
+				auto bitset = copyBitset<math::pow(NbrPointsPerLine, Dimension + 1)>(m_lines[j]) <<= static_cast<long unsigned int>(NbrPoints * i);
 				++j;
 				if (j % NbrLines == 0) {
 					j = 0;

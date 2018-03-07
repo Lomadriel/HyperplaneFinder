@@ -1,11 +1,28 @@
 cmake_minimum_required(VERSION 3.7)
+
 project(HyperplaneFinder)
+enable_language(CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pedantic -pedantic-errors -Wall -Wextra -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wstrict-overflow=5 -Wredundant-decls -Wshadow -Wsign-conversion -Wundef -Wfatal-errors -Wvector-operation-performance -Winvalid-pch -Wconversion -Wdouble-promotion -Wunreachable-code -Wfloat-equal -Wold-style-cast -Weffc++ -Woverloaded-virtual -Wstrict-null-sentinel -Wsign-promo -Wnoexcept -Wctor-dtor-privacy -Wdelete-non-virtual-dtor -Wnon-virtual-dtor -Wsuggest-final-types -Wzero-as-null-pointer-constant -Wuseless-cast")
+include(common.cmake)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
-include_directories(src)
+set(CMAKE_DEBUG_POSTFIX _d)
 
-set(SOURCE_FILES src/main.cpp)
-add_executable(HyperplaneFinder ${SOURCE_FILES})
+# By default build in Release mode
+if( NOT CMAKE_BUILD_TYPE )
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+get_filename_component(root_dir   ${CMAKE_SOURCE_DIR}   REALPATH)
+get_filename_component(src_dir    ${root_dir}/src       REALPATH)
+
+get_files(
+  files "${src_dir}"
+  OPTIONS recurse
+)
+
+make_target(
+  HyperplaneFinder "HyperplaneFinder" ${files}
+  INCLUDES "${src_dir}"
+  OPTIONS cxx executable
+)
+set_property(TARGET HyperplaneFinder PROPERTY CXX_STANDARD 17)
