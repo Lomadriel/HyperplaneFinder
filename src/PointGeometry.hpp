@@ -82,13 +82,17 @@ namespace segre {
 	public:
 		explicit PointGeometry(std::array<std::bitset<NbrPoints>, NbrLines>&& lines) noexcept
 				: m_lines(std::move(lines))
-				, m_tPts(TENSOR_2D) {
+				, m_tPts(TENSOR_2D)
+				, m_masks() {
+			computeMasks();
 		}
 
 		explicit PointGeometry(std::array<std::bitset<NbrPoints>, NbrLines>&& lines,
 		                       std::array<std::array<unsigned int, TensorSize>, NbrPoints>&& tensors) noexcept
 				: m_lines(std::move(lines))
-				, m_tPts(std::move(tensors)) {
+				, m_tPts(std::move(tensors))
+		        , m_masks() {
+			computeMasks();
 		}
 
 		std::vector<std::bitset<NbrPoints>> findHyperplanes() const noexcept {
@@ -459,8 +463,57 @@ namespace segre {
 			}
 		}
 
+		void computeMasks(){
+			if constexpr(Dimension == 1) // no sub dimensions in dimension1
+				return;
+
+			std::array<std::bitset<NbrPoints>,Dimension> gen_lines; // lines starting from 0, like a canonical base
+			std::array<std::array<size_t,NbrPointsPerLine>,Dimension> gen_lines_indexes; // indexes of the points of the previous lines
+
+			// Fill gen_lines and gen_lines_indexes
+			for(size_t i = 0; i < gen_lines.size(); ++i){
+				for(size_t j = 0; j < NbrPointsPerLine; ++j){
+
+					gen_lines_indexes[i][j] = j * math::pow(NbrPointsPerLine, i);
+					gen_lines[i][j * math::pow(NbrPointsPerLine, i)] = 1;
+				}
+			}
+
+			// Generate masks:
+			// In the loop:
+			// - take dimension-1 lines
+			// - A = first line
+			// - For each lines (except first):
+			//     - A += A shifted along the line
+			// - A is a mask
+			// - A shifted along the line not taken at first step generate other masks
+			for(size_t ignored_line = Dimension - 1; ignored_line >= 0; --ignored_line){ // to take dimension-1 lines, we choose an ignored line
+				size_t line_index = !ignored_line; // current line: first non-ignored line
+				std::bitset<NbrPoints> gen_line = gen_lines[line_index];
+
+				// First mask
+				m_masks[ignored_line][0] = gen_line;
+				for(size_t line_shift_index = 0; line_shift_index < Dimension; ++line_shift_index){
+					if(line_shift_index == line_index || line_shift_index == ignored_line)
+						continue;
+
+					for(size_t i = 1; i < NbrPointsPerLine; ++i){
+						m_masks[ignored_line][0] |= (gen_line << gen_lines_indexes[line_shift_index][i]);
+					}
+					gen_line = m_masks[ignored_line][0];
+				}
+
+				// Shifts of the first mask
+				for(size_t submask = 1; submask < NbrPointsPerLine; ++submask){
+					m_masks[ignored_line][submask] = m_masks[ignored_line][submask - 1] << gen_lines_indexes[ignored_line][1];
+				}
+			}
+		}
+
 		std::array<std::bitset<NbrPoints>, NbrLines> m_lines;
 		std::array<std::array<unsigned int, TensorSize>, NbrPoints> m_tPts;
+
+		std::array<std::array<std::bitset<NbrPoints>,NbrPointsPerLine>,Dimension> m_masks;
 	};
 
 	std::ostream& operator<<(std::ostream &os, const Entry& entry) {
