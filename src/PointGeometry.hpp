@@ -487,7 +487,7 @@ namespace segre {
 			//     - A += A shifted along the line
 			// - A is a mask
 			// - A shifted along the line not taken at first step generate other masks
-			for(size_t ignored_line = Dimension - 1; ignored_line >= 0; --ignored_line){ // to take dimension-1 lines, we choose an ignored line
+			for(size_t ignored_line = 0; ignored_line < Dimension; ++ignored_line){ // to take dimension-1 lines, we choose an ignored line
 				size_t line_index = !ignored_line; // current line: first non-ignored line
 				std::bitset<NbrPoints> gen_line = gen_lines[line_index];
 
