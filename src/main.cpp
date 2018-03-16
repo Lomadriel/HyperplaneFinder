@@ -3,34 +3,49 @@
 #include <utility>
 #include <algorithm>
 #include <vector>
+#include <chrono>
 
 #include <PointGeometry.hpp>
 
+constexpr size_t PPL = 4; // Points Per Lines
+
+template<int N>
+using VPoints = std::vector<std::bitset<math::pow(PPL,N)>>;
+
+template<int>
+using VLines = std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>;
+
 int main() {
-	std::array<std::bitset<4>, 1> lines;
-	lines[0] = std::bitset<4>(15);
+	const auto time_start = std::chrono::system_clock::now();
 
-	segre::PointGeometry<1, 4, 1> geometry0(std::move(lines));
-	segre::PointGeometry<2, 4, 8> geometry(geometry0.computeCartesianProduct(), geometry0.buildTensorPoints());
-	segre::PointGeometry<3, 4, 48> geometry1(geometry.computeCartesianProduct(), geometry.buildTensorPoints());
-	segre::PointGeometry<4, 4, 256> geometry2(geometry1.computeCartesianProduct(), geometry1.buildTensorPoints());
+	std::array<std::bitset<PPL>, 1> lines;
+	lines[0] = std::bitset<PPL>(math::pow(2UL,PPL) - 1);
 
-	auto vPoints0 = geometry.findHyperplanes();
-	auto vLines = geometry.findVeldkampLinesDimension4(vPoints0);
-	geometry.distinguishVeldkampLines(vLines, vPoints0, geometry1);
-	auto vPoints = geometry.computeHyperplanes(vPoints0, vLines.second);
+	segre::PointGeometry<1, PPL, 1> geometry1(std::move(lines));
+	segre::PointGeometry<2, PPL, 8> geometry2(geometry1.computeCartesianProduct(), geometry1.buildTensorPoints());
+	segre::PointGeometry<3, PPL, 48> geometry3(geometry2.computeCartesianProduct(), geometry2.buildTensorPoints());
+	segre::PointGeometry<4, PPL, 256> geometry4(geometry3.computeCartesianProduct(), geometry3.buildTensorPoints());
 
-	auto vLines2 = geometry1.findVeldkampLinesDimension4(vPoints);
-	geometry1.distinguishVeldkampLines(vLines2, vPoints, geometry2);
+	VPoints<2> vPoints2 = geometry2.findHyperplanes(); // brut force
+	VLines<2> vLines2 = geometry2.findVeldkampLinesDimension4(vPoints2);
+	geometry2.distinguishVeldkampLines(vLines2, vPoints2, geometry3);
 
-	auto vPoints2 = geometry1.computeHyperplanes(vPoints, vLines2.second);
-	auto entries = geometry2.makeTable(vPoints2);
-	//auto entries = geometry1.makeTable(vPoints);
+	VPoints<3> vPoints3 = geometry2.computeHyperplanes(vPoints2, vLines2.second);
+	VLines<3> vLines3 = geometry3.findVeldkampLinesDimension4(vPoints3);
+	geometry3.distinguishVeldkampLines(vLines3, vPoints3, geometry4);
+
+	VPoints<4> vPoints4 = geometry3.computeHyperplanes(vPoints3, vLines3.second);
+	std::vector<segre::Entry> entries = geometry4.makeTable(vPoints4);
+	//std::vector<segre::Entry> entries = geometry3.makeTable(vPoints3);
 
 	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,
 	                                              const segre::Entry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
+
+	const auto time_end = std::chrono::system_clock::now();
+	const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start);
+	std::cout << "Finished in " << static_cast<int>(elapsed.count()) << " seconds\n" << std::endl;
 
 	std::copy(entries.begin(), entries.end(), std::ostream_iterator<segre::Entry>(std::cout, "\n"));
 
