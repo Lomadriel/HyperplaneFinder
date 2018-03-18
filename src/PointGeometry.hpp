@@ -595,6 +595,15 @@ namespace segre {
 			}
 		}
 
+		os << "}, SubGeometry={";
+
+		for(auto iterator = entry.subgeometry.cbegin(); iterator != entry.subgeometry.cend();) {
+			os << iterator->first << "=" << iterator->second;
+			if (++iterator != entry.subgeometry.cend()) {
+				os << ", ";
+			}
+		}
+
 		os << "}, Crd: " << entry.count << '}';
 
 		return os;
