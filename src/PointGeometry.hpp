@@ -36,6 +36,14 @@ namespace std { // NOLINT
 }
 
 namespace segre {
+	template <std::size_t NbrPointsPerLine>
+	struct VeldkampLines {
+		explicit VeldkampLines(std::vector<std::array<unsigned int, NbrPointsPerLine>>&& exceptional_lines, std::vector<std::array<unsigned int, NbrPointsPerLine>>&& projectives_lines) noexcept;
+
+		std::vector<std::array<unsigned int, NbrPointsPerLine>> exceptional;
+		std::vector<std::array<unsigned int, NbrPointsPerLine>> projectives;
+	};
+
 	struct Entry {
 		Entry()
 			: nbrPoints{0}
@@ -126,11 +134,10 @@ namespace segre {
 			return true;
 		}
 
-		std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>
-		findVeldkampLinesDimension4(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
-			std::vector<std::vector<unsigned int>> supposedExceptional;
-			std::vector<std::vector<unsigned int>> projectiveLines;
+		VeldkampLines<NbrPointsPerLine>
 		findVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
+			std::vector<std::array<unsigned int, NbrPointsPerLine>> supposedExceptional;
+			std::vector<std::array<unsigned int, NbrPointsPerLine>> projectiveLines;
 
 			CombinationGenerator gen;
 			gen.initialize(static_cast<unsigned int>(veldkampPoints.size()), 2);
@@ -138,7 +145,7 @@ namespace segre {
 			while (!gen.isFinished()) {
 				const std::vector<unsigned int>& currentCombination = gen.nextCombination();
 
-				std::vector<std::pair<std::bitset<NbrPoints>, unsigned int>> sameCore;
+				std::vector<unsigned int> sameCore;
 				const std::bitset<NbrPoints>& h1 = veldkampPoints[currentCombination[0]];
 				const std::bitset<NbrPoints>& h2 = veldkampPoints[currentCombination[1]];
 
@@ -149,55 +156,53 @@ namespace segre {
 					const std::bitset<NbrPoints> intersection2i = h2 & veldkampPoints[i];
 
 					if (intersection12 == intersection1i
-							&& intersection12 == intersection2i
-							&& intersection1i == intersection2i) {
-						sameCore.emplace_back(veldkampPoints[i], i);
+					    && intersection12 == intersection2i
+					    && intersection1i == intersection2i) {
+						sameCore.emplace_back(i);
 					}
 				}
 
-				CombinationGenerator gen2;
-				gen2.initialize(static_cast<unsigned int>(sameCore.size()), 2);
+				if (sameCore.size() == 2) {
+					if (sameCore[0] > currentCombination[1]) {
 
-				while (!gen2.isFinished()) {
-					const std::vector<unsigned int>& currentCombination2 = gen2.nextCombination();
+						projectiveLines.emplace_back(std::array<unsigned int, NbrPointsPerLine>({
+								currentCombination[0],
+								currentCombination[1],
+								sameCore[0],
+								sameCore[1]}));
+					}
+				} else {
+					CombinationGenerator gen2;
+					gen2.initialize(static_cast<unsigned int>(sameCore.size()), 2);
 
-					if (sameCore[currentCombination2[0]].second > currentCombination[0] && sameCore[currentCombination2[1]].second > currentCombination[1]
-							&& sameCore[currentCombination2[1]].second > currentCombination[0] && sameCore[currentCombination2[0]].second > currentCombination[1]){
-						const std::bitset<NbrPoints>& ha = sameCore[currentCombination2[0]].first;
-						const std::bitset<NbrPoints>& hb = sameCore[currentCombination2[1]].first;
+					while (!gen2.isFinished()) {
+						const std::vector<unsigned int>& currentCombination2 = gen2.nextCombination();
 
-						const std::bitset<NbrPoints> intersectionAB = ha & hb;
+						if (sameCore[currentCombination2[0]] > currentCombination[1]) {
 
-						if (intersection12 == intersectionAB) {
-							if (sameCore.size() == 2) {
-								projectiveLines.emplace_back(std::initializer_list<unsigned int>{currentCombination[0],
-								                              currentCombination[1],
-								                              sameCore[currentCombination2[0]].second,
-								                              sameCore[currentCombination2[1]].second});
-							} else {
-								supposedExceptional.emplace_back(std::initializer_list<unsigned int>{currentCombination[0],
-								                               currentCombination[1],
-								                               sameCore[currentCombination2[0]].second,
-								                               sameCore[currentCombination2[1]].second});
-							}
+							supposedExceptional.emplace_back(std::array<unsigned int, NbrPointsPerLine>({
+									currentCombination[0],
+									currentCombination[1],
+									sameCore[currentCombination2[0]],
+									sameCore[currentCombination2[1]]}));
 						}
 					}
 				}
 			}
 
-			return std::make_pair(supposedExceptional, projectiveLines);
+			return VeldkampLines<NbrPointsPerLine>{std::move(supposedExceptional), std::move(projectiveLines)};
 		}
 
-		void distinguishVeldkampLines(std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>& vLines,
+		void distinguishVeldkampLines(VeldkampLines<NbrPointsPerLine>& vLines,
 		                              const std::vector<std::bitset<NbrPoints>>& vPoints,
 		                              const PointGeometry<Dimension + 1, NbrPointsPerLine, math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension)>& nextGeometry) const {
 			std::vector<size_t> toRemove;
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
-			for (size_t index = 0; index < vLines.first.size(); ++index) {
+			for (size_t index = 0; index < vLines.exceptional.size(); ++index) {
 				std::bitset<NewNbrPoints> hyperplane;
-				for (size_t i = 0; i < vLines.first[index].size(); ++i) {
-					hyperplane |= copyBitset<NewNbrPoints>(vPoints[vLines.first[index][i]]) <<= (i * NbrPoints);
+				for (size_t i = 0; i < vLines.exceptional[index].size(); ++i) {
+					hyperplane |= copyBitset<NewNbrPoints>(vPoints[vLines.exceptional[index][i]]) <<= (i * NbrPoints);
 				}
 
 				if (getRank(nextGeometry.buildMatrix(hyperplane)) < math::pow(2UL, Dimension + 1)) {
@@ -205,11 +210,11 @@ namespace segre {
 				}
 			}
 
-			vLines.second.reserve(vLines.second.size() + toRemove.size());
+			vLines.projectives.reserve(vLines.projectives.size() + toRemove.size());
 
 			while (!toRemove.empty()) {
-				vLines.second.push_back(vLines.first[toRemove.back()]);
-				vLines.first.erase(std::next(vLines.first.begin(), static_cast<unsigned int>(toRemove.back())));
+				vLines.projectives.push_back(vLines.exceptional[toRemove.back()]);
+				vLines.exceptional.erase(std::next(vLines.exceptional.begin(), static_cast<unsigned int>(toRemove.back())));
 
 				toRemove.pop_back();
 			}
@@ -261,7 +266,7 @@ namespace segre {
 			return rank;
 		}
 
-		decltype(auto) computeHyperplanes(const std::vector<std::bitset<NbrPoints>>& veldkampPoints, const std::vector<std::vector<unsigned int>>& pVLines) {
+		decltype(auto) computeHyperplanes(const std::vector<std::bitset<NbrPoints>>& veldkampPoints, const std::vector<std::array<unsigned int, NbrPointsPerLine>>& pVLines) {
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
 			std::vector<std::bitset<NewNbrPoints>> hyperplanes;
@@ -317,7 +322,7 @@ namespace segre {
 		}
 
 		static std::array<std::bitset<NbrPoints>, NbrPointsPerLine> getHyperplanes(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
-		                                                 const std::vector<unsigned int>& veldkampLine) {
+		                                                 const std::array<unsigned int, NbrPointsPerLine>& veldkampLine) {
 			std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hyperplanes;
 
 			for (size_t i = 0; i < veldkampLine.size(); ++i) {
@@ -393,7 +398,7 @@ namespace segre {
 			entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
 
 			std::vector<std::bitset<NbrPoints>> includedLines;
-			for (const auto& line : m_lines) {
+			for (const std::bitset<NbrPoints>& line : m_lines) {
 				if ((line & hyperplane) == line) {
 					includedLines.push_back(line);
 				}
@@ -538,6 +543,13 @@ namespace segre {
 		os << "}, Crd: " << entry.count << '}';
 
 		return os;
+	}
+
+	template <std::size_t NbrPointsPerLine>
+	VeldkampLines<NbrPointsPerLine>::VeldkampLines(std::vector<std::array<unsigned int, NbrPointsPerLine>>&& exceptional_lines,
+	                             std::vector<std::array<unsigned int, NbrPointsPerLine>>&& projectives_lines) noexcept
+		: exceptional(std::move(exceptional_lines))
+		, projectives(std::move(projectives_lines)) {
 	}
 }
 
