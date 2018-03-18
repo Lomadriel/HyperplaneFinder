@@ -13,7 +13,7 @@ template<int N>
 using VPoints = std::vector<std::bitset<math::pow(PPL,N)>>;
 
 template<int>
-using VLines = std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>;
+using VLines = segre::VeldkampLines<PPL>;
 
 int main() {
 	const auto time_start = std::chrono::system_clock::now();
@@ -27,15 +27,24 @@ int main() {
 	segre::PointGeometry<4, PPL, 256> geometry4(geometry3.computeCartesianProduct(), geometry3.buildTensorPoints());
 
 	VPoints<2> vPoints2 = geometry2.findHyperplanes(); // brut force
-	VLines<2> vLines2 = geometry2.findVeldkampLinesDimension4(vPoints2);
+	VLines<2> vLines2 = geometry2.findVeldkampLines(vPoints2);
 	geometry2.distinguishVeldkampLines(vLines2, vPoints2, geometry3);
 
-	VPoints<3> vPoints3 = geometry2.computeHyperplanes(vPoints2, vLines2.second);
-	VLines<3> vLines3 = geometry3.findVeldkampLinesDimension4(vPoints3);
+	VPoints<3> vPoints3 = geometry2.computeHyperplanes(vPoints2, vLines2.projectives);
+	VLines<3> vLines3 = geometry3.findVeldkampLines(vPoints3);
 	geometry3.distinguishVeldkampLines(vLines3, vPoints3, geometry4);
+	std::vector<segre::Entry> geometry3_table = geometry3.makeTable<false>(vPoints3);
 
-	VPoints<4> vPoints4 = geometry3.computeHyperplanes(vPoints3, vLines3.second);
-	std::vector<segre::Entry> entries = geometry4.makeTable(vPoints4);
+	std::sort(geometry3_table.begin(), geometry3_table.end(), [] (const segre::Entry& a,
+	                                              const segre::Entry& b) {
+		return a.nbrPoints > b.nbrPoints;
+	});
+
+	//std::copy(geometry3_table.begin(), geometry3_table.end(), std::ostream_iterator<segre::Entry>(std::cout, "\n"));
+	//return 0;
+
+	VPoints<4> vPoints4 = geometry3.computeHyperplanes(vPoints3, vLines3.projectives);
+	std::vector<segre::Entry> entries = geometry4.makeTable(vPoints4, geometry3_table);
 	//std::vector<segre::Entry> entries = geometry3.makeTable(vPoints3);
 
 	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,

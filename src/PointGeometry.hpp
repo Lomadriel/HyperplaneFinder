@@ -49,6 +49,7 @@ namespace segre {
 			: nbrPoints{0}
 			, nbrLines{0}
 			, pointsOfOrder{}
+			, subgeometry{}
 			, count{0} {
 		}
 
@@ -62,7 +63,8 @@ namespace segre {
 		bool operator==(const Entry& entry) const {
 			return nbrPoints == entry.nbrPoints &&
 			       nbrLines == entry.nbrLines &&
-			       map_compare(pointsOfOrder, entry.pointsOfOrder);
+			       map_compare(pointsOfOrder, entry.pointsOfOrder) &&
+			       map_compare(subgeometry, entry.subgeometry);
 		}
 
 		friend std::ostream& operator<<(std::ostream &os, const Entry& entry);
@@ -70,6 +72,7 @@ namespace segre {
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
 		std::map<unsigned int, unsigned int> pointsOfOrder;
+		std::map<std::size_t, std::size_t> subgeometry;
 		size_t count;
 	};
 
@@ -393,6 +396,7 @@ namespace segre {
 			return matrix;
 		}
 
+		template <bool OrderOfPoints>
 		Entry getEntry(const std::bitset<NbrPoints>& hyperplane) const noexcept {
 			Entry entry;
 			entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
@@ -406,39 +410,90 @@ namespace segre {
 
 			entry.nbrLines = static_cast<unsigned int>(includedLines.size());
 
-			if (entry.nbrLines == 0) {
-				entry.pointsOfOrder[0] = entry.nbrPoints;
-			} else {
-				unsigned int pointOfOrder0 = entry.nbrPoints;
-				for (size_t i = 0; i < NbrPoints; ++i) {
-					unsigned int count = 0;
-					if (hyperplane[i]) {
-						for (size_t j = 0; j < includedLines.size(); ++j) {
-							if (includedLines[j][i] != 0) {
-								++count;
+			if constexpr (OrderOfPoints) {
+				if (entry.nbrLines == 0) {
+					entry.pointsOfOrder[0] = entry.nbrPoints;
+				} else {
+					unsigned int pointOfOrder0 = entry.nbrPoints;
+					for (size_t i = 0; i < NbrPoints; ++i) {
+						unsigned int count = 0;
+						if (hyperplane[i]) {
+							for (size_t j = 0; j < includedLines.size(); ++j) {
+								if (includedLines[j][i] != 0) {
+									++count;
+								}
+							}
+
+							if (count != 0) {
+								++(entry.pointsOfOrder[count]);
+								--pointOfOrder0;
 							}
 						}
-
-						if (count != 0) {
-							++(entry.pointsOfOrder[count]);
-							--pointOfOrder0;
-						}
 					}
-				}
 
-				if (pointOfOrder0 != 0) {
-					entry.pointsOfOrder[0] = pointOfOrder0;
+					if (pointOfOrder0 != 0) {
+						entry.pointsOfOrder[0] = pointOfOrder0;
+					}
 				}
 			}
 
 			return entry;
 		}
 
+		Entry getEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<Entry>& precedent_table) const noexcept {
+			Entry entry;
+
+			entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
+
+			std::vector<std::bitset<NbrPoints>> includedLines;
+			for (const std::bitset<NbrPoints>& line : m_lines) {
+				if ((line & hyperplane) == line) {
+					includedLines.push_back(line);
+				}
+			}
+
+			entry.nbrLines = static_cast<unsigned int>(includedLines.size());
+
+			for (const auto& direction_masks : m_masks) {
+				for (const auto& mask : direction_masks) {
+					std::size_t nbr_points = (hyperplane & mask).count();
+
+					std::vector<Entry>::const_iterator it = std::find_if(precedent_table.begin(), precedent_table.end(),
+						[&nbr_points](const Entry& e) {
+							return e.nbrPoints == nbr_points;
+						});
+
+					++(entry.subgeometry[static_cast<std::size_t>(std::distance(precedent_table.cbegin(), it))]);
+				}
+			}
+
+			return entry;
+		}
+
+		template <bool OrderOfPoints>
 		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints) const noexcept {
 			std::vector<Entry> entries;
 
 			for (const auto& vPoint : vPoints) {
-				Entry entry = getEntry(vPoint);
+				Entry entry = getEntry<OrderOfPoints>(vPoint);
+
+				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+				if (it == entries.end()) {
+					entry.count = 1;
+					entries.push_back(entry);
+				} else {
+					++(it->count);
+				}
+			}
+
+			return entries;
+		}
+
+		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<Entry>& precedent_table) const noexcept {
+			std::vector<Entry> entries;
+
+			for (const auto& vPoint : vPoints) {
+				Entry entry = getEntry(vPoint, precedent_table);
 
 				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
