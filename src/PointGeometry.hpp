@@ -16,14 +16,16 @@
 namespace math {
 	template <typename T, typename U>
 	inline constexpr T pow(T base, U exponent) {
+		static_assert(std::is_integral_v<U>);
 		return exponent == 0 ? 1 : base * pow(base, exponent-1);
 	}
 }
 
-namespace std {
+// Fixme : Replace std::bitset by a custom bitset
+namespace std { // NOLINT
 	template<size_t N>
 	bool operator<(const std::bitset<N>& x, const std::bitset<N>& y) {
-		for (size_t i = N-1; i--;) {
+		for (size_t i = N - 1; i--;) {
 			if (x[i] ^ y[i]) {
 				return y[i];
 			}
@@ -36,10 +38,10 @@ namespace std {
 namespace segre {
 	struct Entry {
 		Entry()
-				: nbrPoints{0}
-				, nbrLines{0}
-				, pointsOfOrder{}
-				, count{0} {
+			: nbrPoints{0}
+			, nbrLines{0}
+			, pointsOfOrder{}
+			, count{0} {
 		}
 
 		template <typename Map>
@@ -106,9 +108,10 @@ namespace segre {
 		}
 
 		bool isHyperplane(const std::bitset<NbrPoints>& potentialHyperplane) const noexcept {
-			for (const auto& line : m_lines) {
-				auto intersection = line & potentialHyperplane;
-				auto intersectionSize = intersection.count();
+			for (const std::bitset<NbrPoints>& line : m_lines) {
+				std::bitset<NbrPoints> intersection = line & potentialHyperplane;
+				std::size_t intersectionSize = intersection.count();
+
 				if (intersectionSize == 0) {
 					return false;
 				}
@@ -127,6 +130,7 @@ namespace segre {
 		findVeldkampLinesDimension4(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
 			std::vector<std::vector<unsigned int>> supposedExceptional;
 			std::vector<std::vector<unsigned int>> projectiveLines;
+		findVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
 
 			CombinationGenerator gen;
 			gen.initialize(static_cast<unsigned int>(veldkampPoints.size()), 2);
@@ -329,7 +333,8 @@ namespace segre {
 
 			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result;
 
-			std::generate(result.begin(), result.end(), [this, i = 0, j = 0] () mutable -> auto {
+			// Copies the base geometry
+			std::generate(result.begin(), result.end(), [this, i = 0UL, j = 0UL] () mutable -> decltype(auto) {
 				auto bitset = copyBitset<math::pow(NbrPointsPerLine, Dimension + 1)>(m_lines[j]) <<= static_cast<long unsigned int>(NbrPoints * i);
 				++j;
 				if (j % NbrLines == 0) {
@@ -340,6 +345,7 @@ namespace segre {
 				return bitset;
 			});
 
+			// Computes the missing lines.
 			for (size_t i = 0; i < NbrPoints; ++i) {
 				std::bitset<NewNbrPoints> line;
 				for (size_t j = 0; j < NbrPointsPerLine; ++j) {
