@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.10) # For CXX_STANDARD 17 property on Visual Studio
 
 project(HyperplaneFinder)
 enable_language(CXX)
