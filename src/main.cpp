@@ -40,7 +40,7 @@ int main() {
 	});
 
 	VPoints<4> vPoints4 = geometry3.computeHyperplanes(vPoints3, vLines3.projectives);
-	std::vector<segre::Entry> entries = geometry4.makeTable(vPoints4, geometry3_table);
+	std::vector<segre::Entry> entries = geometry4.makeTable<true>(vPoints4, geometry3_table);
 
 	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,
 	                                              const segre::Entry& b) {

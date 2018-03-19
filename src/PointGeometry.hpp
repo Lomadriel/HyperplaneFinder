@@ -440,19 +440,24 @@ namespace segre {
 			return entry;
 		}
 
+		template <bool OrderOfPoints>
 		Entry getEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<Entry>& precedent_table) const noexcept {
 			Entry entry;
 
-			entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
+			if constexpr (!OrderOfPoints) {
+				entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
 
-			std::vector<std::bitset<NbrPoints>> includedLines;
-			for (const std::bitset<NbrPoints>& line : m_lines) {
-				if ((line & hyperplane) == line) {
-					includedLines.push_back(line);
+				std::vector<std::bitset<NbrPoints>> includedLines;
+				for (const std::bitset<NbrPoints>& line : m_lines) {
+					if ((line & hyperplane) == line) {
+						includedLines.push_back(line);
+					}
 				}
-			}
 
-			entry.nbrLines = static_cast<unsigned int>(includedLines.size());
+				entry.nbrLines = static_cast<unsigned int>(includedLines.size());
+			} else {
+				entry = getEntry<OrderOfPoints>(hyperplane);
+			}
 
 			for (const auto& direction_masks : m_masks) {
 				for (const auto& mask : direction_masks) {
@@ -489,11 +494,12 @@ namespace segre {
 			return entries;
 		}
 
+		template <bool OrderOfPoints>
 		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<Entry>& precedent_table) const noexcept {
 			std::vector<Entry> entries;
 
 			for (const auto& vPoint : vPoints) {
-				Entry entry = getEntry(vPoint, precedent_table);
+				Entry entry = getEntry<OrderOfPoints>(vPoint, precedent_table);
 
 				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
