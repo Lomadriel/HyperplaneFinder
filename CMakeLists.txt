@@ -26,3 +26,11 @@ make_target(
   OPTIONS cxx executable
 )
 set_property(TARGET HyperplaneFinder PROPERTY CXX_STANDARD 17)
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+	target_add_flag(HyperplaneFinder "-march=native" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-msse4.2" DEBUG RELEASE RELWITHDEBINFO)
+endif()
+
+# Debug
+#set(CMAKE_VERBOSE_MAKEFILE 1)
