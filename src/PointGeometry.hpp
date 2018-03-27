@@ -226,6 +226,8 @@ namespace segre {
 			std::vector<size_t> toRemove;
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
+			// Checks the rank of the matrix associated to each hyperplane.
+			// If the rank of the matrix is lesser than pow(2, Dimension + 1) then the line isn't exceptional.
 			for (size_t index = 0; index < vLines.exceptional.size(); ++index) {
 				std::bitset<NewNbrPoints> hyperplane;
 				for (size_t i = 0; i < vLines.exceptional[index].size(); ++i) {
@@ -240,6 +242,7 @@ namespace segre {
 
 			vLines.projectives.reserve(vLines.projectives.size() + toRemove.size());
 
+			// Remove the projective lines from the list of exceptional lines.
 			while (!toRemove.empty()) {
 				vLines.projectives.push_back(vLines.exceptional[toRemove.back()]);
 				vLines.exceptional.erase(std::next(vLines.exceptional.begin(), static_cast<unsigned int>(toRemove.back())));
@@ -299,6 +302,7 @@ namespace segre {
 
 			std::vector<std::bitset<NewNbrPoints>> hyperplanes;
 
+			// Compute the hyperplane of the next geometry using the veldkamp lines of the current geometry.
 			for (size_t i = 0; i < pVLines.size(); ++i) {
 				std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hypers = getHyperplanesOfTheVeldkampLine(veldkampPoints, pVLines[i]);
 				std::sort(hypers.begin(), hypers.end());
@@ -316,6 +320,7 @@ namespace segre {
 
 			std::bitset<NewNbrPoints> fullLayout = copyBitset<NewNbrPoints>(std::bitset<NbrPoints>().flip());
 
+			// Compute the missing hyperplanes by using 3 times the same hyperplane and the current full geometry.
 			for (size_t i = 0; i < veldkampPoints.size(); ++i) {
 				std::bitset<NewNbrPoints> hyperplane = copyBitset<NewNbrPoints>(veldkampPoints[i]);
 				hyperplane |= copyBitset<NewNbrPoints>(veldkampPoints[i]) <<= NbrPoints;
@@ -372,7 +377,7 @@ namespace segre {
 
 			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result;
 
-			// Copies the base geometry
+			// Duplicates the current geometry to generate each layer of the cartesian product.
 			std::generate(result.begin(), result.end(), [this, i = 0UL, j = 0UL] () mutable -> decltype(auto) {
 				auto bitset = copyBitset<math::pow(NbrPointsPerLine, Dimension + 1)>(m_lines[j]) <<= static_cast<long unsigned int>(NbrPoints * i);
 				++j;
@@ -384,7 +389,7 @@ namespace segre {
 				return bitset;
 			});
 
-			// Computes the missing lines.
+			// Computes the missing lines linking each layer.
 			for (size_t i = 0; i < NbrPoints; ++i) {
 				std::bitset<NewNbrPoints> line;
 				for (size_t j = 0; j < NbrPointsPerLine; ++j) {
@@ -406,6 +411,7 @@ namespace segre {
 				for (size_t j = 0; j < NbrPoints; ++j) {
 					for (unsigned int k = 0; k < TENSOR_2D[0].size(); ++k) {
 						for (unsigned int l = 0; l < TensorSize; ++l) {
+							// The mod operator is here because the coefficient in the associated space are {0, 1, 2}
 							pts[i * NbrPoints + j][k * TensorSize + l] = TENSOR_2D[i][k] * m_tPts[j][l] % 3;
 						}
 					}
