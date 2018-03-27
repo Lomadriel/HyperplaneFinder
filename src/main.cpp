@@ -26,12 +26,12 @@ int main() {
 	segre::PointGeometry<3, PPL, 48> geometry3(geometry2.computeCartesianProduct(), geometry2.buildTensorPoints());
 	segre::PointGeometry<4, PPL, 256> geometry4(geometry3.computeCartesianProduct(), geometry3.buildTensorPoints());
 
-	VPoints<2> vPoints2 = geometry2.findHyperplanes(); // brut force
-	VLines<2> vLines2 = geometry2.findVeldkampLines(vPoints2);
+	VPoints<2> vPoints2 = geometry2.findHyperplanesByBruteforce(); // brut force
+	VLines<2> vLines2 = geometry2.computeVeldkampLines(vPoints2);
 	geometry2.distinguishVeldkampLines(vLines2, vPoints2, geometry3);
 
-	VPoints<3> vPoints3 = geometry2.computeHyperplanes(vPoints2, vLines2.projectives);
-	VLines<3> vLines3 = geometry3.findVeldkampLines(vPoints3);
+	VPoints<3> vPoints3 = geometry2.computeHyperplanesFromVeldkampLines(vPoints2, vLines2.projectives);
+	VLines<3> vLines3 = geometry3.computeVeldkampLines(vPoints3);
 	geometry3.distinguishVeldkampLines(vLines3, vPoints3, geometry4);
 	std::vector<segre::Entry> geometry3_table = geometry3.makeTable<false>(vPoints3);
 
@@ -39,8 +39,8 @@ int main() {
 		return a.nbrPoints > b.nbrPoints;
 	});
 
-	VPoints<4> vPoints4 = geometry3.computeHyperplanes(vPoints3, vLines3.projectives);
-	std::vector<segre::Entry> entries = geometry4.makeTable<true>(vPoints4, geometry3_table);
+	VPoints<4> vPoints4 = geometry3.computeHyperplanesFromVeldkampLines(vPoints3, vLines3.projectives);
+	std::vector<segre::Entry> entries = geometry4.makeTable<false>(vPoints4, geometry3_table);
 
 	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,
 	                                              const segre::Entry& b) {

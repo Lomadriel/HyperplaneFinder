@@ -72,7 +72,7 @@ namespace segre {
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
 		std::map<unsigned int, unsigned int> pointsOfOrder;
-		std::map<std::size_t, std::size_t> subgeometry;
+		std::map<long long int, std::size_t> subgeometry;
 		size_t count;
 	};
 
@@ -108,7 +108,13 @@ namespace segre {
 			computeMasks();
 		}
 
-		std::vector<std::bitset<NbrPoints>> findHyperplanes() const noexcept {
+		/**
+		 * @details Computes the hyperplanes of the geometry by checking every combination of k points
+		 * 	where k is in [0, NbrPoints - 1]
+		 *
+		 * @return a vector of hyperplanes
+		 */
+		std::vector<std::bitset<NbrPoints>> findHyperplanesByBruteforce() const noexcept {
 			std::vector<std::bitset<NbrPoints>> hyperplanes;
 
 			for (unsigned int j = 2; j < NbrPoints; ++j) {
@@ -118,6 +124,12 @@ namespace segre {
 			return std::move(hyperplanes);
 		}
 
+		/**
+		 * Checks if the given combination is an hyperplane.
+		 *
+		 * @param potentialHyperplane
+		 * @return true if potentialHyperplane is an hyperplane, false otherwise.
+		 */
 		bool isHyperplane(const std::bitset<NbrPoints>& potentialHyperplane) const noexcept {
 			for (const std::bitset<NbrPoints>& line : m_lines) {
 				std::bitset<NbrPoints> intersection = line & potentialHyperplane;
@@ -137,8 +149,14 @@ namespace segre {
 			return true;
 		}
 
+		/**
+		 * Computes the veldkamp lines of the geometry using the given hyperplanes.
+		 *
+		 * @param veldkampPoints the hyperplanes of the geometry.
+		 * @return A struct containing the projective lines and the supposed exceptional lines.
+		 */
 		VeldkampLines<NbrPointsPerLine>
-		findVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
+		computeVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints) const noexcept {
 			std::vector<std::array<unsigned int, NbrPointsPerLine>> supposedExceptional;
 			std::vector<std::array<unsigned int, NbrPointsPerLine>> projectiveLines;
 
@@ -196,6 +214,12 @@ namespace segre {
 			return VeldkampLines<NbrPointsPerLine>{std::move(supposedExceptional), std::move(projectiveLines)};
 		}
 
+		/**
+		 * Excludes the projectives lines from the list of exceptional lines.
+		 * @param vLines a struct containing the projective and exceptional lines.
+		 * @param vPoints the hyperplanes of the current geometry
+		 * @param nextGeometry the next geometry used to build the matrix associated to the hyperplanes.
+		 */
 		void distinguishVeldkampLines(VeldkampLines<NbrPointsPerLine>& vLines,
 		                              const std::vector<std::bitset<NbrPoints>>& vPoints,
 		                              const PointGeometry<Dimension + 1, NbrPointsPerLine, math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension)>& nextGeometry) const {
@@ -208,6 +232,7 @@ namespace segre {
 					hyperplane |= copyBitset<NewNbrPoints>(vPoints[vLines.exceptional[index][i]]) <<= (i * NbrPoints);
 				}
 
+				// Checks if the matrix associated to the hyperplane live in the projective space.
 				if (getRank(nextGeometry.buildMatrix(hyperplane)) < math::pow(2UL, Dimension + 1)) {
 					toRemove.push_back(index);
 				}
@@ -269,13 +294,13 @@ namespace segre {
 			return rank;
 		}
 
-		decltype(auto) computeHyperplanes(const std::vector<std::bitset<NbrPoints>>& veldkampPoints, const std::vector<std::array<unsigned int, NbrPointsPerLine>>& pVLines) {
+		decltype(auto) computeHyperplanesFromVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints, const std::vector<std::array<unsigned int, NbrPointsPerLine>>& pVLines) {
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
 			std::vector<std::bitset<NewNbrPoints>> hyperplanes;
 
 			for (size_t i = 0; i < pVLines.size(); ++i) {
-				std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hypers = getHyperplanes(veldkampPoints, pVLines[i]);
+				std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hypers = getHyperplanesOfTheVeldkampLine(veldkampPoints, pVLines[i]);
 				std::sort(hypers.begin(), hypers.end());
 
 				do {
@@ -324,7 +349,13 @@ namespace segre {
 			return hyperplanes;
 		}
 
-		static std::array<std::bitset<NbrPoints>, NbrPointsPerLine> getHyperplanes(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
+		/**
+		 * Returns the hyperplanes of the given veldkamp line.
+		 * @param veldkampPoints list of all the veldkamp points of the current geometry.
+		 * @param veldkampLine a veldkamp line.
+		 * @return the hyperplanes of the given veldkamp line.
+		 */
+		static std::array<std::bitset<NbrPoints>, NbrPointsPerLine> getHyperplanesOfTheVeldkampLine(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
 		                                                 const std::array<unsigned int, NbrPointsPerLine>& veldkampLine) {
 			std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hyperplanes;
 
@@ -397,7 +428,7 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		Entry getEntry(const std::bitset<NbrPoints>& hyperplane) const noexcept {
+		Entry getTableEntry(const std::bitset<NbrPoints>& hyperplane) const noexcept {
 			Entry entry;
 			entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
 
@@ -441,7 +472,7 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		Entry getEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<Entry>& precedent_table) const noexcept {
+		Entry getTableEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<Entry>& precedent_table) const noexcept {
 			Entry entry;
 
 			if constexpr (!OrderOfPoints) {
@@ -456,7 +487,7 @@ namespace segre {
 
 				entry.nbrLines = static_cast<unsigned int>(includedLines.size());
 			} else {
-				entry = getEntry<OrderOfPoints>(hyperplane);
+				entry = getTableEntry<OrderOfPoints>(hyperplane);
 			}
 
 			for (const auto& direction_masks : m_masks) {
@@ -468,7 +499,11 @@ namespace segre {
 							return e.nbrPoints == nbr_points;
 						});
 
-					++(entry.subgeometry[static_cast<std::size_t>(std::distance(precedent_table.cbegin(), it))]);
+					if (it == precedent_table.cend()) {
+						++(entry.subgeometry[-1]);
+					} else {
+						++(entry.subgeometry[static_cast<long long int>(std::distance(precedent_table.cbegin(), it))]);
+					}
 				}
 			}
 
@@ -480,7 +515,7 @@ namespace segre {
 			std::vector<Entry> entries;
 
 			for (const auto& vPoint : vPoints) {
-				Entry entry = getEntry<OrderOfPoints>(vPoint);
+				Entry entry = getTableEntry<OrderOfPoints>(vPoint);
 
 				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
@@ -499,7 +534,7 @@ namespace segre {
 			std::vector<Entry> entries;
 
 			for (const auto& vPoint : vPoints) {
-				Entry entry = getEntry<OrderOfPoints>(vPoint, precedent_table);
+				Entry entry = getTableEntry<OrderOfPoints>(vPoint, precedent_table);
 
 				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
@@ -604,7 +639,12 @@ namespace segre {
 		os << "}, SubGeometry={";
 
 		for(auto iterator = entry.subgeometry.cbegin(); iterator != entry.subgeometry.cend();) {
-			os << 'H' << iterator->first << "=" << iterator->second;
+			if (iterator->first != -1) {
+				os << 'H' << iterator->first << "=" << iterator->second;
+			} else {
+				os << "Full=" << iterator->second;
+			}
+
 			if (++iterator != entry.subgeometry.cend()) {
 				os << ", ";
 			}
