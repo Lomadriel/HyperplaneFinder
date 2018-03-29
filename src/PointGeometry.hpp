@@ -44,8 +44,8 @@ namespace segre {
 		std::vector<std::array<unsigned int, NbrPointsPerLine>> projectives;
 	};
 
-	struct Entry {
-		Entry()
+	struct HyperplaneTableEntry {
+		HyperplaneTableEntry()
 			: nbrPoints{0}
 			, nbrLines{0}
 			, pointsOfOrder{}
@@ -60,14 +60,14 @@ namespace segre {
 			                     rhs.begin());
 		}
 
-		bool operator==(const Entry& entry) const {
+		bool operator==(const HyperplaneTableEntry& entry) const {
 			return nbrPoints == entry.nbrPoints &&
 			       nbrLines == entry.nbrLines &&
 			       map_compare(pointsOfOrder, entry.pointsOfOrder) &&
 			       map_compare(subgeometry, entry.subgeometry);
 		}
 
-		friend std::ostream& operator<<(std::ostream &os, const Entry& entry);
+		friend std::ostream& operator<<(std::ostream &os, const HyperplaneTableEntry& entry);
 
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
@@ -434,8 +434,8 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		Entry getTableEntry(const std::bitset<NbrPoints>& hyperplane) const noexcept {
-			Entry entry;
+		HyperplaneTableEntry getHyperplaneTableEntry(const std::bitset<NbrPoints>& hyperplane) const noexcept {
+			HyperplaneTableEntry entry;
 			entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
 
 			std::vector<std::bitset<NbrPoints>> includedLines;
@@ -478,8 +478,8 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		Entry getTableEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<Entry>& precedent_table) const noexcept {
-			Entry entry;
+		HyperplaneTableEntry getHyperplaneTableEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<HyperplaneTableEntry>& precedent_table) const noexcept {
+			HyperplaneTableEntry entry;
 
 			if constexpr (!OrderOfPoints) {
 				entry.nbrPoints = static_cast<unsigned int>(hyperplane.count());
@@ -493,15 +493,15 @@ namespace segre {
 
 				entry.nbrLines = static_cast<unsigned int>(includedLines.size());
 			} else {
-				entry = getTableEntry<OrderOfPoints>(hyperplane);
+				entry = getHyperplaneTableEntry<OrderOfPoints>(hyperplane);
 			}
 
 			for (const auto& direction_masks : m_masks) {
 				for (const auto& mask : direction_masks) {
 					std::size_t nbr_points = (hyperplane & mask).count();
 
-					std::vector<Entry>::const_iterator it = std::find_if(precedent_table.begin(), precedent_table.end(),
-						[&nbr_points](const Entry& e) {
+					std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(precedent_table.begin(), precedent_table.end(),
+						[&nbr_points](const HyperplaneTableEntry& e) {
 							return e.nbrPoints == nbr_points;
 						});
 
@@ -517,13 +517,13 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints) const noexcept {
-			std::vector<Entry> entries;
+		std::vector<HyperplaneTableEntry> makeHyperplaneTable(const std::vector<std::bitset<NbrPoints>>& vPoints) const noexcept {
+			std::vector<HyperplaneTableEntry> entries;
 
 			for (const auto& vPoint : vPoints) {
-				Entry entry = getTableEntry<OrderOfPoints>(vPoint);
+				HyperplaneTableEntry entry = getHyperplaneTableEntry<OrderOfPoints>(vPoint);
 
-				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+				std::vector<HyperplaneTableEntry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
 					entry.count = 1;
 					entries.push_back(entry);
@@ -536,13 +536,13 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		std::vector<Entry> makeTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<Entry>& precedent_table) const noexcept {
-			std::vector<Entry> entries;
+		std::vector<HyperplaneTableEntry> makeHyperplaneTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<HyperplaneTableEntry>& precedent_table) const noexcept {
+			std::vector<HyperplaneTableEntry> entries;
 
 			for (const auto& vPoint : vPoints) {
-				Entry entry = getTableEntry<OrderOfPoints>(vPoint, precedent_table);
+				HyperplaneTableEntry entry = getHyperplaneTableEntry<OrderOfPoints>(vPoint, precedent_table);
 
-				std::vector<Entry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+				std::vector<HyperplaneTableEntry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
 					entry.count = 1;
 					entries.push_back(entry);
@@ -629,8 +629,8 @@ namespace segre {
 		std::array<std::array<std::bitset<NbrPoints>,NbrPointsPerLine>,Dimension> m_masks;
 	};
 
-	std::ostream& operator<<(std::ostream &os, const Entry& entry) {
-		os << "Entry{" <<
+	std::ostream& operator<<(std::ostream &os, const HyperplaneTableEntry& entry) {
+		os << "HyperplaneTableEntry{" <<
 		   "Ps: " << entry.nbrPoints <<
 		   ", Ls: " << entry.nbrLines <<
 		   ", Order={";

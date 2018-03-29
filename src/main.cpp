@@ -33,17 +33,17 @@ int main() {
 	VPoints<3> vPoints3 = geometry2.computeHyperplanesFromVeldkampLines(vPoints2, vLines2.projectives);
 	VLines<3> vLines3 = geometry3.computeVeldkampLines(vPoints3);
 	geometry3.distinguishVeldkampLines(vLines3, vPoints3, geometry4);
-	std::vector<segre::Entry> geometry3_table = geometry3.makeTable<false>(vPoints3);
+	std::vector<segre::HyperplaneTableEntry> geometry3_table = geometry3.makeHyperplaneTable<false>(vPoints3);
 
-	std::sort(geometry3_table.begin(), geometry3_table.end(), [] (const segre::Entry& a, const segre::Entry& b) {
+	std::sort(geometry3_table.begin(), geometry3_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
 
 	VPoints<4> vPoints4 = geometry3.computeHyperplanesFromVeldkampLines(vPoints3, vLines3.projectives);
-	std::vector<segre::Entry> entries = geometry4.makeTable<false>(vPoints4, geometry3_table);
+	std::vector<segre::HyperplaneTableEntry> entries = geometry4.makeHyperplaneTable<false>(vPoints4, geometry3_table);
 
-	std::sort(entries.begin(), entries.end(), [] (const segre::Entry& a,
-	                                              const segre::Entry& b) {
+	std::sort(entries.begin(), entries.end(), [] (const segre::HyperplaneTableEntry& a,
+	                                              const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
 
@@ -52,10 +52,10 @@ int main() {
 	std::cout << "Finished in " << static_cast<int>(elapsed.count()) << " seconds\n" << std::endl;
 
 	std::cout << "Table 3\n\n";
-	std::copy(geometry3_table.begin(), geometry3_table.end(), std::ostream_iterator<segre::Entry>(std::cout, "\n"));
+	std::copy(geometry3_table.begin(), geometry3_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
 
 	std::cout << "Table 4\n";
-	std::copy(entries.begin(), entries.end(), std::ostream_iterator<segre::Entry>(std::cout, "\n"));
+	std::copy(entries.begin(), entries.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
 
 	return EXIT_SUCCESS;
 }
