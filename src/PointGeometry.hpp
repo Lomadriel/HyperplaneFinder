@@ -76,6 +76,34 @@ namespace segre {
 		size_t count;
 	};
 
+	template<size_t NbrPointsPerLine>
+	struct LineEntry {
+
+		LineEntry()
+		  : isProjective(false)
+		    , coreNbrPoints(0)
+		    , coreNbrLines(0)
+		    , pointsType()
+		    , count(0) {
+		}
+
+		bool operator==(const LineEntry<NbrPointsPerLine> entry) const {
+			return isProjective == entry.isProjective
+			  && coreNbrPoints == entry.coreNbrPoints
+			  && coreNbrLines == entry.coreNbrLines
+			  && pointsType == entry.pointsType;
+		}
+
+		template<size_t NbrPointsPerLine_>
+		friend std::ostream& operator<<(std::ostream &os, const LineEntry<NbrPointsPerLine_>& entry);
+
+		bool isProjective;
+		size_t coreNbrPoints;
+		size_t coreNbrLines;
+		std::map<long long int, std::size_t> pointsType;
+		size_t count;
+	};
+
 	template<size_t N1,size_t N2>
 	inline std::bitset<N1> copyBitset(const std::bitset<N2>& bs2) {
 		std::bitset<N1> bs1;
@@ -553,6 +581,63 @@ namespace segre {
 
 			return entries;
 		}
+
+
+		LineEntry<NbrPointsPerLine> makeLinesTableEntry(bool isProjective, const std::array<unsigned int, NbrPointsPerLine>& line, const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
+			LineEntry<NbrPointsPerLine> entry;
+			entry.isProjective = isProjective;
+
+			std::bitset<NbrPoints> kernel = vPoints[line[0]] & vPoints[line[1]];
+			entry.coreNbrPoints = kernel.count();
+			entry.coreNbrLines = 0;
+			for(const std::bitset<NbrPoints>& geometryLine : m_lines){
+				if((kernel & geometryLine) == geometryLine){
+					++entry.coreNbrLines;
+				}
+			}
+
+
+			for(unsigned int i = 0; i < NbrPointsPerLine; ++i){
+				const size_t nbr_points = vPoints[line[i]].count();
+				std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(points_table.begin(), points_table.end(),
+				                                                     [&nbr_points](const HyperplaneTableEntry& e) {
+					                                                     return e.nbrPoints == nbr_points;
+				                                                     });
+
+				if (it == points_table.end()) {
+					assert(false && "impossible");
+				} else {
+					++entry.pointsType[static_cast<long long int>(std::distance(points_table.cbegin(), it))];
+				}
+			}
+
+			return entry;
+		}
+
+		std::vector<LineEntry<NbrPointsPerLine>> makeLinesTable(VeldkampLines<NbrPointsPerLine>& vLines,
+		                                     const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<HyperplaneTableEntry>& points_table) const noexcept{
+			static_assert(Dimension < 4, "Points type determination only work for Dimension < 4");
+
+			const auto makeEntries = [&](std::vector<LineEntry<NbrPointsPerLine>>& entries, const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines, bool isProjective){
+				for(const std::array<unsigned int, NbrPointsPerLine>& line : lines){
+					LineEntry<NbrPointsPerLine> entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
+
+					typename std::vector<LineEntry<NbrPointsPerLine>>::iterator it = std::find(entries.begin(), entries.end(), entry);
+					if (it == entries.end()) {
+						entry.count = 1;
+						entries.push_back(entry);
+					} else {
+						++(it->count);
+					}
+				}
+			};
+
+			std::vector<LineEntry<NbrPointsPerLine>> entries;
+			makeEntries(entries, vLines.projectives, true);
+			makeEntries(entries, vLines.exceptional, false);
+			return entries;
+		}
+
 	private:
 
 		template <typename T>
@@ -652,6 +737,27 @@ namespace segre {
 			}
 
 			if (++iterator != entry.subgeometry.cend()) {
+				os << ", ";
+			}
+		}
+
+		os << "}, Crd: " << entry.count << '}';
+
+		return os;
+	}
+
+	template<size_t NbrPointsPerLine>
+	std::ostream& operator<<(std::ostream& os, const LineEntry<NbrPointsPerLine>& entry) {
+		os << "Entry{"
+		   << "Proj: " << entry.isProjective
+		   << ", core{"
+		       << "Ps: " << entry.coreNbrPoints
+		       << ", Ls: " << entry.coreNbrLines
+		   << "}, composition{";
+
+		for(std::map<long long int, std::size_t>::const_iterator iterator = entry.pointsType.cbegin(); iterator != entry.pointsType.cend();) {
+			os << "H" << iterator->first << ":" << iterator->second;
+			if (++iterator != entry.pointsType.cend()) {
 				os << ", ";
 			}
 		}
