@@ -721,7 +721,7 @@ if(MSVC)
 	add_cx_flag(${target} "/Ox" RELEASE)
 
 	# enables automatic parallelization of loops
-	#add_cx_flag(${target} "/Qpar" RELEASE)
+	add_cx_flag(${target} "/Qpar" RELEASE)
 
 	# enable runtime checks
 	add_cx_flag("/RTC1" DEBUG)
