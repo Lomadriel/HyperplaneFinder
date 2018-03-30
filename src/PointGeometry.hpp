@@ -748,8 +748,8 @@ namespace segre {
 
 	template<size_t NbrPointsPerLine>
 	std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry<NbrPointsPerLine>& entry) {
-		os << "Entry{"
-		   << "Proj: " << entry.isProjective
+		os << "VeldkampLineEntry{"
+		   << "Proj: " << std::boolalpha << entry.isProjective
 		   << ", core{"
 		       << "Ps: " << entry.coreNbrPoints
 		       << ", Ls: " << entry.coreNbrLines
