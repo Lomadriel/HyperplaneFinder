@@ -211,29 +211,32 @@ namespace segre {
 					}
 				}
 
-				if (sameCore.size() == 2) {
-					if (sameCore[0] > currentCombination[1]) {
+				CombinationGenerator gen2;
+				gen2.initialize(static_cast<unsigned int>(sameCore.size()), 2);
 
-						projectiveLines.emplace_back(std::array<unsigned int, NbrPointsPerLine>({
-								currentCombination[0],
-								currentCombination[1],
-								sameCore[0],
-								sameCore[1]}));
-					}
-				} else {
-					CombinationGenerator gen2;
-					gen2.initialize(static_cast<unsigned int>(sameCore.size()), 2);
+				while (!gen2.isFinished()) {
+					const std::vector<unsigned int>& currentCombination2 = gen2.nextCombination();
 
-					while (!gen2.isFinished()) {
-						const std::vector<unsigned int>& currentCombination2 = gen2.nextCombination();
+					if (sameCore[currentCombination2[0]] > currentCombination[1]) {
+						const std::bitset<NbrPoints>& ha = veldkampPoints[sameCore[currentCombination2[0]]];
+						const std::bitset<NbrPoints>& hb = veldkampPoints[sameCore[currentCombination2[1]]];
 
-						if (sameCore[currentCombination2[0]] > currentCombination[1]) {
+						const std::bitset<NbrPoints> intersectionAB = ha & hb;
 
-							supposedExceptional.emplace_back(std::array<unsigned int, NbrPointsPerLine>({
-									currentCombination[0],
-									currentCombination[1],
-									sameCore[currentCombination2[0]],
-									sameCore[currentCombination2[1]]}));
+						if (intersection12 == intersectionAB) {
+							if (sameCore.size() == 2) {
+								projectiveLines.emplace_back(
+										std::array<unsigned int, NbrPointsPerLine>({currentCombination[0],
+										                                            currentCombination[1],
+										                                            sameCore[currentCombination2[0]],
+										                                            sameCore[currentCombination2[1]]}));
+							} else {
+								supposedExceptional.emplace_back(
+										std::array<unsigned int, NbrPointsPerLine>({currentCombination[0],
+										                                            currentCombination[1],
+										                                            sameCore[currentCombination2[0]],
+										                                            sameCore[currentCombination2[1]]}));
+							}
 						}
 					}
 				}
