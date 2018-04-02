@@ -36,7 +36,7 @@ int main() {
 	VLines<2> vLines2 = geometry2.computeVeldkampLines(vPoints2);
 	geometry2.distinguishVeldkampLines(vLines2, vPoints2, geometry3);
 
-	std::vector<segre::HyperplaneTableEntry> geometry2_hyp_table = geometry2.makeHyperplaneTable<false>(vPoints2);
+	std::vector<segre::HyperplaneTableEntry> geometry2_hyp_table = geometry2.makeHyperplaneTable<true>(vPoints2);
 	std::sort(geometry2_hyp_table.begin(), geometry2_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});

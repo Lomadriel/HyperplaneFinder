@@ -50,7 +50,7 @@ namespace segre {
 			: nbrPoints{0}
 			, nbrLines{0}
 			, pointsOfOrder{}
-			, subgeometry{}
+			, subgeometries{}
 			, count{0} {
 		}
 
@@ -65,7 +65,7 @@ namespace segre {
 			return nbrPoints == entry.nbrPoints &&
 			       nbrLines == entry.nbrLines &&
 			       map_compare(pointsOfOrder, entry.pointsOfOrder) &&
-			       map_compare(subgeometry, entry.subgeometry);
+			       map_compare(subgeometries, entry.subgeometries);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry);
@@ -73,7 +73,7 @@ namespace segre {
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
 		std::map<unsigned int, unsigned int> pointsOfOrder;
-		std::map<long long int, std::size_t> subgeometry;
+		std::vector<std::map<long long int, std::size_t>> subgeometries;
 		size_t count;
 	};
 
@@ -532,20 +532,27 @@ namespace segre {
 				entry = getHyperplaneTableEntry<OrderOfPoints>(hyperplane);
 			}
 
-			for (const auto& direction_masks : m_subGeometriesMasks) {
-				for (const auto& mask : direction_masks) {
-					std::size_t nbr_points = (hyperplane & mask).count();
+			entry.subgeometries.resize(m_subGeometriesMasks.size());
 
-					std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(precedent_table.begin(), precedent_table.end(),
-					                                                                    [&nbr_points](const HyperplaneTableEntry& e) {
-						                                                                    return e.nbrPoints == nbr_points;
-					                                                                    });
+			{
+				std::size_t i = 0;
+				for (const auto& direction_masks : m_subGeometriesMasks) {
+					for (const auto& mask : direction_masks) {
+						std::size_t nbr_points = (hyperplane & mask).count();
 
-					if (it == precedent_table.cend()) {
-						++(entry.subgeometry[-1]);
-					} else {
-						++(entry.subgeometry[static_cast<long long int>(std::distance(precedent_table.cbegin(), it))]);
+						std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(precedent_table.begin(), precedent_table.end(),
+						                                                                    [&nbr_points](const HyperplaneTableEntry& e) {
+							                                                                    return e.nbrPoints == nbr_points;
+						                                                                    });
+
+						if (it == precedent_table.cend()) {
+							++(entry.subgeometries[i][-1]);
+						} else {
+							++(entry.subgeometries[i][static_cast<long long int>(std::distance(precedent_table.cbegin(), it))]);
+						}
 					}
+
+					++i;
 				}
 			}
 
@@ -749,17 +756,39 @@ namespace segre {
 
 		os << "}, SubGeometry={";
 
-		for (auto iterator = entry.subgeometry.cbegin(); iterator != entry.subgeometry.cend();) {
+		for (std::size_t i = 0; i < entry.subgeometries.size(); ++i) {
+			os << 'D' << i << "={";
+
+			for (auto it = entry.subgeometries[i].cbegin(); it != entry.subgeometries[i].cend();) {
+				if (it->first != -1) {
+					os << 'H' << it->first << "=" << it->second;
+				} else {
+					os << "Full=" << it->second;
+				}
+
+				if (++it != entry.subgeometries[i].cend()) {
+					os << ", ";
+				}
+			}
+
+			os << "}";
+
+			if (i + 1 != entry.subgeometries.size()) {
+				os << ", ";
+			}
+		}
+
+		/*for (auto iterator = entry.subgeometries.cbegin(); iterator != entry.subgeometries.cend();) {
 			if (iterator->first != -1) {
 				os << 'H' << iterator->first << "=" << iterator->second;
 			} else {
 				os << "Full=" << iterator->second;
 			}
 
-			if (++iterator != entry.subgeometry.cend()) {
+			if (++iterator != entry.subgeometries.cend()) {
 				os << ", ";
 			}
-		}
+		}*/
 
 		os << "}, Crd: " << entry.count << '}';
 
