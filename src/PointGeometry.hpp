@@ -17,13 +17,13 @@ namespace math {
 	template <typename T, typename U>
 	inline constexpr T pow(T base, U exponent) {
 		static_assert(std::is_integral_v<U>);
-		return exponent == 0 ? 1 : base * pow(base, exponent-1);
+		return exponent == 0 ? 1 : base * pow(base, exponent - 1);
 	}
 }
 
 // Fixme : Replace std::bitset by a custom bitset
 namespace std { // NOLINT
-	template<size_t N>
+	template <size_t N>
 	bool operator<(const std::bitset<N>& x, const std::bitset<N>& y) {
 		for (size_t i = N - 1; i--;) {
 			if (x[i] ^ y[i]) {
@@ -38,7 +38,8 @@ namespace std { // NOLINT
 namespace segre {
 	template <std::size_t NbrPointsPerLine>
 	struct VeldkampLines {
-		explicit VeldkampLines(std::vector<std::array<unsigned int, NbrPointsPerLine>>&& exceptional_lines, std::vector<std::array<unsigned int, NbrPointsPerLine>>&& projectives_lines) noexcept;
+		explicit VeldkampLines(std::vector<std::array<unsigned int, NbrPointsPerLine>>&& exceptional_lines,
+		                       std::vector<std::array<unsigned int, NbrPointsPerLine>>&& projectives_lines) noexcept;
 
 		std::vector<std::array<unsigned int, NbrPointsPerLine>> exceptional;
 		std::vector<std::array<unsigned int, NbrPointsPerLine>> projectives;
@@ -54,7 +55,7 @@ namespace segre {
 		}
 
 		template <typename Map>
-		bool map_compare (Map const &lhs, Map const &rhs) const {
+		bool map_compare(Map const& lhs, Map const& rhs) const {
 			return lhs.size() == rhs.size()
 			       && std::equal(lhs.begin(), lhs.end(),
 			                     rhs.begin());
@@ -67,7 +68,7 @@ namespace segre {
 			       map_compare(subgeometry, entry.subgeometry);
 		}
 
-		friend std::ostream& operator<<(std::ostream &os, const HyperplaneTableEntry& entry);
+		friend std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry);
 
 		unsigned int nbrPoints;
 		unsigned int nbrLines;
@@ -76,7 +77,7 @@ namespace segre {
 		size_t count;
 	};
 
-	template<size_t NbrPointsPerLine>
+	template <size_t NbrPointsPerLine>
 	struct VeldkampLineTableEntry {
 
 		VeldkampLineTableEntry()
@@ -89,13 +90,13 @@ namespace segre {
 
 		bool operator==(const VeldkampLineTableEntry<NbrPointsPerLine>& entry) const {
 			return isProjective == entry.isProjective
-			  && coreNbrPoints == entry.coreNbrPoints
-			  && coreNbrLines == entry.coreNbrLines
-			  && pointsType == entry.pointsType;
+			       && coreNbrPoints == entry.coreNbrPoints
+			       && coreNbrLines == entry.coreNbrLines
+			       && pointsType == entry.pointsType;
 		}
 
-		template<size_t NbrPointsPerLine_>
-		friend std::ostream& operator<<(std::ostream &os, const VeldkampLineTableEntry<NbrPointsPerLine_>& entry);
+		template <size_t NbrPointsPerLine_>
+		friend std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry<NbrPointsPerLine_>& entry);
 
 		bool isProjective;
 		size_t coreNbrPoints;
@@ -104,10 +105,10 @@ namespace segre {
 		size_t count;
 	};
 
-	template<size_t N1,size_t N2>
+	template <size_t N1, size_t N2>
 	inline std::bitset<N1> copyBitset(const std::bitset<N2>& bs2) {
 		std::bitset<N1> bs1;
-		for(size_t i = 0; i < N2; i++) {
+		for (size_t i = 0; i < N2; i++) {
 			bs1[i] = bs2[i];
 		}
 
@@ -118,7 +119,7 @@ namespace segre {
 
 	template <size_t Dimension, size_t NbrPointsPerLine,
 			size_t NbrLines, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension),
-			        size_t TensorSize = math::pow(2UL, Dimension)>
+			size_t TensorSize = math::pow(2UL, Dimension)>
 	class PointGeometry {
 	public:
 		explicit PointGeometry(std::array<std::bitset<NbrPoints>, NbrLines>&& lines) noexcept
@@ -253,7 +254,9 @@ namespace segre {
 		 */
 		void distinguishVeldkampLines(VeldkampLines<NbrPointsPerLine>& vLines,
 		                              const std::vector<std::bitset<NbrPoints>>& vPoints,
-		                              const PointGeometry<Dimension + 1, NbrPointsPerLine, math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension)>& nextGeometry) const {
+		                              const PointGeometry<Dimension + 1,
+		                                                  NbrPointsPerLine,
+		                                                  math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension)>& nextGeometry) const {
 			std::vector<size_t> toRemove;
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
@@ -328,7 +331,8 @@ namespace segre {
 			return rank;
 		}
 
-		decltype(auto) computeHyperplanesFromVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints, const std::vector<std::array<unsigned int, NbrPointsPerLine>>& pVLines) {
+		decltype(auto) computeHyperplanesFromVeldkampLines(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
+		                                                   const std::vector<std::array<unsigned int, NbrPointsPerLine>>& pVLines) {
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
 			std::vector<std::bitset<NewNbrPoints>> hyperplanes;
@@ -391,8 +395,9 @@ namespace segre {
 		 * @param veldkampLine a veldkamp line.
 		 * @return the hyperplanes of the given veldkamp line.
 		 */
-		static std::array<std::bitset<NbrPoints>, NbrPointsPerLine> getHyperplanesOfTheVeldkampLine(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
-		                                                 const std::array<unsigned int, NbrPointsPerLine>& veldkampLine) {
+		static std::array<std::bitset<NbrPoints>, NbrPointsPerLine>
+		getHyperplanesOfTheVeldkampLine(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
+		                                const std::array<unsigned int, NbrPointsPerLine>& veldkampLine) {
 			std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hyperplanes;
 
 			for (size_t i = 0; i < veldkampLine.size(); ++i) {
@@ -409,8 +414,9 @@ namespace segre {
 			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result;
 
 			// Duplicates the current geometry to generate each layer of the cartesian product.
-			std::generate(result.begin(), result.end(), [this, i = 0UL, j = 0UL] () mutable -> decltype(auto) {
-				auto bitset = copyBitset<math::pow(NbrPointsPerLine, Dimension + 1)>(m_geometryLines[j]) <<= static_cast<long unsigned int>(NbrPoints * i);
+			std::generate(result.begin(), result.end(), [this, i = 0UL, j = 0UL]() mutable -> decltype(auto) {
+				auto bitset = copyBitset<math::pow(NbrPointsPerLine, Dimension + 1)>(m_geometryLines[j]) <<=
+						              static_cast<long unsigned int>(NbrPoints * i);
 				++j;
 				if (j % NbrLines == 0) {
 					j = 0;
@@ -509,7 +515,8 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		HyperplaneTableEntry getHyperplaneTableEntry(const std::bitset<NbrPoints>& hyperplane, const std::vector<HyperplaneTableEntry>& precedent_table) const noexcept {
+		HyperplaneTableEntry getHyperplaneTableEntry(const std::bitset<NbrPoints>& hyperplane,
+		                                             const std::vector<HyperplaneTableEntry>& precedent_table) const noexcept {
 			HyperplaneTableEntry entry;
 
 			if constexpr (!OrderOfPoints) {
@@ -532,9 +539,9 @@ namespace segre {
 					std::size_t nbr_points = (hyperplane & mask).count();
 
 					std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(precedent_table.begin(), precedent_table.end(),
-						[&nbr_points](const HyperplaneTableEntry& e) {
-							return e.nbrPoints == nbr_points;
-						});
+					                                                                    [&nbr_points](const HyperplaneTableEntry& e) {
+						                                                                    return e.nbrPoints == nbr_points;
+					                                                                    });
 
 					if (it == precedent_table.cend()) {
 						++(entry.subgeometry[-1]);
@@ -567,7 +574,8 @@ namespace segre {
 		}
 
 		template <bool OrderOfPoints>
-		std::vector<HyperplaneTableEntry> makeHyperplaneTable(const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<HyperplaneTableEntry>& precedent_table) const noexcept {
+		std::vector<HyperplaneTableEntry> makeHyperplaneTable(const std::vector<std::bitset<NbrPoints>>& vPoints,
+		                                                      const std::vector<HyperplaneTableEntry>& precedent_table) const noexcept {
 			std::vector<HyperplaneTableEntry> entries;
 
 			for (const auto& vPoint : vPoints) {
@@ -586,26 +594,29 @@ namespace segre {
 		}
 
 
-		VeldkampLineTableEntry<NbrPointsPerLine> makeLinesTableEntry(bool isProjective, const std::array<unsigned int, NbrPointsPerLine>& line, const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
+		VeldkampLineTableEntry<NbrPointsPerLine>
+		makeLinesTableEntry(bool isProjective, const std::array<unsigned int, NbrPointsPerLine>& line,
+		                    const std::vector<std::bitset<NbrPoints>>& vPoints,
+		                    const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
 			VeldkampLineTableEntry<NbrPointsPerLine> entry;
 			entry.isProjective = isProjective;
 
 			std::bitset<NbrPoints> kernel = vPoints[line[0]] & vPoints[line[1]];
 			entry.coreNbrPoints = kernel.count();
 			entry.coreNbrLines = 0;
-			for(const std::bitset<NbrPoints>& geometryLine : m_geometryLines){
-				if((kernel & geometryLine) == geometryLine){
+			for (const std::bitset<NbrPoints>& geometryLine : m_geometryLines) {
+				if ((kernel & geometryLine) == geometryLine) {
 					++entry.coreNbrLines;
 				}
 			}
 
 
-			for(unsigned int i = 0; i < NbrPointsPerLine; ++i){
+			for (unsigned int i = 0; i < NbrPointsPerLine; ++i) {
 				const size_t nbr_points = vPoints[line[i]].count();
 				std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(points_table.begin(), points_table.end(),
-				                                                     [&nbr_points](const HyperplaneTableEntry& e) {
-					                                                     return e.nbrPoints == nbr_points;
-				                                                     });
+				                                                                    [&nbr_points](const HyperplaneTableEntry& e) {
+					                                                                    return e.nbrPoints == nbr_points;
+				                                                                    });
 
 				if (it == points_table.end()) {
 					assert(false && "impossible");
@@ -618,14 +629,17 @@ namespace segre {
 		}
 
 		std::vector<VeldkampLineTableEntry<NbrPointsPerLine>> makeVeldkampLinesTable(VeldkampLines<NbrPointsPerLine>& vLines,
-		                                     const std::vector<std::bitset<NbrPoints>>& vPoints, const std::vector<HyperplaneTableEntry>& points_table) const noexcept{
+		                                                                             const std::vector<std::bitset<NbrPoints>>& vPoints,
+		                                                                             const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
 			static_assert(Dimension < 4, "Points type determination only work for Dimension < 4");
 
-			const auto makeEntries = [&](std::vector<VeldkampLineTableEntry<NbrPointsPerLine>>& entries, const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines, bool isProjective){
-				for(const std::array<unsigned int, NbrPointsPerLine>& line : lines){
+			const auto makeEntries = [&](std::vector<VeldkampLineTableEntry<NbrPointsPerLine>>& entries,
+			                             const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines, bool isProjective) {
+				for (const std::array<unsigned int, NbrPointsPerLine>& line : lines) {
 					VeldkampLineTableEntry<NbrPointsPerLine> entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
 
-					typename std::vector<VeldkampLineTableEntry<NbrPointsPerLine>>::iterator it = std::find(entries.begin(), entries.end(), entry);
+					typename std::vector<VeldkampLineTableEntry<NbrPointsPerLine>>::iterator
+							it = std::find(entries.begin(), entries.end(), entry);
 					if (it == entries.end()) {
 						entry.count = 1;
 						entries.push_back(entry);
@@ -655,25 +669,26 @@ namespace segre {
 				return;
 			}
 
-			if (index-1 >= bits) {
-				permutations(index-1, bits, number, hyperplanes);
+			if (index - 1 >= bits) {
+				permutations(index - 1, bits, number, hyperplanes);
 			}
 
 			if (bits > 0) {
-				permutations(index-1, bits-1, number | T((1 << (index-1))), hyperplanes);
+				permutations(index - 1, bits - 1, number | T((1 << (index - 1))), hyperplanes);
 			}
 		}
 
-		void computeMasks(){
-			if constexpr(Dimension == 1) // no sub dimensions in dimension1
+		void computeMasks() {
+			if constexpr (Dimension == 1) { // no sub dimensions in dimension1
 				return;
+			}
 
-			std::array<std::bitset<NbrPoints>,Dimension> gen_lines; // lines starting from 0, like a canonical base
-			std::array<std::array<size_t,NbrPointsPerLine>,Dimension> gen_lines_indexes; // indexes of the points of the previous lines
+			std::array<std::bitset<NbrPoints>, Dimension> gen_lines; // lines starting from 0, like a canonical base
+			std::array<std::array<size_t, NbrPointsPerLine>, Dimension> gen_lines_indexes; // indexes of the points of the previous lines
 
 			// Fill gen_lines and gen_lines_indexes
-			for(size_t i = 0; i < gen_lines.size(); ++i){
-				for(size_t j = 0; j < NbrPointsPerLine; ++j){
+			for (size_t i = 0; i < gen_lines.size(); ++i) {
+				for (size_t j = 0; j < NbrPointsPerLine; ++j) {
 
 					gen_lines_indexes[i][j] = j * math::pow(NbrPointsPerLine, i);
 					gen_lines[i][j * math::pow(NbrPointsPerLine, i)] = 1;
@@ -688,25 +703,29 @@ namespace segre {
 			//     - A += A shifted along the line
 			// - A is a mask
 			// - A shifted along the line not taken at first step generate other masks
-			for(size_t ignored_line = 0; ignored_line < Dimension; ++ignored_line){ // to take dimension-1 lines, we choose an ignored line
-				size_t line_index = !ignored_line; // current line: first non-ignored line
+			for (size_t ignored_line = 0;
+			     ignored_line < Dimension;
+			     ++ignored_line) { // to take dimension-1 lines, we choose an ignored line
+				size_t line_index = static_cast<size_t>(!ignored_line); // current line: first non-ignored line
 				std::bitset<NbrPoints> gen_line = gen_lines[line_index];
 
 				// First mask
 				m_subGeometriesMasks[ignored_line][0] = gen_line;
-				for(size_t line_shift_index = 0; line_shift_index < Dimension; ++line_shift_index){
-					if(line_shift_index == line_index || line_shift_index == ignored_line)
+				for (size_t line_shift_index = 0; line_shift_index < Dimension; ++line_shift_index) {
+					if (line_shift_index == line_index || line_shift_index == ignored_line) {
 						continue;
+					}
 
-					for(size_t i = 1; i < NbrPointsPerLine; ++i){
+					for (size_t i = 1; i < NbrPointsPerLine; ++i) {
 						m_subGeometriesMasks[ignored_line][0] |= (gen_line << gen_lines_indexes[line_shift_index][i]);
 					}
 					gen_line = m_subGeometriesMasks[ignored_line][0];
 				}
 
 				// Shifts of the first mask
-				for(size_t submask = 1; submask < NbrPointsPerLine; ++submask){
-					m_subGeometriesMasks[ignored_line][submask] = m_subGeometriesMasks[ignored_line][submask - 1] << gen_lines_indexes[ignored_line][1];
+				for (size_t submask = 1; submask < NbrPointsPerLine; ++submask) {
+					m_subGeometriesMasks[ignored_line][submask] =
+							m_subGeometriesMasks[ignored_line][submask - 1] << gen_lines_indexes[ignored_line][1];
 				}
 			}
 		}
@@ -714,16 +733,16 @@ namespace segre {
 		std::array<std::bitset<NbrPoints>, NbrLines> m_geometryLines;
 		std::array<std::array<unsigned int, TensorSize>, NbrPoints> m_geometryPoints;
 
-		std::array<std::array<std::bitset<NbrPoints>,NbrPointsPerLine>,Dimension> m_subGeometriesMasks;
+		std::array<std::array<std::bitset<NbrPoints>, NbrPointsPerLine>, Dimension> m_subGeometriesMasks;
 	};
 
-	std::ostream& operator<<(std::ostream &os, const HyperplaneTableEntry& entry) {
-		os << "HyperplaneTableEntry{" <<
-		   "Ps: " << entry.nbrPoints <<
-		   ", Ls: " << entry.nbrLines <<
-		   ", Order={";
+	std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry) {
+		os << "HyperplaneTableEntry{"
+		   << "Ps: " << entry.nbrPoints
+		   << ", Ls: " << entry.nbrLines
+		   << ", Order={";
 
-		for(auto iterator = entry.pointsOfOrder.cbegin(); iterator != entry.pointsOfOrder.cend();) {
+		for (auto iterator = entry.pointsOfOrder.cbegin(); iterator != entry.pointsOfOrder.cend();) {
 			os << iterator->first << "=" << iterator->second;
 			if (++iterator != entry.pointsOfOrder.cend()) {
 				os << ", ";
@@ -732,7 +751,7 @@ namespace segre {
 
 		os << "}, SubGeometry={";
 
-		for(auto iterator = entry.subgeometry.cbegin(); iterator != entry.subgeometry.cend();) {
+		for (auto iterator = entry.subgeometry.cbegin(); iterator != entry.subgeometry.cend();) {
 			if (iterator->first != -1) {
 				os << 'H' << iterator->first << "=" << iterator->second;
 			} else {
@@ -749,16 +768,17 @@ namespace segre {
 		return os;
 	}
 
-	template<size_t NbrPointsPerLine>
+	template <size_t NbrPointsPerLine>
 	std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry<NbrPointsPerLine>& entry) {
 		os << "VeldkampLineEntry{"
 		   << "Proj: " << std::boolalpha << entry.isProjective
 		   << ", core{"
-		       << "Ps: " << entry.coreNbrPoints
-		       << ", Ls: " << entry.coreNbrLines
+		   << "Ps: " << entry.coreNbrPoints
+		   << ", Ls: " << entry.coreNbrLines
 		   << "}, composition{";
 
-		for(std::map<long long int, std::size_t>::const_iterator iterator = entry.pointsType.cbegin(); iterator != entry.pointsType.cend();) {
+		for (std::map<long long int, std::size_t>::const_iterator iterator = entry.pointsType.cbegin();
+		     iterator != entry.pointsType.cend();) {
 			os << "H" << iterator->first << ":" << iterator->second;
 			if (++iterator != entry.pointsType.cend()) {
 				os << ", ";
@@ -772,9 +792,9 @@ namespace segre {
 
 	template <std::size_t NbrPointsPerLine>
 	VeldkampLines<NbrPointsPerLine>::VeldkampLines(std::vector<std::array<unsigned int, NbrPointsPerLine>>&& exceptional_lines,
-	                             std::vector<std::array<unsigned int, NbrPointsPerLine>>&& projectives_lines) noexcept
-		: exceptional(std::move(exceptional_lines))
-		, projectives(std::move(projectives_lines)) {
+	                                               std::vector<std::array<unsigned int, NbrPointsPerLine>>&& projectives_lines) noexcept
+			: exceptional(std::move(exceptional_lines))
+			, projectives(std::move(projectives_lines)) {
 	}
 }
 
