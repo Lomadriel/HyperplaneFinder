@@ -341,6 +341,20 @@ function(target_add_includes target)
 	target_include_directories(${target} PRIVATE ${ARGN})
 endfunction()
 
+## target_add_system_includes(target includes...)
+# Add input system includes (files or directories) to target.
+#   {value} [in] target:     Target to add includes
+#   {value} [in] includes:   Includes to add
+function(target_add_system_includes target)
+	list(LENGTH ARGN size)
+	if(NOT ${size} GREATER 0)
+		return()
+	endif()
+	list(REMOVE_DUPLICATES ARGN)
+	list(SORT ARGN)
+	target_include_directories(${target} SYSTEM PRIVATE ${ARGN})
+endfunction()
+
 ## target_add_flag(target flag [configs...])
 # Add a flag to the compiler arguments of the target for the specified configs.
 # Add the flag only if the compiler support it (checked with CHECK_CXX_COMPILER_FLAG)
@@ -624,7 +638,7 @@ function(setup_target target)
 	endif()
 endfunction()
 
-## make_target(target group files... [INCLUDES includes...]
+## make_target(target group files... [INCLUDES includes...] [EXT_INCLUDES ext_includes...]
 ##     [OPTIONS [executable] [test] [shared] [static_runtime] [c] [cxx] [no_warnings] [low_warnings]])
 # Make a new target with the input options
 # By default targets are static libraries.
@@ -632,6 +646,7 @@ endfunction()
 #   {value}  [in] group:            Group of the target (can contain '/'' for subgroups)
 #   {value}  [in] files:            Source files
 #   {value}  [in] includes:         Include files
+#   {value}  [in] ext_includes:     External include files (no warnings)
 #   {option} [in] executable:       If present, build an executable
 #   {option} [in] test:             If present, build a test executable
 #   {option} [in] shared:           If present, build a shared library
@@ -645,10 +660,12 @@ function(make_target target group)
 
 	# initialize additional include directory list
 	set(includes)
+	set(ext_includes)
 
 	# get options
 	split_args(inputs "OPTIONS" options ${ARGN})
-	split_args(files "INCLUDES" includes ${inputs})
+	split_args(inputs2 "EXT_INCLUDES" ext_includes ${inputs})
+	split_args(files "INCLUDES" includes ${inputs2})
 	has_item(is_executable "executable" ${options})
 	has_item(is_test "test" ${options})
 	has_item(is_shared "shared" ${options})
@@ -674,11 +691,24 @@ function(make_target target group)
 
 	# add all additional include directories
 	target_add_includes(${target} ${includes})
+	target_add_system_includes(${target} ${ext_includes})
 
 	# set directories for IDE
 	source_group(CMake REGULAR_EXPRESSION ".*[.](cmake|rule)$")
 	source_group(CMake FILES "CMakeLists.txt")
 	set_target_properties(${target} PROPERTIES FOLDER ${group})
+endfunction()
+
+## configure_folder(input_folder output_folder)
+# Recursively copie all files from an input folder to an output folder
+#   {value} [in] input_folder:    Input folder
+#   {value} [in] output_folder:   Output folder
+function(configure_folder input_folder output_folder)
+	file(GLOB_RECURSE files "${input_folder}" "${input_folder}/*")
+	foreach(file ${files})
+		file(RELATIVE_PATH relative_file ${input_folder} ${file})
+		configure_file(${file} "${output_folder}/${relative_file}" COPYONLY)
+	endforeach()
 endfunction()
 
 
