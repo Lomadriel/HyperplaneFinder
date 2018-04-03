@@ -4,6 +4,7 @@ project(HyperplaneFinder)
 enable_language(CXX)
 
 include(cmake/common.cmake)
+include(cmake/json.cmake)
 
 set(CMAKE_DEBUG_POSTFIX _d)
 
@@ -23,6 +24,7 @@ get_files(
 make_target(
   HyperplaneFinder "HyperplaneFinder" ${files}
   INCLUDES "${src_dir}"
+  EXT_INCLUDES "${JSON_INCLUDE_DIR}"
   OPTIONS cxx executable
 )
 set_property(TARGET HyperplaneFinder PROPERTY CXX_STANDARD 17)
