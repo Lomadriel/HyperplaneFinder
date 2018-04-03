@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10) # For CXX_STANDARD 17 property on Visual St
 project(HyperplaneFinder)
 enable_language(CXX)
 
-include(common.cmake)
+include(cmake/common.cmake)
 
 set(CMAKE_DEBUG_POSTFIX _d)
 
