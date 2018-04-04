@@ -14,11 +14,13 @@ namespace{
 	constexpr const char* OUTPUT_FOLDER = "./";
 
 	// Templates
+	constexpr const char* LINES_TABLE_TEMPLATE = "lines_table.tex";
 	constexpr const char* HYPERPLANES_TABLE_TEMPLATE = "hyperplanes_table.tex";
 	constexpr const char* DOCUMENT_TEMPLATE = "document.tex";
 
 	// Outputs
 	constexpr const char* TABLE_OUTPUT_DIMENSION_PREFIX = "dimension_";
+	constexpr const char* LINES_TABLE_OUTPUT = "_lines_table.tex";
 	constexpr const char* HYPERPLANES_TABLE_OUTPUT = "_hyperplanes_table.tex";
 	constexpr const char* DOCUMENT_OUTPUT = "tables.tex";
 
@@ -34,6 +36,40 @@ public:
 	  : m_environment(TEMPLATE_FOLDER, OUTPUT_FOLDER)
 	  , m_generated_tables(){
 
+	}
+
+	void generateLinesTable(unsigned int geometry_dimension,
+	                        const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table,
+	                        size_t points_type_number){
+		json data;
+		data["pointsTypeNumber"] = points_type_number;
+
+		std::vector<json> lines_info;
+		for(const segre::VeldkampLineTableEntry& entry : geometry_lin_table){
+			json line_info;
+			line_info["isProjective"] = entry.isProjective;
+			line_info["core"]["points"] = entry.coreNbrPoints;
+			line_info["core"]["lines"] = entry.coreNbrLines;
+
+			std::vector<size_t> points_types;
+			points_types.reserve(points_type_number);
+			for(size_t i = 0; i < points_type_number; ++i){
+				const std::map<long long int, std::size_t>::const_iterator it = entry.pointsType.find(static_cast<long long int>(i));
+				points_types.push_back(it == entry.pointsType.end() ? 0 : it->second);
+			}
+			line_info["pointsType"] = std::move(points_types);
+
+			line_info["cardinal"] = entry.count;
+
+			lines_info.push_back(std::move(line_info));
+		}
+		data["lines"] = std::move(lines_info);
+
+		inja::Template document = m_environment.parse_template(LINES_TABLE_TEMPLATE);
+		std::string file_name = TABLE_OUTPUT_DIMENSION_PREFIX + std::to_string(geometry_dimension) + LINES_TABLE_OUTPUT;
+		m_environment.write(document, data, file_name);
+
+		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_name);
 	}
 
 	void generateHyperplanesTable(unsigned int geometry_dimension,
