@@ -15,10 +15,15 @@ namespace{
 
 	// Templates
 	constexpr const char* HYPERPLANES_TABLE_TEMPLATE = "hyperplanes_table.tex";
+	constexpr const char* DOCUMENT_TEMPLATE = "document.tex";
 
 	// Outputs
 	constexpr const char* TABLE_OUTPUT_DIMENSION_PREFIX = "dimension_";
 	constexpr const char* HYPERPLANES_TABLE_OUTPUT = "_hyperplanes_table.tex";
+	constexpr const char* DOCUMENT_OUTPUT = "tables.tex";
+
+	// Information
+	constexpr const char* DOCUMENT_TITLE = "HyperplaneFinder tables";
 }
 
 class LatexPrinter{
@@ -66,6 +71,29 @@ public:
 		m_environment.write(document, data, file_name);
 
 		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_name);
+	}
+
+	void generateTablesDocument(){
+		json data;
+		data["title"] = DOCUMENT_TITLE;
+
+		time_t now = time(nullptr);
+		struct tm tstruct = *localtime(&now);
+		char buf[11];
+		strftime(buf, sizeof(buf), "%Y/%m/%d", &tstruct);
+		data["date"] = buf;
+
+		std::vector<json> tables;
+		for(const Table& generated_table : m_generated_tables){
+			json table;
+			table["tableName"] = generated_table.tableName;
+			table["fileName"] = generated_table.fileName;
+			tables.push_back(std::move(table));
+		}
+		data["tables"] = std::move(tables);
+
+		inja::Template document = m_environment.parse_template(DOCUMENT_TEMPLATE);
+		m_environment.write(document, data, DOCUMENT_OUTPUT);
 	}
 
 private:

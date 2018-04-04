@@ -1,0 +1,11 @@
+{% include "packages.tex" %}
+{% include "settings.tex" %}
+\begin{document}
+	\begin{center}
+	{% for table in tables %}
+		{{table/tableName}}\\
+		\input{ {{table/fileName}}}
+		\newpage
+	{% endfor %}
+	\end{center}
+\end{document}
