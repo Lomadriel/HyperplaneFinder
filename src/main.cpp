@@ -34,8 +34,8 @@ int main() {
 	std::sort(geometry2_hyp_table.begin(), geometry2_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
-	std::vector<segre::VeldkampLineTableEntry<PPL>> geometry2_lin_table = geometry2.makeVeldkampLinesTable(vLines2, vPoints2, geometry2_hyp_table);
-	std::sort(geometry2_lin_table.begin(), geometry2_lin_table.end(), [](const segre::VeldkampLineTableEntry<PPL>& a, const segre::VeldkampLineTableEntry<PPL>& b){
+	std::vector<segre::VeldkampLineTableEntry> geometry2_lin_table = geometry2.makeVeldkampLinesTable(vLines2, vPoints2, geometry2_hyp_table);
+	std::sort(geometry2_lin_table.begin(), geometry2_lin_table.end(), [](const segre::VeldkampLineTableEntry& a, const segre::VeldkampLineTableEntry& b){
 		return std::make_tuple(a.isProjective, a.coreNbrPoints, a.coreNbrLines) < std::make_tuple(b.isProjective, b.coreNbrPoints, b.coreNbrLines);
 	});
 
@@ -43,12 +43,12 @@ int main() {
 	VLines<3> vLines3 = geometry3.computeVeldkampLines(vPoints3);
 	geometry3.distinguishVeldkampLines(vLines3, vPoints3, geometry4);
 
-	std::vector<segre::HyperplaneTableEntry> geometry3_hyp_table = geometry3.makeHyperplaneTable<false>(vPoints3);
+	std::vector<segre::HyperplaneTableEntry> geometry3_hyp_table = geometry3.makeHyperplaneTable<false>(vPoints3, geometry2_hyp_table);
 	std::sort(geometry3_hyp_table.begin(), geometry3_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
-	std::vector<segre::VeldkampLineTableEntry<PPL>> geometry3_lin_table = geometry3.makeVeldkampLinesTable(vLines3, vPoints3, geometry3_hyp_table);
-	std::sort(geometry3_lin_table.begin(), geometry3_lin_table.end(), [](const segre::VeldkampLineTableEntry<PPL>& a, const segre::VeldkampLineTableEntry<PPL>& b){
+	std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table = geometry3.makeVeldkampLinesTable(vLines3, vPoints3, geometry3_hyp_table);
+	std::sort(geometry3_lin_table.begin(), geometry3_lin_table.end(), [](const segre::VeldkampLineTableEntry& a, const segre::VeldkampLineTableEntry& b){
 		return std::make_tuple(a.isProjective, a.coreNbrPoints, a.coreNbrLines) < std::make_tuple(b.isProjective, b.coreNbrPoints, b.coreNbrLines);
 	});
 
@@ -64,14 +64,17 @@ int main() {
 	const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start);
 	std::cout << "Finished in " << static_cast<int>(elapsed.count()) << " seconds\n" << std::endl;
 
+	std::cout << "\nDimension 2 points:\n";
+	std::copy(geometry2_hyp_table.begin(), geometry2_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
+
 	std::cout << "\nDimension 2 lines:\n";
-	std::copy(geometry2_lin_table.begin(), geometry2_lin_table.end(), std::ostream_iterator<segre::VeldkampLineTableEntry<PPL>>(std::cout, "\n"));
+	std::copy(geometry2_lin_table.begin(), geometry2_lin_table.end(), std::ostream_iterator<segre::VeldkampLineTableEntry>(std::cout, "\n"));
 
 	std::cout << "\nDimension 3 points:\n";
 	std::copy(geometry3_hyp_table.begin(), geometry3_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
 
 	std::cout << "\nDimension 3 lines:\n";
-	std::copy(geometry3_lin_table.begin(), geometry3_lin_table.end(), std::ostream_iterator<segre::VeldkampLineTableEntry<PPL>>(std::cout, "\n"));
+	std::copy(geometry3_lin_table.begin(), geometry3_lin_table.end(), std::ostream_iterator<segre::VeldkampLineTableEntry>(std::cout, "\n"));
 
 	std::cout << "\nDimension 4 points:\n";
 	std::copy(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));

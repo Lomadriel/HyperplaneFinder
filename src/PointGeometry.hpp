@@ -77,7 +77,6 @@ namespace segre {
 		size_t count;
 	};
 
-	template <size_t NbrPointsPerLine>
 	struct VeldkampLineTableEntry {
 
 		VeldkampLineTableEntry()
@@ -88,15 +87,14 @@ namespace segre {
 		    , count(0) {
 		}
 
-		bool operator==(const VeldkampLineTableEntry<NbrPointsPerLine>& entry) const {
+		bool operator==(const VeldkampLineTableEntry& entry) const {
 			return isProjective == entry.isProjective
 			       && coreNbrPoints == entry.coreNbrPoints
 			       && coreNbrLines == entry.coreNbrLines
 			       && pointsType == entry.pointsType;
 		}
 
-		template <size_t NbrPointsPerLine_>
-		friend std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry<NbrPointsPerLine_>& entry);
+		friend std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry& entry);
 
 		bool isProjective;
 		size_t coreNbrPoints;
@@ -594,11 +592,11 @@ namespace segre {
 		}
 
 
-		VeldkampLineTableEntry<NbrPointsPerLine>
+		VeldkampLineTableEntry
 		makeLinesTableEntry(bool isProjective, const std::array<unsigned int, NbrPointsPerLine>& line,
 		                    const std::vector<std::bitset<NbrPoints>>& vPoints,
 		                    const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
-			VeldkampLineTableEntry<NbrPointsPerLine> entry;
+			VeldkampLineTableEntry entry;
 			entry.isProjective = isProjective;
 
 			std::bitset<NbrPoints> kernel = vPoints[line[0]] & vPoints[line[1]];
@@ -628,17 +626,17 @@ namespace segre {
 			return entry;
 		}
 
-		std::vector<VeldkampLineTableEntry<NbrPointsPerLine>> makeVeldkampLinesTable(VeldkampLines<NbrPointsPerLine>& vLines,
+		std::vector<VeldkampLineTableEntry> makeVeldkampLinesTable(VeldkampLines<NbrPointsPerLine>& vLines,
 		                                                                             const std::vector<std::bitset<NbrPoints>>& vPoints,
 		                                                                             const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
 			static_assert(Dimension < 4, "Points type determination only work for Dimension < 4");
 
-			const auto makeEntries = [&](std::vector<VeldkampLineTableEntry<NbrPointsPerLine>>& entries,
+			const auto makeEntries = [&](std::vector<VeldkampLineTableEntry>& entries,
 			                             const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines, bool isProjective) {
 				for (const std::array<unsigned int, NbrPointsPerLine>& line : lines) {
-					VeldkampLineTableEntry<NbrPointsPerLine> entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
+					VeldkampLineTableEntry entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
 
-					typename std::vector<VeldkampLineTableEntry<NbrPointsPerLine>>::iterator
+					typename std::vector<VeldkampLineTableEntry>::iterator
 							it = std::find(entries.begin(), entries.end(), entry);
 					if (it == entries.end()) {
 						entry.count = 1;
@@ -649,7 +647,7 @@ namespace segre {
 				}
 			};
 
-			std::vector<VeldkampLineTableEntry<NbrPointsPerLine>> entries;
+			std::vector<VeldkampLineTableEntry> entries;
 			makeEntries(entries, vLines.projectives, true);
 			makeEntries(entries, vLines.exceptional, false);
 			return entries;
@@ -768,8 +766,7 @@ namespace segre {
 		return os;
 	}
 
-	template <size_t NbrPointsPerLine>
-	std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry<NbrPointsPerLine>& entry) {
+	std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry& entry) {
 		os << "VeldkampLineEntry{"
 		   << "Proj: " << std::boolalpha << entry.isProjective
 		   << ", core{"
