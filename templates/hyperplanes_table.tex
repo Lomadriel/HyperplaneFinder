@@ -1,0 +1,15 @@
+\FPeval{\subGeometriesNumber}{clip({{subGeometriesNumber}})}%
+\FPeval{\subGeometriesNumberPlusOne}{clip(\subGeometriesNumber+1)}%
+\FPeval{\clineEnd}{clip({{subGeometriesNumber}}+3{% if subGeometriesNumber > 0 %}+1{% endif %})}%
+\noindent
+\begin{tabular}{|c|c|c|{% for i in range(subGeometriesNumber)%}c|{% endfor %}{% if subGeometriesNumber > 0 %}c|{% endif %}c|}
+	\hline
+	\multirow{2}{*}{Id} & \multicolumn{2}{c|}{Composition} & {% if subGeometriesNumber > 0 %}\multicolumn{\subGeometriesNumberPlusOne}{c|}{Sub-geometries} & {% endif %}\multirow{2}{*}{cardinal}\\
+	\cline{2-\clineEnd}
+	& Points & Lines & {% for i in range(subGeometriesNumber)%} H{{i}} & {% endfor %} {% if subGeometriesNumber > 0 %} Full &{% endif %}\\
+	\hline
+{% for hyp in hyperplanes %}
+	{{index}} & {{hyp/points}} & {{hyp/lines}} & {% for val in hyp/subgeometries %} {{val}} & {% endfor %} {{hyp/cardinal}}\\
+	\hline
+{% endfor %}
+\end{tabular}

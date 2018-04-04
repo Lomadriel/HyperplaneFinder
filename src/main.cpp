@@ -6,6 +6,12 @@
 #include <chrono>
 
 #include <PointGeometry.hpp>
+#include <LatexPrinter.hpp>
+
+#include <nlohmann/json.hpp>
+#include <inja.hpp>
+
+using json = nlohmann::json;
 
 constexpr size_t PPL = 4; // Points Per Lines
 
@@ -78,6 +84,11 @@ int main() {
 
 	std::cout << "\nDimension 4 points:\n";
 	std::copy(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
+
+	LatexPrinter printer;
+	printer.generateHyperplanesTable(2, geometry2_hyp_table, 0);
+	printer.generateHyperplanesTable(3, geometry3_hyp_table, geometry2_hyp_table.size());
+	printer.generateHyperplanesTable(4, geometry4_hyp_table, geometry3_hyp_table.size());
 
 	return EXIT_SUCCESS;
 }
