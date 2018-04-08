@@ -29,6 +29,7 @@ make_target(
   EXT_INCLUDES "${JSON_INCLUDE_DIR}" "${INJA_INCLUDE_DIR}"
   OPTIONS cxx executable
 )
+target_link_libraries(HyperplaneFinder stdc++fs)
 set_property(TARGET HyperplaneFinder PROPERTY CXX_STANDARD 17)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")

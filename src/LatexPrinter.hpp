@@ -6,12 +6,18 @@
 
 #include <PointGeometry.hpp>
 
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
+
 using json = nlohmann::json;
 
 namespace{
 	// Folders
 	constexpr const char* TEMPLATE_FOLDER = "./templates/";
+
 	constexpr const char* OUTPUT_FOLDER = "./";
+	constexpr const char* TABLES_OUTPUT_FOLDER = "tables/";
 
 	// Templates
 	constexpr const char* LINES_TABLE_TEMPLATE = "lines_table.tex";
@@ -36,6 +42,9 @@ public:
 	  : m_environment(TEMPLATE_FOLDER, OUTPUT_FOLDER)
 	  , m_generated_tables(){
 
+		std::error_code ignored;
+		fs::create_directories(OUTPUT_FOLDER, ignored);
+		fs::create_directories(TABLES_OUTPUT_FOLDER, ignored);
 	}
 
 	void generateLinesTable(unsigned int geometry_dimension,
@@ -66,10 +75,10 @@ public:
 		data["lines"] = std::move(lines_info);
 
 		inja::Template document = m_environment.parse_template(LINES_TABLE_TEMPLATE);
-		std::string file_name = TABLE_OUTPUT_DIMENSION_PREFIX + std::to_string(geometry_dimension) + LINES_TABLE_OUTPUT;
-		m_environment.write(document, data, file_name);
+		std::string file_path = std::string(TABLES_OUTPUT_FOLDER) + TABLE_OUTPUT_DIMENSION_PREFIX + std::to_string(geometry_dimension) + LINES_TABLE_OUTPUT;
+		m_environment.write(document, data, file_path);
 
-		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_name);
+		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_path);
 	}
 
 	void generateHyperplanesTable(unsigned int geometry_dimension,
@@ -103,10 +112,10 @@ public:
 		data["hyperplanes"] = std::move(hyps_info);
 
 		inja::Template document = m_environment.parse_template(HYPERPLANES_TABLE_TEMPLATE);
-		std::string file_name = TABLE_OUTPUT_DIMENSION_PREFIX + std::to_string(geometry_dimension) + HYPERPLANES_TABLE_OUTPUT;
-		m_environment.write(document, data, file_name);
+		std::string file_path = std::string(TABLES_OUTPUT_FOLDER) + TABLE_OUTPUT_DIMENSION_PREFIX + std::to_string(geometry_dimension) + HYPERPLANES_TABLE_OUTPUT;
+		m_environment.write(document, data, file_path);
 
-		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_name);
+		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_path);
 	}
 
 	void generateTablesDocument(){
@@ -122,8 +131,8 @@ public:
 		std::vector<json> tables;
 		for(const Table& generated_table : m_generated_tables){
 			json table;
-			table["tableName"] = generated_table.tableName;
-			table["fileName"] = generated_table.fileName;
+			table["tableName"] = generated_table.table_name;
+			table["filePath"] = generated_table.file_path;
 			tables.push_back(std::move(table));
 		}
 		data["tables"] = std::move(tables);
@@ -135,14 +144,14 @@ public:
 private:
 
 	struct Table{
-		Table(const std::string& tableName_, const std::string& fileName_) noexcept
-		  : tableName(tableName_)
-		  , fileName(fileName_) {
+		Table(const std::string& table_name_, const std::string& file_name_) noexcept
+		  : table_name(table_name_)
+		  , file_path(file_name_) {
 
 		}
 
-		std::string tableName;
-		std::string fileName;
+		std::string table_name;
+		std::string file_path;
 	};
 
 	inja::Environment m_environment;
