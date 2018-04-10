@@ -22,12 +22,15 @@ namespace{
 	// Templates
 	constexpr const char* LINES_TABLE_TEMPLATE = "lines_table.tex";
 	constexpr const char* HYPERPLANES_TABLE_TEMPLATE = "hyperplanes_table.tex";
+	constexpr const char* HYPERPLANE_REPRESENTATION_TEMPLATE = "hyperplane_representation.tex";
 	constexpr const char* DOCUMENT_TEMPLATE = "document.tex";
 
 	// Outputs
 	constexpr const char* TABLE_OUTPUT_DIMENSION_PREFIX = "dimension_";
 	constexpr const char* LINES_TABLE_OUTPUT = "_lines_table.tex";
 	constexpr const char* HYPERPLANES_TABLE_OUTPUT = "_hyperplanes_table.tex";
+	constexpr const char* HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX = "hyperplane_representation_";
+	constexpr const char* HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX = ".tex";
 	constexpr const char* DOCUMENT_OUTPUT = "tables.tex";
 
 	// Information
@@ -40,7 +43,8 @@ public:
 
 	LatexPrinter() noexcept
 	  : m_environment(TEMPLATE_FOLDER, OUTPUT_FOLDER)
-	  , m_generated_tables(){
+	  , m_generated_tables()
+	  , m_current_hyperplane_representation_number(0){
 
 		std::error_code ignored;
 		fs::create_directories(OUTPUT_FOLDER, ignored);
@@ -141,6 +145,31 @@ public:
 		m_environment.write(document, data, DOCUMENT_OUTPUT);
 	}
 
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	std::string generateHyperplaneRepresentation(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane){
+		std::vector<unsigned int> inPoints;
+		inPoints.reserve(hyperplane.count());
+		for(unsigned int i = 0; i < math::pow(NbrPointsPerLine,Dimension); ++i){
+			if(hyperplane[i]){
+				inPoints.push_back(i);
+			}
+		}
+
+		json data;
+		data["inPoints"] = std::move(inPoints);
+		data["dimention"] = Dimension;
+		data["nbrPointsPerLine"] = NbrPointsPerLine;
+
+		inja::Template document = m_environment.parse_template(HYPERPLANE_REPRESENTATION_TEMPLATE);
+		std::string output_file_name = std::string(OUTPUT_FOLDER)
+		                               + HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
+		                               + std::to_string(m_current_hyperplane_representation_number++)
+		                               + HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX;
+		m_environment.write(document, data, output_file_name);
+
+		return output_file_name;
+	}
+
 private:
 
 	struct Table{
@@ -156,6 +185,8 @@ private:
 
 	inja::Environment m_environment;
 	std::vector<Table> m_generated_tables;
+
+	unsigned int m_current_hyperplane_representation_number;
 };
 
 #endif //HYPERPLANEFINDER_LATEXPRINTER_HPP
