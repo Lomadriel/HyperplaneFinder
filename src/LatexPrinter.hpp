@@ -34,7 +34,7 @@ namespace{
 	constexpr const char* DOCUMENT_OUTPUT = "tables.tex";
 
 	// Information
-	constexpr const char* DOCUMENT_TITLE = "HyperplaneFinder tables";
+	constexpr const char* TABLES_DOCUMENT_TITLE = "HyperplaneFinder tables";
 }
 
 class LatexPrinter{
@@ -124,7 +124,7 @@ public:
 
 	void generateTablesDocument(){
 		json data;
-		data["title"] = DOCUMENT_TITLE;
+		data["title"] = TABLES_DOCUMENT_TITLE;
 
 		time_t now = time(nullptr);
 		struct tm tstruct = *localtime(&now);
@@ -147,16 +147,16 @@ public:
 
 	template<size_t Dimension, size_t NbrPointsPerLine>
 	std::string generateHyperplaneRepresentation(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane){
-		std::vector<unsigned int> inPoints;
-		inPoints.reserve(hyperplane.count());
+		std::vector<unsigned int> in_points;
+		in_points.reserve(hyperplane.count());
 		for(unsigned int i = 0; i < math::pow(NbrPointsPerLine,Dimension); ++i){
 			if(hyperplane[i]){
-				inPoints.push_back(i);
+				in_points.push_back(i);
 			}
 		}
 
 		json data;
-		data["inPoints"] = std::move(inPoints);
+		data["inPoints"] = std::move(in_points);
 		data["dimention"] = Dimension;
 		data["nbrPointsPerLine"] = NbrPointsPerLine;
 

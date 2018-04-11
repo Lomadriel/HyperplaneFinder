@@ -18,7 +18,7 @@
 \begin{document}
 	%---------------------------------
 	% Geometry
-	\newcommand{\inPoints}{ {% for inpoint in inPoints %}{{inpoint}}{% if not is_last  %},{% endif %}{% endfor %}}%
+	\newcommand{\inPoints}{ {% for inPoint in inPoints %}{{inPoint}}{% if not is_last  %},{% endif %}{% endfor %}}%
 	\pgfmathsetmacro\dimension{ {{dimention}}}% in [0,3]
 	\pgfmathsetmacro\pointsPerLine{ {{nbrPointsPerLine}}}% in [1,\infty[
 
