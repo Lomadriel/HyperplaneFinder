@@ -10,6 +10,7 @@
 #include <utility>
 #include <map>
 #include <iostream>
+#include <set>
 
 #include <CombinationGenerator.hpp>
 
@@ -586,7 +587,30 @@ namespace segre {
 			for (const auto& vPoint : vPoints) {
 				HyperplaneTableEntry entry = getHyperplaneTableEntry<OrderOfPoints>(vPoint, precedent_table);
 
-				std::vector<HyperplaneTableEntry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+				// Check if entry already exist
+				std::vector<HyperplaneTableEntry>::iterator it = std::find_if(entries.begin(), entries.end(), [&entry](const HyperplaneTableEntry& oentry){
+
+					// Compare subgeometries (order is not important) with those of the other entry
+					// check if all subgeometries correspond to a subgeometry of the other entry
+					std::set<const std::map<long long int, size_t>*> already_used;
+					for(const std::map<long long int, size_t>& subgeometry : entry.subgeometries){
+
+						// Check if the subgeometry corresponds to a subgeometry of the other entry
+						const std::vector<std::map<long long int, size_t>>::const_iterator itt = std::find_if(oentry.subgeometries.cbegin(), oentry.subgeometries.cend(), [&already_used, &subgeometry](const std::map<long long int, size_t>& osubgeometry){
+
+							// if equal and not already used in a correspondance
+							if(subgeometry == osubgeometry && already_used.count(&osubgeometry) == 0){
+								already_used.insert(&osubgeometry);
+								return true;
+							}
+							return false;
+						});
+						if(itt == oentry.subgeometries.cend()){
+							return false;
+						}
+					}
+					return true;
+				});
 				if (it == entries.end()) {
 					entry.count = 1;
 					entries.push_back(entry);
