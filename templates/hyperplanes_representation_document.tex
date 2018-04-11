@@ -1,0 +1,52 @@
+\documentclass[12pt,a4paper,twoside]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[top=2cm, bottom=1.8cm, left=1.8cm, right=1.8cm, head=14pt, foot=36pt]{geometry}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{longtable}
+\usepackage[nomessages]{fp}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{ifthen}
+
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+
+{% include "settings.tex" %}
+
+%---------------------------------
+% Geometry
+\pgfmathsetmacro\dimension{ {{dimention}}}% in [0,3]
+\pgfmathsetmacro\pointsPerLine{ {{nbrPointsPerLine}}}% in [1,\infty[
+
+%---------------------------------
+% Sizes
+\pgfmathsetmacro\pointssep{100}%
+\pgfmathsetmacro\pointssize{10}%
+\pgfmathsetmacro\lineswidth{1}%
+
+%---------------------------------
+% Colors
+\colorlet{points_boder_color}{black}%
+\colorlet{points_color}{white}%
+\colorlet{in_points_color}{black}%
+\colorlet{lines_color}{gray}%
+
+\newcommand{\inPoints}{}%
+
+\begin{document}
+	\begin{center}
+{% for hyperplane in hyperplanes %}
+		\renewcommand{\inPoints}{ {% for inPoint in hyperplane/inPoints %}{{inPoint}}{% if not is_last  %},{% endif %}{% endfor %}}%
+		\resizebox{0.49\textwidth}{!}{\input{hyperplane_representation_print}}{% endfor %}
+	\end{center}
+\end{document}
