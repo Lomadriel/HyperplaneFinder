@@ -91,7 +91,6 @@ int main() {
 	printer.generateHyperplanesTable(3, geometry3_hyp_table, geometry2_hyp_table.size());
 	printer.generateLinesTable(3, geometry3_lin_table, geometry3_hyp_table.size());
 	printer.generateHyperplanesTable(4, geometry4_hyp_table, geometry3_hyp_table.size());
-	printer.generateTablesDocument();
 
 	return EXIT_SUCCESS;
 }

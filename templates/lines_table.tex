@@ -1,14 +1,33 @@
-\FPeval{\pointsTypeNumber}{clip({{pointsTypeNumber}})}%
-\FPeval{\clineEnd}{clip({{pointsTypeNumber}}+4)}%
-\noindent
-\begin{longtable}{|c|c|c|c|{% for i in range(pointsTypeNumber)%}c|{% endfor %}c|}
-	\hline
-	\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal}\\
-	\cline{3-\clineEnd}
-	 & & Points & Lines & {% for i in range(pointsTypeNumber)%} H{{i}} & {% endfor %} \\
-	\hline
+%\documentclass[12pt,a4paper,twoside]{article}
+\documentclass{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage[nomessages]{fp}
+
+\begin{document}
+	\FPeval{\pointsTypeNumber}{clip({{pointsTypeNumber}})}%
+	\FPeval{\clineEnd}{clip({{pointsTypeNumber}}+4)}%
+	\noindent
+	\begin{tabular}{|c|c|c|c|{% for i in range(pointsTypeNumber)%}c|{% endfor %}c|}
+		\hline
+		\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal}\\
+		\cline{3-\clineEnd}
+		 & & Points & Lines & {% for i in range(pointsTypeNumber)%} H{{i}} & {% endfor %} \\
+		\hline
 {% for line in lines %}
-	{{index}} & {{line/isProjective}} & {{line/core/points}} & {{line/core/lines}} & {% for val in line/pointsType %} {{val}} & {% endfor %} {{line/cardinal}}\\
-	\hline
+		{{index}} & {{line/isProjective}} & {{line/core/points}} & {{line/core/lines}} & {% for val in line/pointsType %} {{val}} & {% endfor %} {{line/cardinal}}\\
+		\hline
 {% endfor %}
-\end{longtable}
+	\end{tabular}
+\end{document}

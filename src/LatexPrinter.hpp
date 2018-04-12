@@ -89,60 +89,47 @@ public:
 	                              const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table,
 	                              size_t sub_geometries_number){
 		json data;
+		data["subDimensionsNumber"] = geometry_dimension;
 		data["subGeometriesNumber"] = sub_geometries_number;
+		data["divNumber"] = geometry_dimension * (sub_geometries_number + 1);
 
-		std::vector<json> hyps_info;
+		const bool print_subgeometries = sub_geometries_number > 0;
+		data["printSubgeometries"] = print_subgeometries;
+
+		std::vector<json> hyperplanes_info;
 		for(const segre::HyperplaneTableEntry& entry : geometry_hyp_table){
-			json hyp_info;
-			hyp_info["points"] = entry.nbrPoints;
-			hyp_info["lines"] = entry.nbrLines;
+			json hyperplane_info;
+			hyperplane_info["points"] = entry.nbrPoints;
+			hyperplane_info["lines"] = entry.nbrLines;
 
-			std::vector<size_t> sub;
-			sub.reserve(sub_geometries_number+1);
-			for(size_t i = 0; i < sub_geometries_number; ++i){
-				const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometry.find(static_cast<long long int>(i));
-				sub.push_back(it == entry.subgeometry.end() ? 0 : it->second);
+			if(print_subgeometries){
+				std::vector<std::vector<size_t>> subgeometries_by_dimensions;
+				for(size_t i = 0; i < geometry_dimension; ++i){
+					std::vector<size_t> subgeometries;
+					subgeometries.reserve(sub_geometries_number+1);
+					for(size_t j = 0; j < sub_geometries_number; ++j){
+						const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometries[i].find(static_cast<long long int>(j));
+						subgeometries.push_back(it == entry.subgeometries[i].end() ? 0 : it->second);
+					}
+					const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometries[i].find(-1);
+					subgeometries.push_back(it == entry.subgeometries[i].end() ? 0 : it->second);
+
+					subgeometries_by_dimensions.push_back(std::move(subgeometries));
+				}
+				hyperplane_info["subgeometries"] = std::move(subgeometries_by_dimensions);
 			}
-			if(sub_geometries_number > 0){
-				const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometry.find(-1);
-				sub.push_back(it == entry.subgeometry.end() ? 0 : it->second);
-			}
-			hyp_info["subgeometries"] = std::move(sub);
 
-			hyp_info["cardinal"] = entry.count;
+			hyperplane_info["cardinal"] = entry.count;
 
-			hyps_info.push_back(std::move(hyp_info));
+			hyperplanes_info.push_back(std::move(hyperplane_info));
 		}
-		data["hyperplanes"] = std::move(hyps_info);
+		data["hyperplanes"] = std::move(hyperplanes_info);
 
 		inja::Template document = m_environment.parse_template(HYPERPLANES_TABLE_TEMPLATE);
 		std::string file_path = std::string(TABLES_OUTPUT_FOLDER) + TABLE_OUTPUT_DIMENSION_PREFIX + std::to_string(geometry_dimension) + HYPERPLANES_TABLE_OUTPUT;
 		m_environment.write(document, data, file_path);
 
 		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_path);
-	}
-
-	void generateTablesDocument(){
-		json data;
-		data["title"] = TABLES_DOCUMENT_TITLE;
-
-		time_t now = time(nullptr);
-		struct tm tstruct = *localtime(&now);
-		char buf[11];
-		strftime(buf, sizeof(buf), "%Y/%m/%d", &tstruct);
-		data["date"] = buf;
-
-		std::vector<json> tables;
-		for(const Table& generated_table : m_generated_tables){
-			json table;
-			table["tableName"] = generated_table.table_name;
-			table["filePath"] = generated_table.file_path;
-			tables.push_back(std::move(table));
-		}
-		data["tables"] = std::move(tables);
-
-		inja::Template document = m_environment.parse_template(DOCUMENT_TEMPLATE);
-		m_environment.write(document, data, DOCUMENT_OUTPUT);
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine>

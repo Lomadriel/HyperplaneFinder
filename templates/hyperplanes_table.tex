@@ -1,15 +1,39 @@
-\FPeval{\subGeometriesNumber}{clip({{subGeometriesNumber}})}%
-\FPeval{\subGeometriesNumberPlusOne}{clip(\subGeometriesNumber+1)}%
-\FPeval{\clineEnd}{clip({{subGeometriesNumber}}+3{% if subGeometriesNumber > 0 %}+1{% endif %})}%
-\noindent
-\begin{longtable}{|c|c|c|{% for i in range(subGeometriesNumber)%}c|{% endfor %}{% if subGeometriesNumber > 0 %}c|{% endif %}c|}
-	\hline
-	\multirow{2}{*}{Id} & \multicolumn{2}{c|}{Composition} & {% if subGeometriesNumber > 0 %}\multicolumn{\subGeometriesNumberPlusOne}{c|}{Sub-geometries} & {% endif %}\multirow{2}{*}{cardinal}\\
-	\cline{2-\clineEnd}
-	& Points & Lines & {% for i in range(subGeometriesNumber)%} H{{i}} & {% endfor %} {% if subGeometriesNumber > 0 %} Full &{% endif %}\\
-	\hline
+%\documentclass[12pt,a4paper,twoside]{article}
+\documentclass{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage[nomessages]{fp}
+
+\begin{document}
+	\FPeval{\divNumber}{clip({{divNumber}})}%
+	\FPeval{\subDimensionsNumber}{clip({{subDimensionsNumber}})}%
+	\FPeval{\subGeometriesNumber}{clip({{subGeometriesNumber}})}%
+	\FPeval{\subGeometriesNumberPlusOne}{clip(\subGeometriesNumber+1)}%
+	\FPeval{\clineEnd}{clip(3{% if printSubgeometries %}+{{divNumber}}{% endif %})}%
+	\noindent
+	\begin{tabular}{|c|c|c|{% if printSubgeometries %}{% for i in range(divNumber)%}c|{% endfor %}{% endif %}c|}
+		\hline
+		\multirow{3}{*}{Id} & \multicolumn{2}{c|}{\multirow{2}{*}{Composition}} & {% if printSubgeometries %}\multicolumn{\divNumber}{c|}{Sub-geometries} & {% endif %}\multirow{3}{*}{cardinal}\\
+{% if printSubgeometries %}		\cline{4-\clineEnd}{% endif %}
+		& \multicolumn{2}{c|}{} & {% if printSubgeometries %}{% for i in range(subDimensionsNumber)%} \multicolumn{\subGeometriesNumberPlusOne}{c|}{D{{i}}} & {% endfor %}{% endif %}\\
+		\cline{2-\clineEnd}
+		& Points & Lines & {% if printSubgeometries %}{% for i in range(subDimensionsNumber)%}{% for j in range(subGeometriesNumber)%} H{{j}} &{% endfor %}Full &{% endfor %}{% endif %}\\
+		\hline
+		\hline
 {% for hyp in hyperplanes %}
-	{{index}} & {{hyp/points}} & {{hyp/lines}} & {% for val in hyp/subgeometries %} {{val}} & {% endfor %} {{hyp/cardinal}}\\
-	\hline
+		{{index}} & {{hyp/points}} & {{hyp/lines}} & {% if printSubgeometries %}{% for dim in hyp/subgeometries %} {% for val in dim %} {{val}} & {% endfor %}{% endfor %}{% endif %} {{hyp/cardinal}}\\
+		\hline
 {% endfor %}
-\end{longtable}
+	\end{tabular}
+\end{document}
