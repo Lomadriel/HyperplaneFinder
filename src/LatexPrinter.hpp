@@ -85,16 +85,20 @@ public:
 		m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_path);
 	}
 
+	template<bool printPointsOrder, bool printSubgeometries>
 	void generateHyperplanesTable(unsigned int geometry_dimension,
 	                              const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table,
 	                              size_t sub_geometries_number){
 		json data;
+		data["geometryDimension"] = geometry_dimension;
+		data["ordersNumber"] = geometry_dimension + 1;
 		data["subDimensionsNumber"] = geometry_dimension;
 		data["subGeometriesNumber"] = sub_geometries_number;
 		data["divNumber"] = geometry_dimension * (sub_geometries_number + 1);
 
-		const bool print_subgeometries = sub_geometries_number > 0;
+		const bool print_subgeometries = printSubgeometries && (sub_geometries_number > 0);
 		data["printSubgeometries"] = print_subgeometries;
+		data["printPointsOrder"] = printPointsOrder;
 
 		std::vector<json> hyperplanes_info;
 		for(const segre::HyperplaneTableEntry& entry : geometry_hyp_table){
@@ -104,6 +108,7 @@ public:
 
 			if(print_subgeometries){
 				std::vector<std::vector<size_t>> subgeometries_by_dimensions;
+				subgeometries_by_dimensions.reserve(geometry_dimension);
 				for(size_t i = 0; i < geometry_dimension; ++i){
 					std::vector<size_t> subgeometries;
 					subgeometries.reserve(sub_geometries_number+1);
@@ -118,6 +123,16 @@ public:
 				}
 				hyperplane_info["subgeometries"] = std::move(subgeometries_by_dimensions);
 			}
+
+			if constexpr(printPointsOrder){
+				std::vector<unsigned int> points_order;
+				points_order.reserve(geometry_dimension + 1);
+				for(unsigned int i = 0; i <= geometry_dimension; ++i){
+					const std::map<unsigned int, unsigned int>::const_iterator it = entry.pointsOfOrder.find(i);
+					points_order.push_back(it == entry.pointsOfOrder.end() ? 0 : it->second);
+				}
+				hyperplane_info["pointsOrder"] = std::move(points_order);
+			};
 
 			hyperplane_info["cardinal"] = entry.count;
 

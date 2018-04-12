@@ -25,6 +25,7 @@
 		\cline{3-\clineEnd}
 		 & & Points & Lines & {% for i in range(pointsTypeNumber)%} H{{i}} & {% endfor %} \\
 		\hline
+		\hline
 {% for line in lines %}
 		{{index}} & {{line/isProjective}} & {{line/core/points}} & {{line/core/lines}} & {% for val in line/pointsType %} {{val}} & {% endfor %} {{line/cardinal}}\\
 		\hline
