@@ -150,7 +150,16 @@ int metod_stuff() {
 	lines[48 - 1][9 - 1] = lines[48 - 1][33 - 1] = lines[48 - 1][45 - 1] = 1;
 
 	segre::PointGeometry<2, 3, 48, 48> geometry2(std::move(lines), false);
-	auto result = geometry2.findHyperplanesByBruteforce();
+	std::vector<std::bitset<48>> result = geometry2.findHyperplanesByBruteforce();
+	std::vector<segre::HyperplaneTableEntry> geometry2_hyp_table = geometry2.makeHyperplaneTable<true>(result);
+
+	std::cout << "\nDimension 2 points:\n";
+	std::copy(geometry2_hyp_table.begin(), geometry2_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
+
+	LatexPrinter printer;
+	printer.generateHyperplanesTable<true,false>(2, geometry2_hyp_table, 0);
+
+	return EXIT_SUCCESS;
 }
 
 int main() {
