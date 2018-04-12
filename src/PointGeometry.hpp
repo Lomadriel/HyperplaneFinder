@@ -121,6 +121,13 @@ namespace segre {
 			size_t TensorSize = math::pow(2UL, Dimension)>
 	class PointGeometry {
 	public:
+		explicit PointGeometry(std::array<std::bitset<NbrPoints>, NbrPoints>&& lines, bool) noexcept
+				: m_geometryLines(std::move(lines))
+				, m_geometryPoints()
+				, m_subGeometriesMasks() {
+
+		}
+
 		explicit PointGeometry(std::array<std::bitset<NbrPoints>, NbrLines>&& lines) noexcept
 				: m_geometryLines(std::move(lines))
 				, m_geometryPoints(TENSOR_2D)
