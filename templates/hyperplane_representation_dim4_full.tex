@@ -1,0 +1,46 @@
+%!TEX program = pdflatex
+\documentclass[11pt,class=book]{standalone}
+\usepackage[french]{babel}
+\usepackage[french]{translator}
+\usepackage[T1]{fontenc}
+\usepackage[table,svgnames]{xcolor}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{ifthen}
+
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+
+\usepackage{standalone}
+\usepackage{import}
+
+\usepackage{adjustbox}
+
+\adjustboxset{valign=c,margin=20pt,max width=130pt}
+
+\setlength{\tabcolsep}{6pt} % Default value: 6pt
+\renewcommand{\arraystretch}{1} % Default value: 1
+\begin{document}
+	\begin{tabular}{cc|c|c|c|c|}
+		\cline{3-6}
+		 & & \multicolumn{4}{c|}{Slice} \\
+		\cline{3-6}
+		 & & 1 & 2 & 3 & 4 \\
+{% for subParts in parts %}
+{% if is_first %}
+		\hline
+		\multicolumn{1}{|c|}{\multirow{4}{*}[-165pt]{\rotatebox[origin=c]{90}{Direction}}} &
+{% else %}
+		\cline{2-6}
+		\multicolumn{1}{|c|}{} &
+{% endif %}
+		\multicolumn{1}{c|}{ {{plusOne(index)}}} &
+{% for part in subParts %}
+		\adjustbox{}{\import{./}{ {{part/filePath}}}} {% if is_last %}\\{% else %}&{% endif %}
+{% endfor %}
+{% endfor %}
+		\hline
+	\end{tabular}
+\end{document}
