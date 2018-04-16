@@ -19,15 +19,15 @@
 	\FPeval{\pointsTypeNumber}{clip({{pointsTypeNumber}})}%
 	\FPeval{\clineEnd}{clip({{pointsTypeNumber}}+4)}%
 	\noindent
-	\begin{tabular}{|c|c|c|c|{% for i in range(pointsTypeNumber)%}c|{% endfor %}c|}
+	\begin{tabular}{|c|c|c|c|c|{% for i in range(pointsTypeNumber)%}c|{% endfor %}c|}
 		\hline
-		\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal}\\
+		\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal} & \multirow{2}{*}{2$\times$cardinal}\\
 		\cline{3-\clineEnd}
 		 & & Points & Lines & {% for i in range(pointsTypeNumber)%} H{{count(i)}} & {% endfor %} \\
 		\hline
 		\hline
 {% for line in lines %}
-		{{count(index)}} & {{line/isProjective}} & {{line/core/points}} & {{line/core/lines}} & {% for val in line/pointsType %} {{val}} & {% endfor %} {{line/cardinal}}\\
+		{{count(index)}} & {{line/isProjective}} & {{line/core/points}} & {{line/core/lines}} & {% for val in line/pointsType %} {{val}} & {% endfor %}{{line/cardinal}} & {{double(line/cardinal)}}\\
 		\hline
 {% endfor %}
 	\end{tabular}
