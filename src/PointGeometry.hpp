@@ -261,7 +261,7 @@ namespace segre {
 				}
 
 				// Checks if the matrix associated to the hyperplane live in the projective space.
-				if (getRank(nextGeometry.buildMatrix(hyperplane)) < math::pow(2UL, Dimension + 1)) {
+				if (getRank(nextGeometry.buildMatrix(hyperplane)) == math::pow(2UL, Dimension + 1) - 1) {
 					toRemove.push_back(index);
 				}
 			}
@@ -582,8 +582,12 @@ namespace segre {
 
 				// Check if entry already exist
 				std::vector<HyperplaneTableEntry>::iterator it = std::find_if(entries.begin(), entries.end(), [&entry](const HyperplaneTableEntry& oentry){
+					// Compare order of points
+					if (oentry.pointsOfOrder != entry.pointsOfOrder) {
+						return false;
+					}
 
-					// Compare subgeometries (order is not important) with those of the other entry
+					// Compare subgeometries with those of the other entry
 					// check if all subgeometries correspond to a subgeometry of the other entry
 					std::set<const std::map<long long int, size_t>*> already_used;
 					for(const std::map<long long int, size_t>& subgeometry : entry.subgeometries){
