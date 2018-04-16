@@ -64,6 +64,10 @@ public:
 			const size_t value = m_environment.get_argument<size_t>(args, 0, data);
 			return COUNT_FROM + value;
 		});
+		m_environment.add_callback("double", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
+			const size_t value = m_environment.get_argument<size_t>(args, 0, data);
+			return 2 * value;
+		});
 	}
 
 	void generateLinesTable(unsigned int geometry_dimension,
