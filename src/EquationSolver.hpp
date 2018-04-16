@@ -16,10 +16,10 @@ namespace segre {
 	using EquationSolution = std::array<std::array<unsigned char, 2>, Dimension>;
 
 	template <std::size_t Dimension>
-	std::vector<EquationSolution<Dimension>> resolveEquation(const std::array<unsigned char, math::pow(2, Dimension)>& coefficient);
+	std::vector<EquationSolution<Dimension>> resolveEquation(const std::array<unsigned char, math::pow(2UL, Dimension)>& coefficient);
 
 	template <std::size_t Dimension>
-	inline bool isSolution(const std::array<unsigned char, math::pow(2, Dimension)>& coefficient,
+	inline bool isSolution(const std::array<unsigned char, math::pow(2UL, Dimension)>& coefficient,
 	                       const std::array<std::array<unsigned char, 2>, Dimension>& variables);
 
 	template <std::size_t Dimension, std::size_t NumberOfPoints>
@@ -29,7 +29,7 @@ namespace segre {
 	std::size_t computeSolutionValue(const EquationSolution<Dimension>& solution);
 
 	template <size_t Dimension>
-	std::vector<EquationSolution<Dimension>> resolveEquation(const std::array<unsigned char, math::pow(2, Dimension)>& coefficient) {
+	std::vector<EquationSolution<Dimension>> resolveEquation(const std::array<unsigned char, math::pow(2UL, Dimension)>& coefficient) {
 		std::vector<EquationSolution<Dimension>> solutions{};
 
 		std::array<std::array<unsigned char, 2>, Dimension> variables{};
@@ -82,7 +82,7 @@ namespace segre {
 	}
 
 	template <size_t Dimension>
-	inline bool isSolution(const std::array<unsigned char, math::pow(2, Dimension)>& coefficient,
+	inline bool isSolution(const std::array<unsigned char, math::pow(2UL, Dimension)>& coefficient,
 	                const std::array<std::array<unsigned char, 2>, Dimension>& variables) {
 		int value = 0;
 		for (std::size_t i = 0; i < 2; ++i) {
