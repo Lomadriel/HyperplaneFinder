@@ -5,8 +5,10 @@
 #include <vector>
 #include <chrono>
 
+#include <math_utility.hpp>
 #include <PointGeometry.hpp>
 #include <LatexPrinter.hpp>
+#include <EquationSolver.hpp>
 
 #include <nlohmann/json.hpp>
 #include <inja.hpp>

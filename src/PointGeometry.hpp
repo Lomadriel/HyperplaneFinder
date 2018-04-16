@@ -12,15 +12,8 @@
 #include <iostream>
 #include <set>
 
+#include <math_utility.hpp>
 #include <CombinationGenerator.hpp>
-
-namespace math {
-	template <typename T, typename U>
-	inline constexpr T pow(T base, U exponent) {
-		static_assert(std::is_integral_v<U>);
-		return exponent == 0 ? 1 : base * pow(base, exponent - 1);
-	}
-}
 
 // Fixme : Replace std::bitset by a custom bitset
 namespace std { // NOLINT
@@ -397,7 +390,7 @@ namespace segre {
 		static std::array<std::bitset<NbrPoints>, NbrPointsPerLine>
 		getHyperplanesOfTheVeldkampLine(const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
 		                                const std::array<unsigned int, NbrPointsPerLine>& veldkampLine) {
-			std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hyperplanes;
+			std::array<std::bitset<NbrPoints>, NbrPointsPerLine> hyperplanes{};
 
 			for (size_t i = 0; i < veldkampLine.size(); ++i) {
 				hyperplanes[i] = veldkampPoints[veldkampLine[i]];
@@ -410,7 +403,7 @@ namespace segre {
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 			constexpr size_t NewNbrLines = math::pow(NbrPointsPerLine, Dimension) * (1 + Dimension);
 
-			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result;
+			std::array<std::bitset<NewNbrPoints>, NewNbrLines> result{};
 
 			// Duplicates the current geometry to generate each layer of the cartesian product.
 			std::generate(result.begin(), result.end(), [this, i = 0UL, j = 0UL]() mutable -> decltype(auto) {
@@ -441,7 +434,7 @@ namespace segre {
 		decltype(auto) buildTensorPoints() const noexcept {
 			constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
 
-			std::array<std::array<unsigned int, TensorSize * 2>, NewNbrPoints> pts;
+			std::array<std::array<unsigned int, TensorSize * 2>, NewNbrPoints> pts{};
 
 			for (size_t i = 0; i < NbrPointsPerLine; ++i) {
 				for (size_t j = 0; j < NbrPoints; ++j) {
@@ -712,8 +705,8 @@ namespace segre {
 				return;
 			}
 
-			std::array<std::bitset<NbrPoints>, Dimension> gen_lines; // lines starting from 0, like a canonical base
-			std::array<std::array<size_t, NbrPointsPerLine>, Dimension> gen_lines_indexes; // indexes of the points of the previous lines
+			std::array<std::bitset<NbrPoints>, Dimension> gen_lines{}; // lines starting from 0, like a canonical base
+			std::array<std::array<size_t, NbrPointsPerLine>, Dimension> gen_lines_indexes{}; // indexes of the points of the previous lines
 
 			// Fill gen_lines and gen_lines_indexes
 			for (size_t i = 0; i < gen_lines.size(); ++i) {
