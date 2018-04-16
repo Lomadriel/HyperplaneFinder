@@ -24,6 +24,8 @@ namespace{
 	constexpr const char* HYPERPLANES_TABLE_TEMPLATE = "hyperplanes_table.tex";
 	constexpr const char* HYPERPLANE_REPRESENTATION_TEMPLATE = "hyperplane_representation.tex";
 	constexpr const char* HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE = "hyperplanes_representation_document.tex";
+	constexpr const char* HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE = "hyperplane_representation_dim4_part.tex";
+	constexpr const char* HYPERPLANE_REPRESENTATION_DIM4_FULL_TEMPLATE = "hyperplane_representation_dim4_full.tex";
 	constexpr const char* DOCUMENT_TEMPLATE = "document.tex";
 
 	// Non-template files
@@ -35,6 +37,7 @@ namespace{
 	constexpr const char* HYPERPLANES_TABLE_OUTPUT = "_hyperplanes_table.tex";
 	constexpr const char* HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX = "hyperplane_representation_";
 	constexpr const char* HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX = ".tex";
+	constexpr const char* HYPERPLANE_REPRESENTATION_DIM4_OUTPUT = "hyperplane_representation.tex";
 	constexpr const char* HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX = "dimension_";
 	constexpr const char* HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT = "_hyperplanes_representation.tex";
 	constexpr const char* DOCUMENT_OUTPUT = "tables.tex";
@@ -47,6 +50,9 @@ namespace{
 	constexpr int COUNT_FROM = 1;
 }
 
+template<size_t>
+struct dependent_false: public std::false_type{ };
+
 class LatexPrinter{
 
 public:
@@ -54,7 +60,8 @@ public:
 	LatexPrinter() noexcept
 	  : m_environment(TEMPLATE_FOLDER, OUTPUT_FOLDER)
 	  , m_generated_tables()
-	  , m_current_hyperplane_representation_number(0){
+	  , m_current_hyperplane_representation_number(0)
+	  , m_current_hyperplane_representation_dim4_number(0) {
 
 		std::error_code ignored;
 		fs::create_directories(OUTPUT_FOLDER, ignored);
@@ -67,6 +74,10 @@ public:
 		m_environment.add_callback("double", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
 			const size_t value = m_environment.get_argument<size_t>(args, 0, data);
 			return 2 * value;
+		});
+		m_environment.add_callback("plusOne", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
+			const size_t value = m_environment.get_argument<size_t>(args, 0, data);
+			return value + 1;
 		});
 	}
 
@@ -168,6 +179,11 @@ public:
 
 	template<size_t Dimension, size_t NbrPointsPerLine>
 	std::string generateHyperplaneRepresentation(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane){
+
+		if constexpr (Dimension > 3){
+			static_assert(dependent_false<Dimension>::value, "Dimension not supported");
+		}
+
 		std::vector<unsigned int> in_points;
 		in_points.reserve(hyperplane.count());
 		for(unsigned int i = 0; i < math::pow(NbrPointsPerLine,Dimension); ++i){
@@ -186,6 +202,129 @@ public:
 		                               + HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
 		                               + std::to_string(m_current_hyperplane_representation_number++)
 		                               + HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX;
+		m_environment.write(document, data, output_file_name);
+
+		return output_file_name;
+	}
+
+	template<size_t NbrPointsPerLine>
+	std::string generateHyperplaneRepresentationDimension4(const std::bitset<math::pow(NbrPointsPerLine,4)>& hyperplane){
+
+		const std::string hyperplane_folder = std::string(OUTPUT_FOLDER)
+		                                      + HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
+		                                      + std::to_string(m_current_hyperplane_representation_dim4_number++)
+		                                      + "/";
+		std::error_code ignored;
+		fs::create_directories(hyperplane_folder, ignored);
+
+		std::vector<std::vector<json>> parts_infos;
+		parts_infos.reserve(4);
+		for(int current_dimension = 0; current_dimension < 4; ++current_dimension) {
+			std::vector<json> sub_parts_infos;
+			sub_parts_infos.reserve(4);
+			for(int current_slice = 0; current_slice < 4; ++current_slice) {
+
+				// Fix current dimension coord to the slice
+				// non fixed dimension: 0-1-2-3
+				// fixed dimension: slice
+				std::vector<int> coords[4];
+				for(int dimension = 0; dimension < 4; ++dimension) {
+					if(dimension == current_dimension){
+						coords[dimension].push_back(current_slice);
+					}
+					else{
+						for(int slice = 0; slice < 4; ++slice) {
+							coords[dimension].push_back(slice);
+						}
+					}
+				}
+
+				// Compute dimension multiplier
+				// num = x * dimension_multiplier[0] + y * dimension_multiplier[1] + x * dimension_multiplier[2] + x * dimension_multiplier[3]
+				// multiplier of the current dimension: 0
+				// others dimension (with current dimension ignored): 1-4-16
+				int dimension_multiplier[4];
+				int current_multiply = 1;
+				for(int dimension = 0; dimension < 4; ++dimension) {
+					if(dimension == current_dimension){
+						dimension_multiplier[dimension] = 0;
+					}
+					else{
+						dimension_multiplier[dimension] = current_multiply;
+						current_multiply *= 4;
+					}
+				}
+
+				// Generate points
+				std::vector<json> points;
+				std::vector<json> in_points;
+				int used_coords[4];
+				for(size_t a = 0; a < coords[0].size(); ++a){
+					used_coords[0] = coords[0][a];
+					for(size_t b = 0; b < coords[1].size(); ++b){
+						used_coords[1] = coords[1][b];
+						for(size_t c = 0; c < coords[2].size(); ++c){
+							used_coords[2] = coords[2][c];
+							for(size_t d = 0; d < coords[3].size(); ++d){
+								used_coords[3] = coords[3][d];
+
+								json point;
+								constexpr const char* dim_names[] = {"x", "y", "z"};
+								int current_dim = 0;
+								for(int i = 0; i < 4; ++i){
+									if(dimension_multiplier[i] > 0){
+										point[dim_names[current_dim++]] = used_coords[i];
+									}
+								}
+
+								int coord_number = 0;
+								for(size_t i = 0; i < 4; ++i){
+									coord_number += used_coords[i] * dimension_multiplier[i];
+								}
+								point["coordNumber"] = coord_number;
+
+								size_t number = 0;
+								size_t multiplier = 1;
+								for(size_t i = 0; i < 4; ++i){
+									number += static_cast<size_t>(used_coords[i]) * multiplier;
+									multiplier *= 4;
+								}
+								point["number"] = number;
+
+								if(hyperplane[number]){
+									in_points.push_back(point);
+								}
+								points.push_back(std::move(point));
+							}
+						}
+					}
+				}
+
+				json part_infos;
+				part_infos["direction"] = current_dimension;
+				part_infos["slice"] = current_slice;
+				part_infos["points"] = std::move(points);
+				part_infos["inPoints"] = std::move(in_points);
+
+				inja::Template document = m_environment.parse_template(HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE);
+				const std::string output_file_name = std::string("Direction_")
+				                                     + std::to_string(current_dimension)
+										             + "_slice_"
+						                             + std::to_string(current_slice)
+				                                     + ".tex";
+				m_environment.write(document, part_infos, hyperplane_folder + output_file_name);
+				part_infos["filePath"] = std::move(output_file_name);
+
+				sub_parts_infos.push_back(std::move(part_infos));
+			}
+			parts_infos.push_back(std::move(sub_parts_infos));
+		}
+
+		json data;
+		data["parts"] = parts_infos;
+
+		inja::Template document = m_environment.parse_template(HYPERPLANE_REPRESENTATION_DIM4_FULL_TEMPLATE);
+		const std::string output_file_name = hyperplane_folder + HYPERPLANE_REPRESENTATION_DIM4_OUTPUT;
 		m_environment.write(document, data, output_file_name);
 
 		return output_file_name;
@@ -256,6 +395,7 @@ private:
 	std::vector<Table> m_generated_tables;
 
 	unsigned int m_current_hyperplane_representation_number;
+	unsigned int m_current_hyperplane_representation_dim4_number;
 };
 
 #endif //HYPERPLANEFINDER_LATEXPRINTER_HPP
