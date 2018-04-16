@@ -42,6 +42,9 @@ namespace{
 	// Information
 	constexpr const char* TABLES_DOCUMENT_TITLE = "HyperplaneFinder tables";
 	constexpr const char* HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE = "Hyperplanes reprensentation";
+
+	// Config
+	constexpr int COUNT_FROM = 1;
 }
 
 class LatexPrinter{
@@ -56,6 +59,11 @@ public:
 		std::error_code ignored;
 		fs::create_directories(OUTPUT_FOLDER, ignored);
 		fs::create_directories(TABLES_OUTPUT_FOLDER, ignored);
+
+		m_environment.add_callback("count", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
+			const size_t value = m_environment.get_argument<size_t>(args, 0, data);
+			return COUNT_FROM + value;
+		});
 	}
 
 	void generateLinesTable(unsigned int geometry_dimension,
