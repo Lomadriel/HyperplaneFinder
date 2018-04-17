@@ -180,6 +180,71 @@ public:
 	template<size_t Dimension, size_t NbrPointsPerLine>
 	std::string generateHyperplaneRepresentation(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane){
 
+		if constexpr (Dimension < 4){
+			return generateHyperplaneRepresentationDimensionLess4<Dimension, NbrPointsPerLine>(hyperplane);
+		}
+		else if constexpr (Dimension == 4){
+			return generateHyperplaneRepresentationDimension4<NbrPointsPerLine>(hyperplane);
+		}
+		else{
+			static_assert(dependent_false<Dimension>::value, "Dimension not supported");
+			return std::string();
+		}
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	std::string generateHyperplaneRepresentationsDocument(const std::vector<std::bitset<math::pow(NbrPointsPerLine,Dimension)>>& hyperplanes){
+
+		json data;
+		data["title"] = HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE;
+
+		time_t now = time(nullptr);
+		struct tm tstruct = *localtime(&now);
+		char buf[11];
+		strftime(buf, sizeof(buf), "%Y/%m/%d", &tstruct);
+		data["date"] = buf;
+
+		data["dimention"] = Dimension;
+		data["nbrPointsPerLine"] = NbrPointsPerLine;
+
+		std::vector<json> hyperplanes_;
+		hyperplanes_.reserve(hyperplanes.size());
+		for(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane : hyperplanes){
+			json hyperplane_info;
+			std::vector<unsigned int> in_points;
+			in_points.reserve(hyperplane.count());
+			for(unsigned int i = 0; i < math::pow(NbrPointsPerLine,Dimension); ++i){
+				if(hyperplane[i]){
+					in_points.push_back(i);
+				}
+			}
+			hyperplane_info["inPoints"] = std::move(in_points);
+			hyperplanes_.push_back(std::move(hyperplane_info));
+		}
+		data["hyperplanes"] = std::move(hyperplanes_);
+
+		std::error_code ignored;
+		fs::copy_file(
+		  std::string(TEMPLATE_FOLDER) + HYPERPLANE_REPRESENTATION_PRINT,
+		  std::string(OUTPUT_FOLDER) + HYPERPLANE_REPRESENTATION_PRINT,
+		  ignored
+		);
+
+		inja::Template document = m_environment.parse_template(HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE);
+		std::string output_file_name = std::string(OUTPUT_FOLDER)
+		                               + HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX
+		                               + std::to_string(Dimension)
+		                               + HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT;
+		m_environment.write(document, data, output_file_name);
+
+		return output_file_name;
+	}
+
+private:
+
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	std::string generateHyperplaneRepresentationDimensionLess4(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane){
+
 		if constexpr (Dimension > 3){
 			static_assert(dependent_false<Dimension>::value, "Dimension not supported");
 		}
@@ -309,8 +374,8 @@ public:
 				inja::Template document = m_environment.parse_template(HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE);
 				const std::string output_file_name = std::string("Direction_")
 				                                     + std::to_string(current_dimension)
-										             + "_slice_"
-						                             + std::to_string(current_slice)
+				                                     + "_slice_"
+				                                     + std::to_string(current_slice)
 				                                     + ".tex";
 				m_environment.write(document, part_infos, hyperplane_folder + output_file_name);
 				part_infos["filePath"] = std::move(output_file_name);
@@ -329,56 +394,6 @@ public:
 
 		return output_file_name;
 	}
-
-	template<size_t Dimension, size_t NbrPointsPerLine>
-	std::string generateHyperplaneRepresentationsDocument(const std::vector<std::bitset<math::pow(NbrPointsPerLine,Dimension)>>& hyperplanes){
-
-		json data;
-		data["title"] = HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE;
-
-		time_t now = time(nullptr);
-		struct tm tstruct = *localtime(&now);
-		char buf[11];
-		strftime(buf, sizeof(buf), "%Y/%m/%d", &tstruct);
-		data["date"] = buf;
-
-		data["dimention"] = Dimension;
-		data["nbrPointsPerLine"] = NbrPointsPerLine;
-
-		std::vector<json> hyperplanes_;
-		hyperplanes_.reserve(hyperplanes.size());
-		for(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane : hyperplanes){
-			json hyperplane_info;
-			std::vector<unsigned int> in_points;
-			in_points.reserve(hyperplane.count());
-			for(unsigned int i = 0; i < math::pow(NbrPointsPerLine,Dimension); ++i){
-				if(hyperplane[i]){
-					in_points.push_back(i);
-				}
-			}
-			hyperplane_info["inPoints"] = std::move(in_points);
-			hyperplanes_.push_back(std::move(hyperplane_info));
-		}
-		data["hyperplanes"] = std::move(hyperplanes_);
-
-		std::error_code ignored;
-		fs::copy_file(
-		  std::string(TEMPLATE_FOLDER) + HYPERPLANE_REPRESENTATION_PRINT,
-		  std::string(OUTPUT_FOLDER) + HYPERPLANE_REPRESENTATION_PRINT,
-		  ignored
-		);
-
-		inja::Template document = m_environment.parse_template(HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE);
-		std::string output_file_name = std::string(OUTPUT_FOLDER)
-		                               + HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX
-		                               + std::to_string(Dimension)
-		                               + HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT;
-		m_environment.write(document, data, output_file_name);
-
-		return output_file_name;
-	}
-
-private:
 
 	struct Table{
 		Table(const std::string& table_name_, const std::string& file_name_) noexcept
