@@ -19,40 +19,44 @@ class LatexPrinter{
 
 	struct Config{
 		// Folders
-		static constexpr const char* TEMPLATE_FOLDER = "./templates/";
+		static const std::string TEMPLATE_FOLDER;
+		static const std::string TABLES_TEMPLATE_FOLDER;
+		static const std::string HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER;
 
-		static constexpr const char* OUTPUT_FOLDER = "./";
-		static constexpr const char* TABLES_OUTPUT_FOLDER = "tables/";
+		static const std::string OUTPUT_FOLDER;
+		static const std::string TABLES_OUTPUT_FOLDER;
+		static const std::string HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER;
 
 		// Templates
-		static constexpr const char* LINES_TABLE_TEMPLATE = "lines_table.tex";
-		static constexpr const char* HYPERPLANES_TABLE_TEMPLATE = "hyperplanes_table.tex";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_TEMPLATE = "hyperplane_representation.tex";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE = "hyperplanes_representation_document.tex";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE = "hyperplane_representation_dim4_part.tex";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_DIM4_FULL_TEMPLATE = "hyperplane_representation_dim4_full.tex";
-		static constexpr const char* DOCUMENT_TEMPLATE = "document.tex";
+		static const std::string LINES_TABLE_TEMPLATE;
+		static const std::string HYPERPLANES_TABLE_TEMPLATE;
+		static const std::string TABLES_DOCUMENT_TEMPLATE;
 
-		// Non-template files
-		static constexpr const char* HYPERPLANE_REPRESENTATION_PRINT = "hyperplane_representation_print.tex";
+		static const std::string HYPERPLANE_REPRESENTATION_TEMPLATE;
+		static const std::string HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE;
+		static const std::string HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE;
+		static const std::string HYPERPLANE_REPRESENTATION_DIM4_FULL_TEMPLATE;
+
+		static const std::string HYPERPLANE_REPRESENTATION_PRINT;
 
 		// Outputs
-		static constexpr const char* TABLE_OUTPUT_DIMENSION_PREFIX = "dimension_";
-		static constexpr const char* LINES_TABLE_OUTPUT = "_lines_table.tex";
-		static constexpr const char* HYPERPLANES_TABLE_OUTPUT = "_hyperplanes_table.tex";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX = "hyperplane_representation_";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX = ".tex";
-		static constexpr const char* HYPERPLANE_REPRESENTATION_DIM4_OUTPUT = "hyperplane_representation.tex";
-		static constexpr const char* HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX = "dimension_";
-		static constexpr const char* HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT = "_hyperplanes_representation.tex";
-		static constexpr const char* DOCUMENT_OUTPUT = "tables.tex";
+		static const std::string TABLES_OUTPUT_PREFIX;
+		static const std::string LINES_TABLE_OUTPUT_POSTFIX;
+		static const std::string HYPERPLANES_TABLE_OUTPUT_POSTFIX;
+		static const std::string TABLES_DOCUMENT_OUTPUT;
+
+		static const std::string HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX;
+		static const std::string HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX;
+		static const std::string HYPERPLANE_REPRESENTATION_DIM4_OUTPUT;
+		static const std::string HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX;
+		static const std::string HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT;
 
 		// Information
-		static constexpr const char* TABLES_DOCUMENT_TITLE = "HyperplaneFinder tables";
-		static constexpr const char* HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE = "Hyperplanes reprensentation";
+		static const std::string TABLES_DOCUMENT_TITLE;
+		static const std::string HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE;
 
 		// Others
-		static constexpr int COUNT_FROM = 1;
+		static const int COUNT_FROM;
 	};
 
 	struct Table{
@@ -95,73 +99,6 @@ private:
 	unsigned int m_current_hyperplane_representation_number;
 	unsigned int m_current_hyperplane_representation_dim4_number;
 };
-
-LatexPrinter::Table::Table(const std::string& table_name_, const std::string& file_name_) noexcept
-  : table_name(table_name_)
-    , file_path(file_name_) {
-
-}
-
-LatexPrinter::LatexPrinter() noexcept
-  : m_environment(Config::TEMPLATE_FOLDER, Config::OUTPUT_FOLDER)
-    , m_generated_tables()
-    , m_current_hyperplane_representation_number(0)
-    , m_current_hyperplane_representation_dim4_number(0) {
-
-	std::error_code ignored;
-	fs::create_directories(Config::OUTPUT_FOLDER, ignored);
-	fs::create_directories(Config::TABLES_OUTPUT_FOLDER, ignored);
-
-	m_environment.add_callback("count", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
-		const size_t value = m_environment.get_argument<size_t>(args, 0, data);
-		return Config::COUNT_FROM + value;
-	});
-	m_environment.add_callback("double", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
-		const size_t value = m_environment.get_argument<size_t>(args, 0, data);
-		return 2 * value;
-	});
-	m_environment.add_callback("plusOne", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
-		const size_t value = m_environment.get_argument<size_t>(args, 0, data);
-		return value + 1;
-	});
-}
-
-void LatexPrinter::generateLinesTable(unsigned int geometry_dimension,
-                                      const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table,
-                                      size_t points_type_number) {
-	json data;
-	data["pointsTypeNumber"] = points_type_number;
-
-	std::vector<json> lines_info;
-	for(const segre::VeldkampLineTableEntry& entry : geometry_lin_table){
-		json line_info;
-		line_info["isProjective"] = entry.isProjective;
-		line_info["core"]["points"] = entry.coreNbrPoints;
-		line_info["core"]["lines"] = entry.coreNbrLines;
-
-		std::vector<size_t> points_types;
-		points_types.reserve(points_type_number);
-		for(size_t i = 0; i < points_type_number; ++i){
-			const std::map<long long int, std::size_t>::const_iterator it = entry.pointsType.find(static_cast<long long int>(i));
-			points_types.push_back(it == entry.pointsType.end() ? 0 : it->second);
-		}
-		line_info["pointsType"] = std::move(points_types);
-
-		line_info["cardinal"] = entry.count;
-
-		lines_info.push_back(std::move(line_info));
-	}
-	data["lines"] = std::move(lines_info);
-
-	inja::Template document = m_environment.parse_template(Config::LINES_TABLE_TEMPLATE);
-	std::string file_path = std::string(Config::TABLES_OUTPUT_FOLDER)
-	                        + Config::TABLE_OUTPUT_DIMENSION_PREFIX
-	                        + std::to_string(geometry_dimension)
-	                        + Config::LINES_TABLE_OUTPUT;
-	m_environment.write(document, data, file_path);
-
-	m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_path);
-}
 
 template<bool printPointsOrder, bool printSubgeometries>
 void LatexPrinter::generateHyperplanesTable(unsigned int geometry_dimension,
@@ -218,11 +155,14 @@ void LatexPrinter::generateHyperplanesTable(unsigned int geometry_dimension,
 	}
 	data["hyperplanes"] = std::move(hyperplanes_info);
 
-	inja::Template document = m_environment.parse_template(Config::HYPERPLANES_TABLE_TEMPLATE);
-	std::string file_path = std::string(Config::TABLES_OUTPUT_FOLDER)
-	                        + Config::TABLE_OUTPUT_DIMENSION_PREFIX
+	inja::Template document = m_environment.parse_template(
+	  Config::TABLES_TEMPLATE_FOLDER
+	  + Config::HYPERPLANES_TABLE_TEMPLATE
+	);
+	std::string file_path = Config::TABLES_OUTPUT_FOLDER
+	                        + Config::TABLES_OUTPUT_PREFIX
 	                        + std::to_string(geometry_dimension)
-	                        + Config::HYPERPLANES_TABLE_OUTPUT;
+	                        + Config::HYPERPLANES_TABLE_OUTPUT_POSTFIX;
 	m_environment.write(document, data, file_path);
 
 	m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_path);
@@ -245,6 +185,11 @@ std::string LatexPrinter::generateHyperplaneRepresentation(const std::bitset<mat
 
 template<size_t Dimension, size_t NbrPointsPerLine>
 std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::vector<std::bitset<math::pow(NbrPointsPerLine, Dimension)>>& hyperplanes) {
+
+	if constexpr (Dimension > 3) {
+		static_assert(dependent_false<Dimension>::value, "Dimension not supported");
+		return std::string();
+	}
 
 	json data;
 	data["title"] = Config::HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE;
@@ -276,13 +221,16 @@ std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::v
 
 	std::error_code ignored;
 	fs::copy_file(
-	  std::string(Config::TEMPLATE_FOLDER) + Config::HYPERPLANE_REPRESENTATION_PRINT,
-	  std::string(Config::OUTPUT_FOLDER) + Config::HYPERPLANE_REPRESENTATION_PRINT,
+	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER + Config::HYPERPLANE_REPRESENTATION_PRINT,
+	  Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER + Config::HYPERPLANE_REPRESENTATION_PRINT,
 	  ignored
 	);
 
-	inja::Template document = m_environment.parse_template(Config::HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE);
-	std::string output_file_name = std::string(Config::OUTPUT_FOLDER)
+	inja::Template document = m_environment.parse_template(
+	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER
+	  + Config::HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE
+	);
+	std::string output_file_name = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER
 	                               + Config::HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX
 	                               + std::to_string(Dimension)
 	                               + Config::HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT;
@@ -311,8 +259,11 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(const s
 	data["dimention"] = Dimension;
 	data["nbrPointsPerLine"] = NbrPointsPerLine;
 
-	inja::Template document = m_environment.parse_template(Config::HYPERPLANE_REPRESENTATION_TEMPLATE);
-	std::string output_file_name = std::string(Config::OUTPUT_FOLDER)
+	inja::Template document = m_environment.parse_template(
+	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER
+	  + Config::HYPERPLANE_REPRESENTATION_TEMPLATE
+	);
+	std::string output_file_name = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER
 	                               + Config::HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
 	                               + std::to_string(m_current_hyperplane_representation_number++)
 	                               + Config::HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX;
@@ -324,7 +275,7 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(const s
 template<size_t NbrPointsPerLine>
 std::string LatexPrinter::generateHyperplaneRepresentationDimension4(const std::bitset<math::pow(NbrPointsPerLine, 4)>& hyperplane) {
 
-	const std::string hyperplane_folder = std::string(Config::OUTPUT_FOLDER)
+	const std::string hyperplane_folder = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER
 	                                      + Config::HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
 	                                      + std::to_string(m_current_hyperplane_representation_dim4_number++)
 	                                      + "/";
@@ -420,7 +371,10 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimension4(const std::
 			part_infos["points"] = std::move(points);
 			part_infos["inPoints"] = std::move(in_points);
 
-			inja::Template document = m_environment.parse_template(Config::HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE);
+			inja::Template document = m_environment.parse_template(
+			  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER
+			  + Config::HYPERPLANE_REPRESENTATION_DIM4_PART_TEMPLATE
+			);
 			const std::string output_file_name = std::string("Direction_")
 			                                     + std::to_string(current_dimension)
 			                                     + "_slice_"
@@ -437,7 +391,10 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimension4(const std::
 	json data;
 	data["parts"] = parts_infos;
 
-	inja::Template document = m_environment.parse_template(Config::HYPERPLANE_REPRESENTATION_DIM4_FULL_TEMPLATE);
+	inja::Template document = m_environment.parse_template(
+	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER
+	  + Config::HYPERPLANE_REPRESENTATION_DIM4_FULL_TEMPLATE
+	);
 	const std::string output_file_name = hyperplane_folder + Config::HYPERPLANE_REPRESENTATION_DIM4_OUTPUT;
 	m_environment.write(document, data, output_file_name);
 

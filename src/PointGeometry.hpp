@@ -765,7 +765,7 @@ namespace segre {
 		std::array<std::array<std::bitset<NbrPoints>, NbrPointsPerLine>, Dimension> m_subGeometriesMasks;
 	};
 
-	std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry) {
+	inline std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry) {
 		os << "HyperplaneTableEntry{"
 		   << "Ps: " << entry.nbrPoints
 		   << ", Ls: " << entry.nbrLines
@@ -819,7 +819,7 @@ namespace segre {
 		return os;
 	}
 
-	std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry& entry) {
+	inline std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry& entry) {
 		os << "VeldkampLineEntry{"
 		   << "Proj: " << std::boolalpha << entry.isProjective
 		   << ", core{"
