@@ -50,8 +50,7 @@ LatexPrinter::Table::Table(const std::string& table_name_, const std::string& fi
 LatexPrinter::LatexPrinter() noexcept
   : m_environment()
     , m_generated_tables()
-    , m_current_hyperplane_representation_number(0)
-    , m_current_hyperplane_representation_dim4_number(0) {
+    , m_current_hyperplane_representation_number() {
 
 	std::error_code ignored;
 	fs::create_directories(Config::OUTPUT_FOLDER, ignored);

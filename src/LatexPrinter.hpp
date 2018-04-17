@@ -88,16 +88,15 @@ public:
 private:
 
 	template<size_t Dimension, size_t NbrPointsPerLine>
-	std::string generateHyperplaneRepresentationDimensionLess4(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane);
+	std::string generateHyperplaneRepresentationDimensionLess4(std::string output_folder, const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane);
 
 	template<size_t NbrPointsPerLine>
-	std::string generateHyperplaneRepresentationDimension4(const std::bitset<math::pow(NbrPointsPerLine,4)>& hyperplane);
+	std::string generateHyperplaneRepresentationDimension4(std::string output_folder, const std::bitset<math::pow(NbrPointsPerLine,4)>& hyperplane);
 
 	inja::Environment m_environment;
 	std::vector<Table> m_generated_tables;
 
-	unsigned int m_current_hyperplane_representation_number;
-	unsigned int m_current_hyperplane_representation_dim4_number;
+	std::map<size_t, size_t> m_current_hyperplane_representation_number; // by dimension
 };
 
 template<bool printPointsOrder, bool printSubgeometries>
@@ -171,11 +170,16 @@ void LatexPrinter::generateHyperplanesTable(unsigned int geometry_dimension,
 template<size_t Dimension, size_t NbrPointsPerLine>
 std::string LatexPrinter::generateHyperplaneRepresentation(const std::bitset<math::pow(NbrPointsPerLine, Dimension)>& hyperplane) {
 
+	std::string output_folder = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER + "dimension_" + std::to_string(Dimension) + "/";
+
+	std::error_code ignored;
+	fs::create_directories(output_folder, ignored);
+
 	if constexpr (Dimension < 4){
-		return generateHyperplaneRepresentationDimensionLess4<Dimension, NbrPointsPerLine>(hyperplane);
+		return generateHyperplaneRepresentationDimensionLess4<Dimension, NbrPointsPerLine>(output_folder, hyperplane);
 	}
 	else if constexpr (Dimension == 4){
-		return generateHyperplaneRepresentationDimension4<NbrPointsPerLine>(hyperplane);
+		return generateHyperplaneRepresentationDimension4<NbrPointsPerLine>(output_folder, hyperplane);
 	}
 	else{
 		static_assert(dependent_false<Dimension>::value, "Dimension not supported");
@@ -190,6 +194,11 @@ std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::v
 		static_assert(dependent_false<Dimension>::value, "Dimension not supported");
 		return std::string();
 	}
+
+	std::string output_folder = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER + "dimension_" + std::to_string(Dimension) + "/";
+
+	std::error_code ignored;
+	fs::create_directories(output_folder, ignored);
 
 	json data;
 	data["title"] = Config::HYPERPLANES_REPRESENTATION_DOCUMENT_TITLE;
@@ -219,10 +228,9 @@ std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::v
 	}
 	data["hyperplanes"] = std::move(hyperplanes_);
 
-	std::error_code ignored;
 	fs::copy_file(
 	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER + Config::HYPERPLANE_REPRESENTATION_PRINT,
-	  Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER + Config::HYPERPLANE_REPRESENTATION_PRINT,
+	  output_folder + Config::HYPERPLANE_REPRESENTATION_PRINT,
 	  ignored
 	);
 
@@ -230,7 +238,7 @@ std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::v
 	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER
 	  + Config::HYPERPLANE_REPRESENTATION_DOCUMENT_TEMPLATE
 	);
-	std::string output_file_name = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER
+	std::string output_file_name = output_folder
 	                               + Config::HYPERPLANES_REPRESENTATION_DOCUMENT_PREFIX
 	                               + std::to_string(Dimension)
 	                               + Config::HYPERPLANES_REPRESENTATION_DOCUMENT_OUTPUT;
@@ -240,7 +248,7 @@ std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::v
 }
 
 template<size_t Dimension, size_t NbrPointsPerLine>
-std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(const std::bitset<math::pow(NbrPointsPerLine, Dimension)>& hyperplane) {
+std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(std::string output_folder, const std::bitset<math::pow(NbrPointsPerLine, Dimension)>& hyperplane) {
 
 	if constexpr (Dimension > 3){
 		static_assert(dependent_false<Dimension>::value, "Dimension not supported");
@@ -263,9 +271,9 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(const s
 	  Config::HYPERPLANES_REPRESENTATION_TEMPLATE_FOLDER
 	  + Config::HYPERPLANE_REPRESENTATION_TEMPLATE
 	);
-	std::string output_file_name = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER
+	std::string output_file_name = output_folder
 	                               + Config::HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
-	                               + std::to_string(m_current_hyperplane_representation_number++)
+	                               + std::to_string(m_current_hyperplane_representation_number[Dimension]++)
 	                               + Config::HYPERPLANE_REPRESENTATION_OUTPUT_POSTFIX;
 	m_environment.write(document, data, output_file_name);
 
@@ -273,11 +281,11 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(const s
 }
 
 template<size_t NbrPointsPerLine>
-std::string LatexPrinter::generateHyperplaneRepresentationDimension4(const std::bitset<math::pow(NbrPointsPerLine, 4)>& hyperplane) {
+std::string LatexPrinter::generateHyperplaneRepresentationDimension4(std::string output_folder, const std::bitset<math::pow(NbrPointsPerLine, 4)>& hyperplane) {
 
-	const std::string hyperplane_folder = Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER
+	const std::string hyperplane_folder = output_folder
 	                                      + Config::HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX
-	                                      + std::to_string(m_current_hyperplane_representation_dim4_number++)
+	                                      + std::to_string(m_current_hyperplane_representation_number[4]++)
 	                                      + "/";
 	std::error_code ignored;
 	fs::create_directories(hyperplane_folder, ignored);
