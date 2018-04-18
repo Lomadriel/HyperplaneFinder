@@ -385,19 +385,51 @@ function(target_add_flag target flag)
 endfunction()
 
 ## target_set_output_directory(target directory)
-# Set the target output directory to <input directory>/<config>.
+# Set the target runtime, library and archive output directory to the input directory.
 #   {value} [in] target:      Target to configure
 #   {value} [in] directory:   Output directory
 function(target_set_output_directory target directory)
+	target_set_runtime_output_directory(${target} "${directory}")
+	target_set_library_output_directory(${target} "${directory}")
+	target_set_archive_output_directory(${target} "${directory}")
+endfunction()
+
+## target_set_output_directory(target directory)
+# Set the target runtime output directory to the input directory.
+#   {value} [in] target:      Target to configure
+#   {value} [in] directory:   Output directory
+function(target_set_runtime_output_directory target directory)
 	set_target_properties(${target} PROPERTIES
 	  RUNTIME_OUTPUT_DIRECTORY                "${directory}"
-	  RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${directory}/Debug"
-	  RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}/RelWithDebInfo"
-	  RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${directory}/Release"
+	  RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${directory}"
+	  RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}"
+	  RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${directory}"
+	  )
+endfunction()
+
+## target_set_output_directory(target directory)
+# Set the target library output directory to the input directory.
+#   {value} [in] target:      Target to configure
+#   {value} [in] directory:   Output directory
+function(target_set_library_output_directory target directory)
+	set_target_properties(${target} PROPERTIES
 	  LIBRARY_OUTPUT_DIRECTORY                "${directory}"
-	  LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${directory}/Debug"
-	  LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}/RelWithDebInfo"
-	  LIBRARY_OUTPUT_DIRECTORY_RELEASE        "${directory}/Release"
+	  LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${directory}"
+	  LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}"
+	  LIBRARY_OUTPUT_DIRECTORY_RELEASE        "${directory}"
+	  )
+endfunction()
+
+## target_set_output_directory(target directory)
+# Set the target archive output directory to the input directory.
+#   {value} [in] target:      Target to configure
+#   {value} [in] directory:   Output directory
+function(target_set_archive_output_directory target directory)
+	set_target_properties(${target} PROPERTIES
+	  ARCHIVE_OUTPUT_DIRECTORY                "${directory}"
+	  ARCHIVE_OUTPUT_DIRECTORY_DEBUG          "${directory}"
+	  ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}"
+	  ARCHIVE_OUTPUT_DIRECTORY_RELEASE        "${directory}"
 	  )
 endfunction()
 
@@ -726,10 +758,19 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # place generated binaries in build/bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/bin/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/bin/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/bin/)
 
 # place generated libs in build/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/lib/)
 
 # enable IDE folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
