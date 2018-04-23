@@ -29,9 +29,9 @@
 		\hline
 		\multirow{3}{*}{Id} & \multicolumn{2}{c|}{\multirow{2}{*}{Composition}} & {% if printPointsOrder %}\multicolumn{\ordersNumber}{c|}{\multirow{2}{*}{Points order}} & {% endif %}{% if printSubgeometries %}\multicolumn{\divNumber}{c|}{Sub-geometries} & {% endif %}\multirow{3}{*}{cardinal} & \multirow{3}{*}{2$\times$cardinal}\\
 {% if printSubgeometries %}		\cline{\clineStart-\clineEnd}{% endif %}
-		& \multicolumn{2}{c|}{} & {% if printPointsOrder %}\multicolumn{\ordersNumber}{c|}{} & {% endif %}{% if printSubgeometries %}{% for i in range(subDimensionsNumber)%} \multicolumn{\subGeometriesNumberPlusOne}{c|}{D{{count(i)}}} & {% endfor %}{% endif %}\\
+		& \multicolumn{2}{c|}{} & {% if printPointsOrder %}\multicolumn{\ordersNumber}{c|}{} & {% endif %}{% if printSubgeometries %}{% for i in range(subDimensionsNumber)%} \multicolumn{\subGeometriesNumberPlusOne}{c|}{D{{count(i)}}} & {% endfor %}{% endif %}& \\
 		\cline{2-\clineEnd}
-		& Points & Lines & {% if printPointsOrder %}{% for i in range(ordersNumber)%}{{i}} & {% endfor %}{% endif %}{% if printSubgeometries %}{% for i in range(subDimensionsNumber)%}{% for j in range(subGeometriesNumber)%}H{{count(j)}} & {% endfor %}Full & {% endfor %}{% endif %}\\
+		& Points & Lines & {% if printPointsOrder %}{% for i in range(ordersNumber)%}{{i}} & {% endfor %}{% endif %}{% if printSubgeometries %}{% for i in range(subDimensionsNumber)%}{% for j in range(subGeometriesNumber)%}H{{count(j)}} & {% endfor %}Full & {% endfor %}{% endif %}& \\
 		\hline
 		\hline
 {% for hyp in hyperplanes %}
