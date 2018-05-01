@@ -34,6 +34,7 @@ namespace segre {
 
 		std::array<std::array<std::size_t, 2>, Dimension> variables{};
 
+		// This function need to be generalized.
 		for (std::size_t i = 0; i < 3; ++i) {
 			for (std::size_t j = 0; j < 3; ++j) {
 			    for (std::size_t k = 0; k < 3; ++k) {

@@ -7,6 +7,7 @@
 #include <PointGeometry.hpp>
 
 #include <experimental/filesystem>
+#include "PointGeometry.hpp"
 
 namespace fs = std::experimental::filesystem;
 
@@ -81,14 +82,16 @@ public:
 		});
 	}
 
+	template <std::size_t NbrPoints>
 	void generateLinesTable(unsigned int geometry_dimension,
-	                        const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table,
+	                        const std::vector<segre::VeldkampLineTableEntry<NbrPoints>>& geometry_lin_table,
 	                        size_t points_type_number){
 		json data;
 		data["pointsTypeNumber"] = points_type_number;
+		data["minimalDistanceNumber"] = geometry_dimension;
 
 		std::vector<json> lines_info;
-		for(const segre::VeldkampLineTableEntry& entry : geometry_lin_table){
+		for(const segre::VeldkampLineTableEntry<NbrPoints>& entry : geometry_lin_table){
 			json line_info;
 			line_info["isProjective"] = entry.isProjective;
 			line_info["core"]["points"] = entry.coreNbrPoints;
@@ -100,7 +103,18 @@ public:
 				const std::map<long long int, std::size_t>::const_iterator it = entry.pointsType.find(static_cast<long long int>(i));
 				points_types.push_back(it == entry.pointsType.end() ? 0 : it->second);
 			}
+
 			line_info["pointsType"] = std::move(points_types);
+
+			std::vector<size_t> minimal_distances;
+			minimal_distances.reserve(geometry_dimension);
+
+			for (std::size_t i = 1; i <= geometry_dimension; ++i) {
+				const std::map<std::size_t, std::size_t>::const_iterator it = entry.minimalDistance.find(i);
+				minimal_distances.push_back(it == entry.minimalDistance.end() ? 0 : it->second);
+			}
+
+			line_info["minimalDistance"] = std::move(minimal_distances);
 
 			line_info["cardinal"] = entry.count;
 
@@ -121,16 +135,68 @@ public:
 	                              size_t sub_geometries_number){
 		json data;
 		data["geometryDimension"] = geometry_dimension;
+		data["distanceNbr"] = geometry_dimension - 1;
 		data["ordersNumber"] = geometry_dimension + 1;
 		data["subDimensionsNumber"] = geometry_dimension;
 		data["subGeometriesNumber"] = sub_geometries_number;
 		data["divNumber"] = geometry_dimension * (sub_geometries_number + 1);
+		data["minDistNumber"] = geometry_dimension * (geometry_dimension - 1);
 
 		const bool print_subgeometries = printSubgeometries && (sub_geometries_number > 0);
 		data["printSubgeometries"] = print_subgeometries;
 		data["printPointsOrder"] = printPointsOrder;
 
+		std::vector<std::string> bs;
+		if (geometry_dimension == 4) {
+			bs.reserve(geometry_hyp_table.size());
+
+			bs.push_back("2");
+			bs.push_back("3");
+			bs.push_back("4");
+			bs.push_back("6");
+			bs.push_back("5");
+			bs.push_back("18");
+			bs.push_back("7");
+			bs.push_back("11");
+			bs.push_back("9");
+			bs.push_back("8");
+			bs.push_back("12");
+			bs.push_back("24");
+			bs.push_back("16");
+			bs.push_back("10");
+			bs.push_back("22");
+			bs.push_back("20");
+			bs.push_back("17");
+			bs.push_back("13");
+			bs.push_back("25");
+			bs.push_back("29");
+			bs.push_back("30,27");
+			bs.push_back("46");
+			bs.push_back("28");
+			bs.push_back("31");
+			bs.push_back("23");
+			bs.push_back("19");
+			bs.push_back("44,39");
+			bs.push_back("14");
+			bs.push_back("15");
+			bs.push_back("26");
+			bs.push_back("45,36");
+			bs.push_back("40");
+			bs.push_back("42,37");
+			bs.push_back("35");
+			bs.push_back("43");
+			bs.push_back("38");
+			bs.push_back("21");
+			bs.push_back("32");
+			bs.push_back("34");
+			bs.push_back("41");
+			bs.push_back("49");
+			bs.push_back("33");
+			bs.push_back("47,49");
+		}
+
 		std::vector<json> hyperplanes_info;
+		std::size_t index = 0;
 		for(const segre::HyperplaneTableEntry& entry : geometry_hyp_table){
 			json hyperplane_info;
 			hyperplane_info["points"] = entry.nbrPoints;
@@ -139,19 +205,37 @@ public:
 			if(print_subgeometries){
 				std::vector<std::vector<size_t>> subgeometries_by_dimensions;
 				subgeometries_by_dimensions.reserve(geometry_dimension);
+
+				std::vector<std::vector<size_t>> minimal_distances;
+				minimal_distances.reserve(geometry_dimension);
+
 				for(size_t i = 0; i < geometry_dimension; ++i){
 					std::vector<size_t> subgeometries;
 					subgeometries.reserve(sub_geometries_number+1);
+
 					for(size_t j = 0; j < sub_geometries_number; ++j){
 						const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometries[i].find(static_cast<long long int>(j));
 						subgeometries.push_back(it == entry.subgeometries[i].end() ? 0 : it->second);
 					}
+
 					const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometries[i].find(-1);
 					subgeometries.push_back(it == entry.subgeometries[i].end() ? 0 : it->second);
 
 					subgeometries_by_dimensions.push_back(std::move(subgeometries));
+
+					std::vector<size_t> minimalDistance(geometry_dimension - 1, 0);
+
+					for (auto&& distance = entry.subgeometries[i].cbegin(); distance->first < -1; ++distance) {
+						// FIXME : malloc : memory corruption
+						std::cout << distance->first << " " << (-distance->first - 1) << '\n';
+						minimalDistance[-distance->first -1] = distance->second;
+					}
+
+					minimal_distances.push_back(std::move(minimalDistance));
 				}
+
 				hyperplane_info["subgeometries"] = std::move(subgeometries_by_dimensions);
+				hyperplane_info["minimalDistance"] = std::move(minimal_distances);
 			}
 
 			if constexpr(printPointsOrder){
@@ -166,8 +250,15 @@ public:
 
 			hyperplane_info["cardinal"] = entry.count;
 
+			if (geometry_dimension == 4) {
+				hyperplane_info["bs"] = bs[index];
+			}
+
 			hyperplanes_info.push_back(std::move(hyperplane_info));
+
+			++index;
 		}
+
 		data["hyperplanes"] = std::move(hyperplanes_info);
 
 		inja::Template document = m_environment.parse_template(HYPERPLANES_TABLE_TEMPLATE);
