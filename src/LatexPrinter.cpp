@@ -1,4 +1,4 @@
-#include <LatexPrinter.hpp>
+#include "LatexPrinter.hpp"
 
 
 // Folders

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <set>
 
-#include <CombinationGenerator.hpp>
+#include "CombinationGenerator.hpp"
 
 namespace math {
 	template <typename T, typename U>

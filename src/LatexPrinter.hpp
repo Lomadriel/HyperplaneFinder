@@ -1,12 +1,12 @@
 #ifndef HYPERPLANEFINDER_LATEXPRINTER_HPP
 #define HYPERPLANEFINDER_LATEXPRINTER_HPP
 
+#include <experimental/filesystem>
+
 #include <nlohmann/json.hpp>
 #include <inja.hpp>
 
-#include <PointGeometry.hpp>
-
-#include <experimental/filesystem>
+#include "PointGeometry.hpp"
 
 namespace fs = std::experimental::filesystem;
 

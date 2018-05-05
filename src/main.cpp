@@ -5,11 +5,11 @@
 #include <vector>
 #include <chrono>
 
-#include <PointGeometry.hpp>
-#include <LatexPrinter.hpp>
-
 #include <nlohmann/json.hpp>
 #include <inja.hpp>
+
+#include "PointGeometry.hpp"
+#include "LatexPrinter.hpp"
 
 using json = nlohmann::json;
 
