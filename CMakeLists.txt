@@ -14,9 +14,9 @@ if( NOT CMAKE_BUILD_TYPE )
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-get_filename_component(root_dir        ${CMAKE_SOURCE_DIR}     REALPATH)
-get_filename_component(src_dir         ${root_dir}/src         REALPATH)
-get_filename_component(templates_dir   ${root_dir}/templates   REALPATH)
+get_filename_component(root_dir        ${CMAKE_SOURCE_DIR}     ABSOLUTE)
+get_filename_component(src_dir         ${root_dir}/src         ABSOLUTE)
+get_filename_component(templates_dir   ${root_dir}/templates   ABSOLUTE)
 
 get_files(
   files "${src_dir}"
