@@ -13,14 +13,7 @@
 #include <set>
 
 #include "CombinationGenerator.hpp"
-
-namespace math {
-	template <typename T, typename U>
-	inline constexpr T pow(T base, U exponent) {
-		static_assert(std::is_integral_v<U>);
-		return exponent == 0 ? 1 : base * pow(base, exponent - 1);
-	}
-}
+#include "math.hpp"
 
 // Fixme : Replace std::bitset by a custom bitset
 namespace std { // NOLINT

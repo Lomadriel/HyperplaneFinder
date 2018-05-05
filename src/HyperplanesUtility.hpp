@@ -8,7 +8,7 @@
 
 #include "PermutationGenerator.hpp"
 #include "index_repetition.hpp"
-#include "PointGeometry.hpp"
+#include "math.hpp"
 
 // Declarations
 namespace segre{
