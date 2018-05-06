@@ -1,5 +1,13 @@
 #include "LatexPrinter.hpp"
 
+// Inja
+const std::string LatexPrinter::Config::INJA_STATEMENT_OPEN = "<\\*";
+const std::string LatexPrinter::Config::INJA_STATEMENT_CLOSE = "\\*>";
+const std::string LatexPrinter::Config::INJA_EXPRESSION_OPEN = "<<";
+const std::string LatexPrinter::Config::INJA_EXPRESSION_CLOSE = ">>";
+const std::string LatexPrinter::Config::INJA_COMMENT_OPEN = "<#";
+const std::string LatexPrinter::Config::INJA_COMMENT_CLOSE = "#>";
+const std::string LatexPrinter::Config::INJA_LINE_STATEMENT_START = "##";
 
 // Folders
 const std::string LatexPrinter::Config::TEMPLATE_FOLDER = "./templates/";
@@ -56,6 +64,12 @@ LatexPrinter::LatexPrinter() noexcept
 	fs::create_directories(Config::OUTPUT_FOLDER, ignored);
 	fs::create_directories(Config::TABLES_OUTPUT_FOLDER, ignored);
 	fs::create_directories(Config::HYPERPLANES_REPRESENTATIONS_OUTPUT_FOLDER, ignored);
+
+	m_environment.set_statement(Config::INJA_STATEMENT_OPEN, Config::INJA_STATEMENT_CLOSE);
+	m_environment.set_expression(Config::INJA_EXPRESSION_OPEN, Config::INJA_EXPRESSION_CLOSE);
+
+	m_environment.set_comment(Config::INJA_COMMENT_OPEN, Config::INJA_COMMENT_CLOSE);
+	m_environment.set_line_statement(Config::INJA_LINE_STATEMENT_START);
 
 	m_environment.add_callback("count", 1, [this](inja::Parsed::Arguments args, json data) -> size_t {
 		const size_t value = m_environment.get_argument<size_t>(args, 0, data);

@@ -16,27 +16,27 @@
 \usepackage[nomessages]{fp}
 
 \begin{document}
-	\FPeval{\geometryDimension}{clip({{geometryDimension}})}%
-	\FPeval{\ordersNumber}{clip({{ordersNumber}})}%
-	\FPeval{\divNumber}{clip({{divNumber}})}%
-	\FPeval{\subDimensionsNumber}{clip({{subDimensionsNumber}})}%
-	\FPeval{\subGeometriesNumber}{clip({{subGeometriesNumber}})}%
+	\FPeval{\geometryDimension}{clip(<<geometryDimension>>)}%
+	\FPeval{\ordersNumber}{clip(<<ordersNumber>>)}%
+	\FPeval{\divNumber}{clip(<<divNumber>>)}%
+	\FPeval{\subDimensionsNumber}{clip(<<subDimensionsNumber>>)}%
+	\FPeval{\subGeometriesNumber}{clip(<<subGeometriesNumber>>)}%
 	\FPeval{\subGeometriesNumberPlusOne}{clip(\subGeometriesNumber+1)}%
-	\FPeval{\clineStart}{clip(4{% if printPointsOrder %}+{{ordersNumber}}{% endif %})}%
-	\FPeval{\clineEnd}{clip(3{% if printSubgeometries %}+{{divNumber}}{% endif %}{% if printPointsOrder %}+{{ordersNumber}}{% endif %})}%
+	\FPeval{\clineStart}{clip(4<* if printPointsOrder *>+<<ordersNumber>><* endif *>)}%
+	\FPeval{\clineEnd}{clip(3<* if printSubgeometries *>+<<divNumber>><* endif *><* if printPointsOrder *>+<<ordersNumber>><* endif *>)}%
 	\noindent
-	\begin{tabular}{|c|c|c|{% if printSubgeometries %}{% for i in range(divNumber)%}c|{% endfor %}{% endif %}{% if printPointsOrder %}{% for i in range(ordersNumber)%}c|{% endfor %}{% endif %}c|c|}
+	\begin{tabular}{|c|c|c|<* if printSubgeometries *><* for i in range(divNumber)*>c|<* endfor *><* endif *><* if printPointsOrder *><* for i in range(ordersNumber)*>c|<* endfor *><* endif *>c|c|}
 		\hline
-		\multirow{3}{*}{Id} & \multicolumn{2}{c|}{\multirow{2}{*}{Composition}} & {% if printPointsOrder %}\multicolumn{\ordersNumber}{c|}{\multirow{2}{*}{Points order}} & {% endif %}{% if printSubgeometries %}\multicolumn{\divNumber}{c|}{Sub-geometries} & {% endif %}\multirow{3}{*}{cardinal} & \multirow{3}{*}{2$\times$cardinal}\\
-{% if printSubgeometries %}		\cline{\clineStart-\clineEnd}{% endif %}
-		& \multicolumn{2}{c|}{} & {% if printPointsOrder %}\multicolumn{\ordersNumber}{c|}{} & {% endif %}{% if printSubgeometries %}{% for i in range(subDimensionsNumber)%} \multicolumn{\subGeometriesNumberPlusOne}{c|}{D{{count(i)}}} & {% endfor %}{% endif %}& \\
+		\multirow{3}{*}{Id} & \multicolumn{2}{c|}{\multirow{2}{*}{Composition}} & <* if printPointsOrder *>\multicolumn{\ordersNumber}{c|}{\multirow{2}{*}{Points order}} & <* endif *><* if printSubgeometries *>\multicolumn{\divNumber}{c|}{Sub-geometries} & <* endif *>\multirow{3}{*}{cardinal} & \multirow{3}{*}{2$\times$cardinal}\\
+<* if printSubgeometries *>		\cline{\clineStart-\clineEnd}<* endif *>
+		& \multicolumn{2}{c|}{} & <* if printPointsOrder *>\multicolumn{\ordersNumber}{c|}{} & <* endif *><* if printSubgeometries *><* for i in range(subDimensionsNumber)*> \multicolumn{\subGeometriesNumberPlusOne}{c|}{D<<count(i)>>} & <* endfor *><* endif *>& \\
 		\cline{2-\clineEnd}
-		& Points & Lines & {% if printPointsOrder %}{% for i in range(ordersNumber)%}{{i}} & {% endfor %}{% endif %}{% if printSubgeometries %}{% for i in range(subDimensionsNumber)%}{% for j in range(subGeometriesNumber)%}H{{count(j)}} & {% endfor %}Full & {% endfor %}{% endif %}& \\
+		& Points & Lines & <* if printPointsOrder *><* for i in range(ordersNumber)*><<i>> & <* endfor *><* endif *><* if printSubgeometries *><* for i in range(subDimensionsNumber)*><* for j in range(subGeometriesNumber)*>H<<count(j)>> & <* endfor *>Full & <* endfor *><* endif *>& \\
 		\hline
 		\hline
-{% for hyp in hyperplanes %}
-		{{count(index)}} & {{hyp/points}} & {{hyp/lines}} & {% if printPointsOrder %}{% for order in hyp/pointsOrder%}{{order}} & {% endfor %}{% endif %}{% if printSubgeometries %}{% for dim in hyp/subgeometries %}{% for val in dim %}{{val}} & {% endfor %}{% endfor %}{% endif %}{{hyp/cardinal}} & {{double(hyp/cardinal)}}\\
+<* for hyp in hyperplanes *>
+		<<count(index)>> & <<hyp/points>> & <<hyp/lines>> & <* if printPointsOrder *><* for order in hyp/pointsOrder*><<order>> & <* endfor *><* endif *><* if printSubgeometries *><* for dim in hyp/subgeometries *><* for val in dim *><<val>> & <* endfor *><* endfor *><* endif *><<hyp/cardinal>> & <<double(hyp/cardinal)>>\\
 		\hline
-{% endfor %}
+<* endfor *>
 	\end{tabular}
 \end{document}

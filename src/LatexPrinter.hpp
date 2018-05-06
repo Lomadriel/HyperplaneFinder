@@ -18,6 +18,15 @@ struct dependent_false: public std::false_type{ };
 class LatexPrinter{
 
 	struct Config{
+		// Inja
+		static const std::string INJA_STATEMENT_OPEN;
+		static const std::string INJA_STATEMENT_CLOSE;
+		static const std::string INJA_EXPRESSION_OPEN;
+		static const std::string INJA_EXPRESSION_CLOSE;
+		static const std::string INJA_COMMENT_OPEN;
+		static const std::string INJA_COMMENT_CLOSE;
+		static const std::string INJA_LINE_STATEMENT_START;
+
 		// Folders
 		static const std::string TEMPLATE_FOLDER;
 		static const std::string TABLES_TEMPLATE_FOLDER;

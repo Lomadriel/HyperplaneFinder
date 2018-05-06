@@ -1,11 +1,11 @@
-{% include "packages.tex" %}
-{% include "settings.tex" %}
+<* include "packages.tex" *>
+<* include "settings.tex" *>
 \begin{document}
 	\begin{center}
-{% for table in tables %}
-		{{table/tableName}}:\\
-		\input{ {{table/filePath}}}
+<* for table in tables *>
+		<<table/tableName>>:\\
+		\input{<<table/filePath>>}
 		\hfill\\
-{% endfor %}
+<* endfor *>
 	\end{center}
 \end{document}

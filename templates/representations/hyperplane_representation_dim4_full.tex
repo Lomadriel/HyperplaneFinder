@@ -28,19 +28,19 @@
 		 & & \multicolumn{4}{c|}{Slice} \\
 		\cline{3-6}
 		 & & 1 & 2 & 3 & 4 \\
-{% for subParts in parts %}
-{% if is_first %}
+<* for subParts in parts *>
+<* if is_first *>
 		\hline
 		\multicolumn{1}{|c|}{\multirow{4}{*}[-165pt]{\rotatebox[origin=c]{90}{Direction}}} &
-{% else %}
+<* else *>
 		\cline{2-6}
 		\multicolumn{1}{|c|}{} &
-{% endif %}
-		\multicolumn{1}{c|}{ {{plusOne(index)}}} &
-{% for part in subParts %}
-		\adjustbox{}{\import{./}{ {{part/filePath}}}} {% if is_last %}\\{% else %}&{% endif %}
-{% endfor %}
-{% endfor %}
+<* endif *>
+		\multicolumn{1}{c|}{<<plusOne(index)>>} &
+<* for part in subParts *>
+		\adjustbox{}{\import{./}{<<part/filePath>>}} <* if is_last *>\\<* else *>&<* endif *>
+<* endfor *>
+<* endfor *>
 		\hline
 	\end{tabular}
 \end{document}

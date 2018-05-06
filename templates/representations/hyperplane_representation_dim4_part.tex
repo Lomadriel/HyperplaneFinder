@@ -115,13 +115,13 @@
 		}
 
 		% Numbers
-{% for point in points %}
-		\node[number] at (point_{{point/x}}_{{point/y}}_{{point/z}}.center) { {{point/number}}};
-{% endfor %}
+<* for point in points *>
+		\node[number] at (point_<<point/x>>_<<point/y>>_<<point/z>>.center) {<<point/number>>};
+<* endfor *>
 
 		% In points
-{% for point in inPoints %}
-		\node[in_point,minimum size=\pointssize*5/(5+{{point/z}}+1)] at (point_{{point/x}}_{{point/y}}_{{point/z}}.center) {};
-{% endfor %}
+<* for point in inPoints *>
+		\node[in_point,minimum size=\pointssize*5/(5+<<point/z>>+1)] at (point_<<point/x>>_<<point/y>>_<<point/z>>.center) {};
+<* endfor *>
 	\end{tikzpicture}
 \end{document}

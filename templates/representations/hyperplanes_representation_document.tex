@@ -21,12 +21,12 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 
-{% include "settings.tex" %}
+<* include "settings.tex" *>
 
 %---------------------------------
 % Geometry
-\pgfmathsetmacro\dimension{ {{dimention}}}% in [0,3]
-\pgfmathsetmacro\pointsPerLine{ {{nbrPointsPerLine}}}% in [1,\infty[
+\pgfmathsetmacro\dimension{<<dimention>>}% in [0,3]
+\pgfmathsetmacro\pointsPerLine{<<nbrPointsPerLine>>}% in [1,\infty[
 
 %---------------------------------
 % Sizes
@@ -45,8 +45,8 @@
 
 \begin{document}
 	\begin{center}
-{% for hyperplane in hyperplanes %}
-		\renewcommand{\inPoints}{ {% for inPoint in hyperplane/inPoints %}{{inPoint}}{% if not is_last  %},{% endif %}{% endfor %}}%
-		\resizebox{0.49\textwidth}{!}{\input{hyperplane_representation_print}}{% endfor %}
+<* for hyperplane in hyperplanes *>
+		\renewcommand{\inPoints}{<* for inPoint in hyperplane/inPoints *><<inPoint>><* if not is_last *>,<* endif *><* endfor *>}%
+		\resizebox{0.49\textwidth}{!}{\input{hyperplane_representation_print}}<* endfor *>
 	\end{center}
 \end{document}
