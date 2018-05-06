@@ -218,7 +218,7 @@ std::string LatexPrinter::generateHyperplaneRepresentationsDocument(const std::v
 	strftime(buf, sizeof(buf), "%Y/%m/%d", &tstruct);
 	data["date"] = buf;
 
-	data["dimention"] = Dimension;
+	data["dimension"] = Dimension;
 	data["nbrPointsPerLine"] = NbrPointsPerLine;
 
 	std::vector<json> hyperplanes_;
@@ -273,7 +273,7 @@ std::string LatexPrinter::generateHyperplaneRepresentationDimensionLess4(std::st
 
 	json data;
 	data["inPoints"] = std::move(in_points);
-	data["dimention"] = Dimension;
+	data["dimension"] = Dimension;
 	data["nbrPointsPerLine"] = NbrPointsPerLine;
 
 	inja::Template document = m_environment.parse_template(
