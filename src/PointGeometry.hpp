@@ -55,11 +55,39 @@ namespace segre {
 			                     rhs.begin());
 		}
 
-		bool operator==(const HyperplaneTableEntry& entry) const {
-			return nbrPoints == entry.nbrPoints &&
-			       nbrLines == entry.nbrLines &&
-			       map_compare(pointsOfOrder, entry.pointsOfOrder) &&
-			       map_compare(subgeometries, entry.subgeometries);
+		bool operator==(const HyperplaneTableEntry& oentry) const {
+
+			if(nbrPoints != oentry.nbrPoints)
+				return false;
+
+			if(nbrLines != oentry.nbrLines)
+				return false;
+
+			if(!map_compare(pointsOfOrder, oentry.pointsOfOrder))
+				return false;
+
+			// Compare subgeometries (order is not important) with those of the other entry
+			// check if all subgeometries correspond to a subgeometry of the other entry
+			std::set<const std::map<long long int, size_t>*> already_used;
+			for(const std::map<long long int, size_t>& subgeometry : subgeometries){
+
+				// Check if the subgeometry corresponds to a subgeometry of the other entry
+				const std::vector<std::map<long long int, size_t>>::const_iterator itt = std::find_if(oentry.subgeometries.cbegin(), oentry.subgeometries.cend(),
+				  [&already_used, &subgeometry](const std::map<long long int, size_t>& osubgeometry){
+
+					// if equal and not already used in a correspondence
+					if(subgeometry == osubgeometry && already_used.count(&osubgeometry) == 0){
+						already_used.insert(&osubgeometry);
+						return true;
+					}
+					return false;
+				});
+				if(itt == oentry.subgeometries.cend()){
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry);
@@ -581,29 +609,7 @@ namespace segre {
 				HyperplaneTableEntry entry = getHyperplaneTableEntry<OrderOfPoints>(vPoint, precedent_table);
 
 				// Check if entry already exist
-				std::vector<HyperplaneTableEntry>::iterator it = std::find_if(entries.begin(), entries.end(), [&entry](const HyperplaneTableEntry& oentry){
-
-					// Compare subgeometries (order is not important) with those of the other entry
-					// check if all subgeometries correspond to a subgeometry of the other entry
-					std::set<const std::map<long long int, size_t>*> already_used;
-					for(const std::map<long long int, size_t>& subgeometry : entry.subgeometries){
-
-						// Check if the subgeometry corresponds to a subgeometry of the other entry
-						const std::vector<std::map<long long int, size_t>>::const_iterator itt = std::find_if(oentry.subgeometries.cbegin(), oentry.subgeometries.cend(), [&already_used, &subgeometry](const std::map<long long int, size_t>& osubgeometry){
-
-							// if equal and not already used in a correspondance
-							if(subgeometry == osubgeometry && already_used.count(&osubgeometry) == 0){
-								already_used.insert(&osubgeometry);
-								return true;
-							}
-							return false;
-						});
-						if(itt == oentry.subgeometries.cend()){
-							return false;
-						}
-					}
-					return true;
-				});
+				std::vector<HyperplaneTableEntry>::iterator it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
 					entry.count = 1;
 					entries.push_back(entry);
