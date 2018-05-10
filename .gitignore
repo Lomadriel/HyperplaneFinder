@@ -1,38 +1,12 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+########################
+## Clion
+########################
 
-# Precompiled Headers
-*.gch
-*.pch
+.idea/
+cmake-build-*/
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+########################
+## Visual Studio
+########################
 
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build
-build/*
-
-# IDE
-.idea/*
-cmake-build-debug/
-
-cmake-build-release/
+ide/VS*/
