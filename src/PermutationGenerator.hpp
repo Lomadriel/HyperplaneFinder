@@ -141,6 +141,10 @@ namespace segre {
 			return m_finished;
 		}
 
+		static constexpr unsigned int getPermutationsNumber(){
+			return math::facorial<nbrElements>;
+		}
+
 	private:
 
 		Permutation<nbrElements> m_current_permutation;
@@ -190,6 +194,10 @@ namespace segre {
 
 		bool isFinished() const {
 			return m_finished;
+		}
+
+		static constexpr unsigned int getPermutationsNumber(){
+			return (PermutationGenerator<nbrElements>::getPermutationsNumber() * ...);
 		}
 
 	private:
