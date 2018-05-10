@@ -43,6 +43,9 @@ namespace segre{
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<std::tuple<std::array<std::array<unsigned int, NbrPointsPerLine>, Dimension>, std::array<unsigned int, Dimension>>> computeHyperplaneStabilisationPermutations(std::bitset<NbrPoints> hyperplane);
 
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<std::vector<unsigned int>> make_permutations_table(const std::vector<std::bitset<NbrPoints>>& hyperplanes);
+
 }
 
 // Implementations
@@ -156,6 +159,31 @@ namespace segre{
 		}
 
 		return hyperplane_stabilisation_permutations;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
+	std::vector<std::vector<unsigned int>> make_permutations_table(const std::vector<std::bitset<NbrPoints>>& hyperplanes) {
+		std::vector<std::vector<unsigned int>> permutations_table;
+		permutations_table.reserve(hyperplanes.size());
+
+		for(const auto& vPoint : hyperplanes) {
+			std::vector<unsigned int> hyperplane_permutations;
+			hyperplane_permutations.reserve(math::pow(NbrPointsPerLine, Dimension) * Dimension);
+			const std::vector<unsigned int> points = segre::bitsetToVector(vPoint);
+
+			auto multi_permutations_generator = segre::make_multi_permutations_generator<Dimension, NbrPointsPerLine>();
+			while(!multi_permutations_generator.isFinished()){
+				const std::bitset<NbrPoints> hyperplane_permutation = segre::vectorToBitset<NbrPoints>(segre::apply_permutation<Dimension, NbrPointsPerLine>(points, multi_permutations_generator.nextPermutation()));
+				const ptrdiff_t pos = std::find(hyperplanes.cbegin(), hyperplanes.cend(), hyperplane_permutation) - hyperplanes.cbegin();
+				if(pos > static_cast<ptrdiff_t>(hyperplanes.size())){
+					assert(false && "impossible");
+				}
+				hyperplane_permutations.push_back(static_cast<unsigned int>(pos));
+			}
+			permutations_table.push_back(std::move(hyperplane_permutations));
+		}
+
+		return permutations_table;
 	}
 
 }
