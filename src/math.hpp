@@ -10,6 +10,12 @@ namespace math {
 		static_assert(std::is_integral_v<U>);
 		return exponent == 0 ? 1 : base * pow(base, exponent - 1);
 	}
+
+	template<unsigned int val>
+	constexpr unsigned int facorial = val * facorial<val - 1>;
+
+	template<>
+	constexpr unsigned int facorial<1> = 1;
 }
 
 
