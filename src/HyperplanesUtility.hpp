@@ -34,6 +34,9 @@ namespace segre{
 	template<size_t Dimension, size_t NbrPointsPerLine, typename Perm>
 	std::tuple<std::array<std::array<unsigned int, NbrPointsPerLine>, Dimension>, std::array<unsigned int, Dimension>> convert_permutation(const Perm& permutation);
 
+	template<size_t Dimension, size_t NbrPointsPerLine, typename Permutation>
+	std::vector<unsigned int> apply_permutation(const std::vector<unsigned int>& points, const Permutation& permutation);
+
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<std::tuple<std::array<std::array<unsigned int, NbrPointsPerLine>, Dimension>, std::array<unsigned int, Dimension>>> computeHyperplaneStabilisationPermutations(std::bitset<NbrPoints> hyperplane);
 
@@ -96,6 +99,37 @@ namespace segre{
 		return permutation_value;
 	}
 
+	template<size_t Dimension, size_t NbrPointsPerLine, typename Permutation>
+	std::vector<unsigned int> apply_permutation(const std::vector<unsigned int>& points, const Permutation& permutation) {
+		std::vector<unsigned int> permuted_points;
+		permuted_points.reserve(points.size());
+		for(unsigned int point : points){
+			std::array<unsigned int, Dimension> permuted_point_coords;
+			unsigned int i = 0;
+			iterate_on_tuple([&](const auto& sub_permutation){
+				if(i < Dimension){
+					// swap coord
+					permuted_point_coords[i] = sub_permutation[point % NbrPointsPerLine];
+					point /= NbrPointsPerLine;
+				}
+				else{
+					// swap dimension
+					for(unsigned int j = 0; i < Dimension; ++j){
+						std::swap(permuted_point_coords[j], permuted_point_coords[sub_permutation[j]]);
+					}
+				}
+				++i;
+			}, permutation);
+			unsigned int permuted_point = 0;
+			for(unsigned int j = 0; j < Dimension; ++j){
+				permuted_point += permuted_point_coords[j] * math::pow(static_cast<unsigned int>(NbrPointsPerLine), j);
+			}
+			permuted_points.push_back(permuted_point);
+		}
+		std::sort(permuted_points.begin(), permuted_points.end());
+		return permuted_points;
+	}
+
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
 	std::vector<std::tuple<std::array<std::array<unsigned int, NbrPointsPerLine>, Dimension>, std::array<unsigned int, Dimension>>> computeHyperplaneStabilisationPermutations(std::bitset<NbrPoints> hyperplane) {
 		std::vector<unsigned int> points = bitsetToVector(hyperplane);
@@ -104,34 +138,7 @@ namespace segre{
 		auto multi_permutations_generator = make_multi_permutations_generator<Dimension, NbrPointsPerLine>();
 		while(!multi_permutations_generator.isFinished()){
 			const auto current_permutation = multi_permutations_generator.nextPermutation();
-			std::vector<unsigned int> permuted_points;
-			permuted_points.reserve(points.size());
-			for(unsigned int point : points){
-				std::array<unsigned int, Dimension> permuted_point_coords;
-				unsigned int i = 0;
-				iterate_on_tuple([&](const auto& sub_permutation){
-					if(i < Dimension){
-						// swap coord
-						permuted_point_coords[i] = sub_permutation[point % NbrPointsPerLine];
-						point /= NbrPointsPerLine;
-					}
-					else{
-						// swap dimension
-						for(unsigned int j = 0; i < Dimension; ++j){
-							std::swap(permuted_point_coords[j], permuted_point_coords[sub_permutation[j]]);
-						}
-					}
-					++i;
-				}, current_permutation);
-				unsigned int permuted_point = 0;
-				for(unsigned int j = 0; j < Dimension; ++j){
-					permuted_point += permuted_point_coords[j] * math::pow(static_cast<unsigned int>(NbrPointsPerLine), j);
-				}
-				permuted_points.push_back(permuted_point);
-			}
-
-			std::sort(permuted_points.begin(), permuted_points.end());
-			if(permuted_points == points){
+			if(points == apply_permutation<Dimension, NbrPointsPerLine>(points, multi_permutations_generator.nextPermutation())){
 				hyperplane_stabilisation_permutations.push_back(convert_permutation<Dimension, NbrPointsPerLine>(current_permutation));
 			}
 		}
