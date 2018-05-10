@@ -16,6 +16,9 @@ namespace segre{
 	template <size_t NbrPoints>
 	std::vector<unsigned int> bitsetToVector(const std::bitset<NbrPoints>& hyperplane);
 
+	template <size_t NbrPoints>
+	std::bitset<NbrPoints> vectorToBitset(const std::vector<unsigned int>& hyperplane);
+
 	template<size_t N>
 	struct nothing {};
 
@@ -55,6 +58,15 @@ namespace segre{
 			}
 		}
 		return coords;
+	}
+
+	template<size_t NbrPoints>
+	std::bitset<NbrPoints> vectorToBitset(const std::vector<unsigned int>& coords) {
+		std::bitset<NbrPoints> hyperplane;
+		for(unsigned int coord : coords){
+			hyperplane[coord] = true;
+		}
+		return hyperplane;
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine>
