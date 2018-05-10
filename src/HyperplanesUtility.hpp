@@ -167,11 +167,11 @@ namespace segre{
 		permutations_table.reserve(hyperplanes.size());
 
 		for(const auto& vPoint : hyperplanes) {
+			auto multi_permutations_generator = segre::make_multi_permutations_generator<Dimension, NbrPointsPerLine>();
 			std::vector<unsigned int> hyperplane_permutations;
-			hyperplane_permutations.reserve(math::pow(NbrPointsPerLine, Dimension) * Dimension);
+			hyperplane_permutations.reserve(decltype(multi_permutations_generator)::getPermutationsNumber());
 			const std::vector<unsigned int> points = segre::bitsetToVector(vPoint);
 
-			auto multi_permutations_generator = segre::make_multi_permutations_generator<Dimension, NbrPointsPerLine>();
 			while(!multi_permutations_generator.isFinished()){
 				const std::bitset<NbrPoints> hyperplane_permutation = segre::vectorToBitset<NbrPoints>(segre::apply_permutation<Dimension, NbrPointsPerLine>(points, multi_permutations_generator.nextPermutation()));
 				const ptrdiff_t pos = std::find(hyperplanes.cbegin(), hyperplanes.cend(), hyperplane_permutation) - hyperplanes.cbegin();
