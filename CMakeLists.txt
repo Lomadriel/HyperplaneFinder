@@ -35,8 +35,25 @@ endif()
 set_property(TARGET HyperplaneFinder PROPERTY CXX_STANDARD 17)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+	# https://gcc.gnu.org/onlinedocs/gcc-4.5.3/gcc/i386-and-x86_002d64-Options.html
 	target_add_flag(HyperplaneFinder "-march=native" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-mtune=native" DEBUG RELEASE RELWITHDEBINFO)
 	target_add_flag(HyperplaneFinder "-msse4.2" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-mavx" DEBUG RELEASE RELWITHDEBINFO)
+
+	# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#Optimize-Options
+	target_add_flag(HyperplaneFinder "-fmodulo-sched" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fmodulo-sched-allow-regmoves" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fgcse-sm" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fgcse-las" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fgcse-after-reload" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fdevirtualize-speculatively" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fdevirtualize-at-ltrans" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-floop-nest-optimize" DEBUG RELEASE RELWITHDEBINFO) # experimental
+	target_add_flag(HyperplaneFinder "-floop-parallelize-all" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-fsplit-loops" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-funswitch-loops" DEBUG RELEASE RELWITHDEBINFO)
+	target_add_flag(HyperplaneFinder "-floop-unroll-and-jam" DEBUG RELEASE RELWITHDEBINFO)
 endif()
 
 configure_folder(${templates_dir}   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/templates")
