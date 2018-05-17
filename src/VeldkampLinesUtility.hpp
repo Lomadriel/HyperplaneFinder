@@ -22,6 +22,12 @@ namespace segre{
 	  const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& lines_table_entry,
 	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table
 	);
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<VeldkampLineTableEntry> separateByPermutations(
+	  const std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>& lin_table_with_lines,
+	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table
+	);
 }
 
 // Implementations
@@ -73,6 +79,20 @@ namespace segre {
 			output_table.push_back(std::move(table_entry));
 		}
 
+		return output_table;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<VeldkampLineTableEntry> separateByPermutations(
+	  const std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>& lin_table_with_lines,
+	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table
+	){
+		std::vector<VeldkampLineTableEntry> output_table;
+		for(const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& lines_table_entry : lin_table_with_lines){
+			for(VeldkampLineTableEntry& entry : separateByPermutations<Dimension, NbrPointsPerLine>(lines_table_entry, hyp_permutations_table)){
+				output_table.push_back(std::move(entry));
+			}
+		}
 		return output_table;
 	}
 }
