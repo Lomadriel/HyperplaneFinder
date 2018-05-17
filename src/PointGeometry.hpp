@@ -125,6 +125,18 @@ namespace segre {
 		size_t count;
 	};
 
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	struct VeldkampLineTableEntryWithLines{
+
+		VeldkampLineTableEntryWithLines(const VeldkampLineTableEntry& entry_)
+		  : entry(entry_)
+		  , lines() {
+		}
+
+		VeldkampLineTableEntry entry;
+		std::vector<std::array<unsigned int, NbrPointsPerLine>> lines;
+	};
+
 	template <size_t N1, size_t N2>
 	inline std::bitset<N1> copyBitset(const std::bitset<N2>& bs2) {
 		std::bitset<N1> bs1;
@@ -678,6 +690,43 @@ namespace segre {
 			};
 
 			std::vector<VeldkampLineTableEntry> entries;
+			makeEntries(entries, vLines.projectives, true);
+			makeEntries(entries, vLines.exceptional, false);
+			return entries;
+		}
+
+		std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>> makeVeldkampLinesTableWithLines(
+		  const VeldkampLines<NbrPointsPerLine>& vLines,
+		  const std::vector<std::bitset<NbrPoints>>& vPoints,
+		  const std::vector<HyperplaneTableEntry>& points_table) const noexcept {
+
+			static_assert(Dimension < 4, "Points type determination only work for Dimension < 4");
+
+			const auto makeEntries =
+			  [&](std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>& entries,
+			      const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines,
+			      bool isProjective) {
+
+				for (const std::array<unsigned int, NbrPointsPerLine>& line : lines) {
+					VeldkampLineTableEntry entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
+
+					const ptrdiff_t pos = std::find_if(entries.begin(), entries.end(), [&entry](const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& oentry){
+						return oentry.entry == entry;
+					}) - entries.begin();
+					if (pos >= static_cast<ptrdiff_t>(entries.size())) {
+						entry.count = 1;
+						VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine> entrywl(entry);
+						entrywl.lines.push_back(line);
+						entries.push_back(std::move(entrywl));
+					} else {
+						using size_type = typename std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>::size_type;
+						++(entries[static_cast<size_type>(pos)].entry.count);
+						entries[static_cast<size_type>(pos)].lines.push_back(line);
+					}
+				}
+			};
+
+			std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>> entries;
 			makeEntries(entries, vLines.projectives, true);
 			makeEntries(entries, vLines.exceptional, false);
 			return entries;
