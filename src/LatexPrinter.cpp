@@ -91,9 +91,11 @@ void LatexPrinter::generateLinesTable(unsigned int geometry_dimension,
 	json data;
 	data["pointsTypeNumber"] = points_type_number;
 
+	int counter = Config::COUNT_FROM;
 	std::vector<json> lines_info;
 	for(const segre::VeldkampLineTableEntry& entry : geometry_lin_table){
 		json line_info;
+		line_info["id"] = std::to_string(counter++);
 		line_info["isProjective"] = entry.isProjective;
 		line_info["core"]["points"] = entry.coreNbrPoints;
 		line_info["core"]["lines"] = entry.coreNbrLines;

@@ -27,7 +27,7 @@
 		\hline
 		\hline
 <* for line in lines *>
-		<<count(index)>> & <<line/isProjective>> & <<line/core/points>> & <<line/core/lines>> & <* for val in line/pointsType *> <<val>> & <* endfor *><<line/cardinal>>\\
+		<<line/id>> & <<line/isProjective>> & <<line/core/points>> & <<line/core/lines>> & <* for val in line/pointsType *> <<val>> & <* endfor *><<line/cardinal>>\\
 		\hline
 <* endfor *>
 	\end{tabular}
