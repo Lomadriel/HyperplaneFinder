@@ -51,6 +51,7 @@ class LatexPrinter{
 		// Outputs
 		static const std::string TABLES_OUTPUT_PREFIX;
 		static const std::string LINES_TABLE_OUTPUT_POSTFIX;
+		static const std::string DIFF_LINES_TABLE_OUTPUT_POSTFIX;
 		static const std::string HYPERPLANES_TABLE_OUTPUT_POSTFIX;
 		static const std::string TABLES_DOCUMENT_OUTPUT;
 
@@ -82,6 +83,11 @@ public:
 	void generateLinesTable(unsigned int geometry_dimension,
 	                        const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table,
 	                        size_t points_type_number);
+
+	void generateLinesDiffTable(unsigned int geometry_dimension,
+	                            const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table_old,
+	                            const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table,
+	                            size_t points_type_number);
 
 	template<bool printPointsOrder, bool printSubgeometries>
 	void generateHyperplanesTable(unsigned int geometry_dimension,

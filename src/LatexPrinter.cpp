@@ -33,6 +33,7 @@ const std::string LatexPrinter::Config::HYPERPLANE_REPRESENTATION_PRINT = "hyper
 // Outputs
 const std::string LatexPrinter::Config::TABLES_OUTPUT_PREFIX = "dimension_";
 const std::string LatexPrinter::Config::LINES_TABLE_OUTPUT_POSTFIX = "_lines_table.tex";
+const std::string LatexPrinter::Config::DIFF_LINES_TABLE_OUTPUT_POSTFIX = "_diff_lines_table.tex";
 const std::string LatexPrinter::Config::HYPERPLANES_TABLE_OUTPUT_POSTFIX = "_hyperplanes_table.tex";
 const std::string LatexPrinter::Config::TABLES_DOCUMENT_OUTPUT = "tables.tex";
 
@@ -122,6 +123,59 @@ void LatexPrinter::generateLinesTable(unsigned int geometry_dimension,
 	                        + Config::TABLES_OUTPUT_PREFIX
 	                        + std::to_string(geometry_dimension)
 	                        + Config::LINES_TABLE_OUTPUT_POSTFIX;
+	m_environment.write(document, data, file_path);
+
+	m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_path);
+}
+
+void LatexPrinter::generateLinesDiffTable(unsigned int geometry_dimension,
+                                          const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table_old,
+                                          const std::vector<segre::VeldkampLineTableEntry>& geometry_lin_table,
+                                          size_t points_type_number) {
+	json data;
+	data["pointsTypeNumber"] = points_type_number;
+
+	size_t counter = static_cast<size_t>(Config::COUNT_FROM);
+	size_t counter_old = static_cast<size_t>(Config::COUNT_FROM);
+	size_t lines_counter = 0;
+	std::vector<segre::VeldkampLineTableEntry>::const_iterator old_it = geometry_lin_table_old.cbegin();
+	std::vector<json> lines_info;
+	for(const segre::VeldkampLineTableEntry& entry : geometry_lin_table){
+		json line_info;
+		line_info["id"] = std::to_string(counter++) + '/' + std::to_string(counter_old);
+		line_info["isProjective"] = entry.isProjective;
+		line_info["core"]["points"] = entry.coreNbrPoints;
+		line_info["core"]["lines"] = entry.coreNbrLines;
+
+		std::vector<size_t> points_types;
+		points_types.reserve(points_type_number);
+		for(size_t i = 0; i < points_type_number; ++i){
+			const std::map<long long int, std::size_t>::const_iterator it = entry.pointsType.find(static_cast<long long int>(i));
+			points_types.push_back(it == entry.pointsType.end() ? 0 : it->second);
+		}
+		line_info["pointsType"] = std::move(points_types);
+
+		line_info["cardinal"] = entry.count;
+
+		lines_info.push_back(std::move(line_info));
+
+		lines_counter += entry.count;
+		if(lines_counter > old_it->count){
+			lines_counter -= old_it->count;
+			++old_it;
+			++counter_old;;
+		}
+	}
+	data["lines"] = std::move(lines_info);
+
+	inja::Template document = m_environment.parse_template(
+	  Config::TABLES_TEMPLATE_FOLDER
+	  + Config::LINES_TABLE_TEMPLATE
+	);
+	std::string file_path = Config::TABLES_OUTPUT_FOLDER
+	                        + Config::TABLES_OUTPUT_PREFIX
+	                        + std::to_string(geometry_dimension)
+	                        + Config::DIFF_LINES_TABLE_OUTPUT_POSTFIX;
 	m_environment.write(document, data, file_path);
 
 	m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " Veldkamp lines", file_path);
