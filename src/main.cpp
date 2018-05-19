@@ -10,6 +10,8 @@
 
 #include "PointGeometry.hpp"
 #include "LatexPrinter.hpp"
+#include "HyperplanesUtility.hpp"
+#include "VeldkampLinesUtility.hpp"
 
 using json = nlohmann::json;
 
@@ -60,6 +62,13 @@ int main() {
 		return std::make_tuple(a.isProjective, a.coreNbrPoints, a.coreNbrLines) < std::make_tuple(b.isProjective, b.coreNbrPoints, b.coreNbrLines);
 	});
 
+	std::vector<segre::VeldkampLineTableEntryWithLines<3, PPL>> geometry3_lin_table_with_lines = geometry3.makeVeldkampLinesTableWithLines(vLines3, vPoints3, geometry3_hyp_table);
+	std::sort(geometry3_lin_table_with_lines.begin(), geometry3_lin_table_with_lines.end(), [](const segre::VeldkampLineTableEntryWithLines<3, PPL>& a, const segre::VeldkampLineTableEntryWithLines<3, PPL>& b){
+		return std::make_tuple(a.entry.isProjective, a.entry.coreNbrPoints, a.entry.coreNbrLines) < std::make_tuple(b.entry.isProjective, b.entry.coreNbrPoints, b.entry.coreNbrLines);
+	});
+
+	std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep = segre::separateByPermutations<3,PPL>(geometry3_lin_table_with_lines, segre::makePermutationsTable<3, PPL>(vPoints3));
+
 	VPoints<4> vPoints4 = geometry3.computeHyperplanesFromVeldkampLines(vPoints3, vLines3.projectives);
 	std::vector<segre::HyperplaneTableEntry> geometry4_hyp_table = geometry4.makeHyperplaneTable<CIMPUTE_AND_PRINT_POINTS_ORDER>(vPoints4, geometry3_hyp_table);
 
@@ -92,6 +101,7 @@ int main() {
 	printer.generateLinesTable(2, geometry2_lin_table, geometry2_hyp_table.size());
 	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(3, geometry3_hyp_table, geometry2_hyp_table.size());
 	printer.generateLinesTable(3, geometry3_lin_table, geometry3_hyp_table.size());
+	printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep, geometry3_hyp_table.size());
 	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(4, geometry4_hyp_table, geometry3_hyp_table.size());
 
 	return EXIT_SUCCESS;
