@@ -141,6 +141,13 @@ void LatexPrinter::generateLinesDiffTable(unsigned int geometry_dimension,
 	std::vector<segre::VeldkampLineTableEntry>::const_iterator old_it = geometry_lin_table_old.cbegin();
 	std::vector<json> lines_info;
 	for(const segre::VeldkampLineTableEntry& entry : geometry_lin_table){
+		lines_counter += entry.count;
+		if(lines_counter > old_it->count){
+			lines_counter -= old_it->count;
+			++old_it;
+			++counter_old;;
+		}
+
 		json line_info;
 		line_info["id"] = std::to_string(counter++) + '/' + std::to_string(counter_old);
 		line_info["isProjective"] = entry.isProjective;
@@ -158,13 +165,6 @@ void LatexPrinter::generateLinesDiffTable(unsigned int geometry_dimension,
 		line_info["cardinal"] = entry.count;
 
 		lines_info.push_back(std::move(line_info));
-
-		lines_counter += entry.count;
-		if(lines_counter > old_it->count){
-			lines_counter -= old_it->count;
-			++old_it;
-			++counter_old;;
-		}
 	}
 	data["lines"] = std::move(lines_info);
 
