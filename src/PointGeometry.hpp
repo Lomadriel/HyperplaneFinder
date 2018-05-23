@@ -14,6 +14,7 @@
 
 #include "CombinationGenerator.hpp"
 #include "math.hpp"
+#include "impossible.hpp"
 
 // Fixme : Replace std::bitset by a custom bitset
 namespace std { // NOLINT
@@ -659,7 +660,7 @@ namespace segre {
 				                                                                    });
 
 				if (it == points_table.end()) {
-					assert(false && "impossible");
+					IMPOSSIBLE;
 				} else {
 					++entry.pointsType[static_cast<long long int>(std::distance(points_table.cbegin(), it))];
 				}

@@ -73,7 +73,7 @@ namespace segre {
 					}
 				}
 				else{
-					assert(false && "impossible");
+					IMPOSSIBLE;
 				}
 			}
 			output_table.push_back(std::move(table_entry));

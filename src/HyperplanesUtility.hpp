@@ -9,6 +9,7 @@
 #include "PermutationGenerator.hpp"
 #include "index_repetition.hpp"
 #include "math.hpp"
+#include "impossible.hpp"
 
 // Declarations
 namespace segre {
@@ -177,7 +178,7 @@ namespace segre {
 				const std::bitset<NbrPoints> hyperplane_permutation = segre::vectorToBitset<NbrPoints>(segre::applyPermutation<Dimension, NbrPointsPerLine>(points, multi_permutations_generator.nextPermutation()));
 				const ptrdiff_t pos = std::find(hyperplanes.cbegin(), hyperplanes.cend(), hyperplane_permutation) - hyperplanes.cbegin();
 				if(pos > static_cast<ptrdiff_t>(hyperplanes.size())) {
-					assert(false && "impossible");
+					IMPOSSIBLE;
 				}
 				hyperplane_permutations.push_back(static_cast<unsigned int>(pos));
 			}
