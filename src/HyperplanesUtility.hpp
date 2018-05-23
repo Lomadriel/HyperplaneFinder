@@ -130,7 +130,7 @@ namespace segre {
 				}
 				else {
 					// swap dimension
-					for(unsigned int j = 0; i < Dimension; ++j) {
+					for(unsigned int j = 0; j < Dimension; ++j) {
 						std::swap(permuted_point_coords[j], permuted_point_coords[sub_permutation[j]]);
 					}
 				}
