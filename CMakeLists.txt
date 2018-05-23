@@ -54,6 +54,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUA
 	target_add_flag(HyperplaneFinder "-fsplit-loops" DEBUG RELEASE RELWITHDEBINFO)
 	target_add_flag(HyperplaneFinder "-funswitch-loops" DEBUG RELEASE RELWITHDEBINFO)
 	target_add_flag(HyperplaneFinder "-floop-unroll-and-jam" DEBUG RELEASE RELWITHDEBINFO)
+
+	# Profile Guided Optimization
+	#target_add_flag(HyperplaneFinder "-fprofile-generate" DEBUG RELEASE RELWITHDEBINFO)
+	#target_add_flag(HyperplaneFinder "-fprofile-use" DEBUG RELEASE RELWITHDEBINFO)
 endif()
 
 configure_folder(${templates_dir}   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/templates")
