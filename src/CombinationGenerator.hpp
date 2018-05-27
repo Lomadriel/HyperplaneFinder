@@ -32,24 +32,24 @@ public:
 	}
 
 	void reset() noexcept {
-        m_iNumLeft = m_iNumCombinations;
-        std::sort(m_vecCurrCombination.begin(), m_vecCurrCombination.end());
-    }
+		m_iNumLeft = m_iNumCombinations;
+		std::sort(m_vecCurrCombination.begin(), m_vecCurrCombination.end());
+	}
 
 	const std::vector<unsigned int>& nextCombination() noexcept {
-	    if (m_iNumLeft == m_iNumCombinations) {
+		if(m_iNumLeft == m_iNumCombinations) {
 			--m_iNumLeft;
 			return m_vecCurrCombination;
 		}
 
 		size_t i = m_k - 1;
-		while (m_vecCurrCombination[i] == m_n - m_k + i) {
+		while(m_vecCurrCombination[i] == m_n - m_k + i) {
 			--i;
 		}
 
 		++(m_vecCurrCombination[i]);
 
-		for (size_t j = i; j < m_k; ++j) {
+		for(size_t j = i; j < m_k; ++j) {
 			m_vecCurrCombination[j] = static_cast<unsigned int>(m_vecCurrCombination[i] + j - i);
 		}
 
@@ -61,13 +61,13 @@ public:
 	static unsigned long long computeBinomialCoefficient(unsigned int n, unsigned int k) {
 		assert(n >= k && n > 1);
 
-		if (k > n - k) {
+		if(k > n - k) {
 			k = n - k;
 		}
 
 		unsigned long long c = 1;
 
-		for (size_t i = 1; i < k+1; i++) {
+		for(size_t i = 1; i < k + 1; i++) {
 			c *= n - (k - i);
 			c /= i;
 		}
