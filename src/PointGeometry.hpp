@@ -16,6 +16,7 @@
 #include "math.hpp"
 #include "impossible.hpp"
 #include "HyperplaneTableEntry.hpp"
+#include "VeldkampLineTableEntry.hpp"
 
 // Fixme : Replace std::bitset by a custom bitset
 namespace std { // NOLINT
@@ -39,44 +40,6 @@ namespace segre {
 
 		std::vector<std::array<unsigned int, NbrPointsPerLine>> exceptional;
 		std::vector<std::array<unsigned int, NbrPointsPerLine>> projectives;
-	};
-
-	struct VeldkampLineTableEntry {
-
-		VeldkampLineTableEntry()
-		  : isProjective(false)
-		    , coreNbrPoints(0)
-		    , coreNbrLines(0)
-		    , pointsType()
-		    , count(0) {
-		}
-
-		bool operator==(const VeldkampLineTableEntry& entry) const {
-			return isProjective == entry.isProjective
-			       && coreNbrPoints == entry.coreNbrPoints
-			       && coreNbrLines == entry.coreNbrLines
-			       && pointsType == entry.pointsType;
-		}
-
-		friend std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry& entry);
-
-		bool isProjective;
-		size_t coreNbrPoints;
-		size_t coreNbrLines;
-		std::map<long long int, std::size_t> pointsType;
-		size_t count;
-	};
-
-	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
-	struct VeldkampLineTableEntryWithLines{
-
-		VeldkampLineTableEntryWithLines(const VeldkampLineTableEntry& entry_)
-		  : entry(entry_)
-		  , lines() {
-		}
-
-		VeldkampLineTableEntry entry;
-		std::vector<std::array<unsigned int, NbrPointsPerLine>> lines;
 	};
 
 	template <size_t N1, size_t N2>
@@ -754,27 +717,6 @@ namespace segre {
 
 		std::array<std::array<std::bitset<NbrPoints>, NbrPointsPerLine>, Dimension> m_subGeometriesMasks;
 	};
-
-	inline std::ostream& operator<<(std::ostream& os, const VeldkampLineTableEntry& entry) {
-		os << "VeldkampLineEntry{"
-		   << "Proj: " << std::boolalpha << entry.isProjective
-		   << ", core{"
-		   << "Ps: " << entry.coreNbrPoints
-		   << ", Ls: " << entry.coreNbrLines
-		   << "}, composition{";
-
-		for (std::map<long long int, std::size_t>::const_iterator iterator = entry.pointsType.cbegin();
-		     iterator != entry.pointsType.cend();) {
-			os << "H" << iterator->first << ":" << iterator->second;
-			if (++iterator != entry.pointsType.cend()) {
-				os << ", ";
-			}
-		}
-
-		os << "}, Crd: " << entry.count << '}';
-
-		return os;
-	}
 
 	template <std::size_t NbrPointsPerLine>
 	VeldkampLines<NbrPointsPerLine>::VeldkampLines(std::vector<std::array<unsigned int, NbrPointsPerLine>>&& exceptional_lines,
