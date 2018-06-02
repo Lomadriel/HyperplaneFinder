@@ -134,12 +134,32 @@ namespace segre {
 	 *
 	 * @tparam     Dimension         Dimension of the geometry
 	 * @tparam     NbrPointsPerLine  Number of points per lines of the geometry
-	 * @tparam     Permutation       Type of @p permutation
+	 * @tparam     Permutation       Type of @p permutation, std::tuple\< @p
+	 *                               Dimension times std::array\<unsigned int,
+	 *                               @p NbrPointsPerLine\>, std::array\<unsigned
+	 *                               int, @p Dimension\>
 	 *
 	 * @return     The permuted hyperplane
 	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, typename Permutation>
 	std::vector<unsigned int> applyPermutation(const std::vector<unsigned int>& hyperplane, const Permutation& permutation);
+
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Apply a coordinates permutation to an hyperplane.
+	 *
+	 * @param[in]  hyperplane        The hyperplane to permute
+	 * @param[in]  permutation       The permutation to apply
+	 *
+	 * @tparam     Dimension         Dimension of the geometry
+	 * @tparam     NbrPointsPerLine  Number of points per lines of the geometry
+	 * @tparam     Permutation       Type of @p permutation, std::tuple\< @p
+	 *                               Dimension times std::array\<unsigned int,
+	 *                               @p NbrPointsPerLine\>\>
+	 *
+	 * @return     The permuted hyperplane
+	 */
+	template<size_t Dimension, size_t NbrPointsPerLine, typename Permutation>
+	std::vector<unsigned int> applyCoordPermutation(const std::vector<unsigned int>& hyperplane, const Permutation& permutation);
 
 	/*------------------------------------------------------------------------*//**
 	 * @brief      Calculates the hyperplane stabilisation permutations.
@@ -272,6 +292,24 @@ namespace segre {
 			for(unsigned int j = 0; j < Dimension; ++j) {
 				permuted_point += permuted_point_coords[j] * math::pow(static_cast<unsigned int>(NbrPointsPerLine), j);
 			}
+			permuted_hyperplane.push_back(permuted_point);
+		}
+		std::sort(permuted_hyperplane.begin(), permuted_hyperplane.end());
+		return permuted_hyperplane;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, typename Permutation>
+	std::vector<unsigned int> applyCoordPermutation(const std::vector<unsigned int>& hyperplane, const Permutation& permutation) {
+		std::vector<unsigned int> permuted_hyperplane;
+		permuted_hyperplane.reserve(hyperplane.size());
+		for(unsigned int point : hyperplane) {
+			unsigned int permuted_point = 0;
+			unsigned int i = 0;
+			iterateOnTuple([&](const auto& sub_permutation) {
+				permuted_point += sub_permutation[point % NbrPointsPerLine] * math::pow(static_cast<unsigned int>(NbrPointsPerLine), i);
+				point /= NbrPointsPerLine;
+				++i;
+			}, permutation);
 			permuted_hyperplane.push_back(permuted_point);
 		}
 		std::sort(permuted_hyperplane.begin(), permuted_hyperplane.end());
