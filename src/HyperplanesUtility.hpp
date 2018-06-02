@@ -258,6 +258,27 @@ namespace segre {
 	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<std::vector<unsigned int>> makeCoordPermutationsTable(const std::vector<std::bitset<NbrPoints>>& hyperplanes);
+
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Makes the dimensions permutations table, this table is the
+	 *             result of applying all possible dimensions permutation on
+	 *             each hyperplane of @p hyperplanes.
+	 *
+	 * @details    The element at position (@c n, @c m) is the number of the
+	 *             hyperplane from the @p hyperplanes that is the result of
+	 *             applying dimensions permutation number @c m on hyperplane
+	 *             number @c n from the @p hyperplanes.
+	 *
+	 * @param[in]  hyperplanes       The hyperplanes to generate the table
+	 *
+	 * @tparam     Dimension         Dimension of the geometry
+	 * @tparam     NbrPointsPerLine  Number of points per lines of the geometry
+	 * @tparam     NbrPoints         Number of points of the geometry
+	 *
+	 * @return     The dimensions permutations table
+	 */
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<std::vector<unsigned int>> makeDimensionPermutationsTable(const std::vector<std::bitset<NbrPoints>>& hyperplanes);
 }
 
 // Implementations
@@ -467,6 +488,30 @@ namespace segre {
 		return permutations_table;
 	}
 
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
+	std::vector<std::vector<unsigned int>> makeDimensionPermutationsTable(const std::vector<std::bitset<NbrPoints>>& hyperplanes) {
+		std::vector<std::vector<unsigned int>> permutations_table;
+		permutations_table.reserve(hyperplanes.size());
+
+		for(const std::bitset<NbrPoints>& hyperplane : hyperplanes) {
+			PermutationGenerator<Dimension> coord_permutations_generator;
+			std::vector<unsigned int> hyperplane_permutations;
+			hyperplane_permutations.reserve(PermutationGenerator<Dimension>::getPermutationsNumber());
+			const std::vector<unsigned int> points = segre::bitsetToVector(hyperplane);
+
+			while(!coord_permutations_generator.isFinished()) {
+				const std::bitset<NbrPoints> hyperplane_permutation = segre::vectorToBitset<NbrPoints>(segre::applyDimensionPermutation<Dimension, NbrPointsPerLine>(points, coord_permutations_generator.nextPermutation()));
+				const ptrdiff_t pos = std::find(hyperplanes.cbegin(), hyperplanes.cend(), hyperplane_permutation) - hyperplanes.cbegin();
+				if(pos > static_cast<ptrdiff_t>(hyperplanes.size())) {
+					IMPOSSIBLE;
+				}
+				hyperplane_permutations.push_back(static_cast<unsigned int>(pos));
+			}
+			permutations_table.push_back(std::move(hyperplane_permutations));
+		}
+
+		return permutations_table;
+	}
 }
 
 
