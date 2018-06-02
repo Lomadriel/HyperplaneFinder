@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace {
+namespace segre::detail {
 
 	template<size_t nbrElements>
 	std::array<unsigned int, nbrElements> generateInitialPermutation() {
@@ -115,7 +115,7 @@ namespace segre {
 	public:
 
 		PermutationGenerator() noexcept
-		  : m_current_permutation(generateInitialPermutation<nbrElements>())
+		  : m_current_permutation(detail::generateInitialPermutation<nbrElements>())
 		  , m_finished(false) {
 
 		}
@@ -127,7 +127,7 @@ namespace segre {
 		PermutationGenerator<nbrElements>& operator=(PermutationGenerator<nbrElements>&&) noexcept = default;
 
 		void reset() {
-			m_current_permutation.reset(generateInitialPermutation<nbrElements>());
+			m_current_permutation.reset(detail::generateInitialPermutation<nbrElements>());
 			m_finished = false;
 		}
 
@@ -147,7 +147,7 @@ namespace segre {
 
 	private:
 
-		Permutation<nbrElements> m_current_permutation;
+		detail::Permutation<nbrElements> m_current_permutation;
 		bool m_finished;
 	};
 

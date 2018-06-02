@@ -8,7 +8,7 @@
 #include "HyperplanesUtility.hpp"
 
 // Declarations
-namespace segre{
+namespace segre {
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::array<unsigned int, NbrPointsPerLine> getPermutation(
