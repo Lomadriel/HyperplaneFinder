@@ -162,6 +162,20 @@ namespace segre {
 	std::vector<unsigned int> applyCoordPermutation(const std::vector<unsigned int>& hyperplane, const Permutation& permutation);
 
 	/*------------------------------------------------------------------------*//**
+	 * @brief      Apply a dimensions permutation to an hyperplane.
+	 *
+	 * @param[in]  hyperplane        The hyperplane to permute
+	 * @param[in]  permutation       The permutation to apply
+	 *
+	 * @tparam     Dimension         Dimension of the geometry
+	 * @tparam     NbrPointsPerLine  Number of points per lines of the geometry
+	 *
+	 * @return     The permuted hyperplane
+	 */
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	std::vector<unsigned int> applyDimensionPermutation(const std::vector<unsigned int>& hyperplane, const std::array<unsigned int, Dimension>& permutation);
+
+	/*------------------------------------------------------------------------*//**
 	 * @brief      Calculates the hyperplane stabilisation permutations.
 	 *
 	 * @details    The hyperplane stabilisation permutations are the
@@ -310,6 +324,22 @@ namespace segre {
 				point /= NbrPointsPerLine;
 				++i;
 			}, permutation);
+			permuted_hyperplane.push_back(permuted_point);
+		}
+		std::sort(permuted_hyperplane.begin(), permuted_hyperplane.end());
+		return permuted_hyperplane;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	std::vector<unsigned int> applyDimensionPermutation(const std::vector<unsigned int>& hyperplane, const std::array<unsigned int, Dimension>& permutation) {
+		std::vector<unsigned int> permuted_hyperplane;
+		permuted_hyperplane.reserve(hyperplane.size());
+		for(unsigned int point : hyperplane) {
+			unsigned int permuted_point = 0;
+			for(unsigned int i = 0; i < Dimension; ++i){
+				permuted_point += (point % NbrPointsPerLine) * math::pow(static_cast<unsigned int>(NbrPointsPerLine), permutation[i]);
+				point /= NbrPointsPerLine;
+			}
 			permuted_hyperplane.push_back(permuted_point);
 		}
 		std::sort(permuted_hyperplane.begin(), permuted_hyperplane.end());
