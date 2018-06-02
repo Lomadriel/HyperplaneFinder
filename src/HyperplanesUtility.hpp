@@ -83,10 +83,34 @@ namespace segre {
 
 	/*------------------------------------------------------------------------*//**
 	 * @brief      Implementation of makeMultiPermutationsGenerator(), needed
-	 *             to generate an index_repetition
+	 *             to generate an index_repetition.
 	 */
 	template<size_t Dimension, size_t... R>
 	MultiPermutationGenerator<R..., Dimension> makeMultiPermutationsGenerator_impl(nothing<Dimension>, index_repetition<R...>);
+
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Makes a coordinate permutations generator with @p Dimension
+	 *             times a permutation of @p NbrPointsPerLine elements.
+	 *
+	 * @details    The coordinate permutations generator returned is adapted for
+	 *             generating all coordinate permutations of an hyperplane of a
+	 *             geometry of dimension @p Dimension and with @p
+	 *             NbrPointsPerLine points per lines.
+	 *
+	 * @tparam     Dimension         Dimension of the geometry
+	 * @tparam     NbrPointsPerLine  Number of points per lines of the geometry
+	 *
+	 * @return     A coordinate permutations generator
+	 */
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	auto makeCoordPermutationsGenerator();
+
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Implementation of makeCoordPermutationsGenerator(), needed
+	 *             to generate an index_repetition.
+	 */
+	template<size_t... R>
+	MultiPermutationGenerator<R...> makeCoordPermutationsGenerator_impl(index_repetition<R...>);
 
 	/*------------------------------------------------------------------------*//**
 	 * @brief      Call @p func on all elements of @p tuple in the increasing
@@ -247,6 +271,16 @@ namespace segre {
 	template<size_t Dimension, size_t... R>
 	MultiPermutationGenerator<R..., Dimension> makeMultiPermutationsGenerator_impl(nothing<Dimension>, index_repetition<R...>) {
 		return MultiPermutationGenerator<R..., Dimension>();
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine>
+	auto makeCoordPermutationsGenerator() {
+		return makeCoordPermutationsGenerator_impl(make_index_repetition<Dimension, NbrPointsPerLine>());
+	}
+
+	template<size_t... R>
+	MultiPermutationGenerator<R...> makeCoordPermutationsGenerator_impl(index_repetition<R...>) {
+		return MultiPermutationGenerator<R...>();
 	}
 
 	template<typename Func, typename... T>
