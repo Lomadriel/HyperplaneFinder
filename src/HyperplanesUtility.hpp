@@ -413,7 +413,7 @@ namespace segre {
 		for(unsigned int point : hyperplane) {
 			unsigned int permuted_point = 0;
 			for(unsigned int i = 0; i < Dimension; ++i){
-				permuted_point += (point % NbrPointsPerLine) * math::pow(static_cast<unsigned int>(NbrPointsPerLine), permutation[i]);
+				permuted_point += static_cast<unsigned int>((point % NbrPointsPerLine) * math::pow(static_cast<unsigned int>(NbrPointsPerLine), permutation[i]));
 				point /= NbrPointsPerLine;
 			}
 			permuted_hyperplane.push_back(permuted_point);
