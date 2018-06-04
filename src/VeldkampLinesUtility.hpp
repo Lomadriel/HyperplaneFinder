@@ -53,7 +53,7 @@ namespace segre {
 	 * @param[in]  lines_table_entry       The Veldkamp lines table entry (with
 	 *                                     lines)
 	 * @param[in]  hyp_permutations_table  The hyperplanes permutations table
-	 *                                     (see makePermutationsTable())
+	 * @param[in]  permutations_number     The permutations number
 	 *
 	 * @tparam     Dimension               Dimension of the geometry
 	 * @tparam     NbrPointsPerLine        Number of points per lines of the
@@ -65,7 +65,8 @@ namespace segre {
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<VeldkampLineTableEntry> separateByPermutations(
 	  const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& lines_table_entry,
-	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table
+	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table,
+	  unsigned int permutations_number
 	);
 
 	/*------------------------------------------------------------------------*//**
@@ -105,7 +106,7 @@ namespace segre {
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
-	std::vector<VeldkampLineTableEntry> separateByPermutations(const VeldkampLineTableEntryWithLines <Dimension, NbrPointsPerLine>& lines_table_entry, const std::vector<std::vector<unsigned int>>& hyp_permutations_table) {
+	std::vector<VeldkampLineTableEntry> separateByPermutations(const VeldkampLineTableEntryWithLines <Dimension, NbrPointsPerLine>& lines_table_entry, const std::vector<std::vector<unsigned int>>& hyp_permutations_table, unsigned int permutations_number) {
 		std::vector<VeldkampLineTableEntry> output_table;
 		std::vector<std::array<unsigned int, NbrPointsPerLine>> sorted_lines(lines_table_entry.lines);
 		std::for_each(sorted_lines.begin(), sorted_lines.end(), [](std::array<unsigned int, NbrPointsPerLine>& line){std::sort(line.begin(), line.end());});
@@ -124,7 +125,7 @@ namespace segre {
 			flags[pos] = true;
 			VeldkampLineTableEntry table_entry = lines_table_entry.entry;
 			table_entry.count = 1;
-			for(size_t i = 0; i < decltype(makeMultiPermutationsGenerator<Dimension, NbrPointsPerLine>())::getPermutationsNumber(); ++i){
+			for(size_t i = 0; i < permutations_number; ++i){
 				std::array<unsigned int, NbrPointsPerLine> permuted_line = applyPermutation<Dimension, NbrPointsPerLine>(line, hyp_permutations_table, i);
 				std::sort(permuted_line.begin(), permuted_line.end());
 				const size_t pos2 = static_cast<const size_t>(std::find(sorted_lines.cbegin(), sorted_lines.cend(), permuted_line) - sorted_lines.cbegin());
@@ -151,7 +152,7 @@ namespace segre {
 	){
 		std::vector<VeldkampLineTableEntry> output_table;
 		for(const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& lines_table_entry : lin_table_with_lines){
-			for(VeldkampLineTableEntry& entry : separateByPermutations<Dimension, NbrPointsPerLine>(lines_table_entry, hyp_permutations_table)){
+			for(VeldkampLineTableEntry& entry : separateByPermutations<Dimension, NbrPointsPerLine>(lines_table_entry, hyp_permutations_table, decltype(makeMultiPermutationsGenerator<Dimension, NbrPointsPerLine>())::getPermutationsNumber())){
 				output_table.push_back(std::move(entry));
 			}
 		}
