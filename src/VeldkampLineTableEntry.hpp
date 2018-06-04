@@ -38,7 +38,7 @@ namespace segre {
 		size_t count;
 	};
 
-	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	template<size_t NbrPointsPerLine>
 	struct VeldkampLineTableEntryWithLines {
 
 		VeldkampLineTableEntryWithLines()

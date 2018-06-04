@@ -161,7 +161,7 @@ namespace segre {
 		  const std::vector<HyperplaneTableEntry>& points_table
 		) const noexcept;
 
-		std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>> makeVeldkampLinesTableWithLines(
+		std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> makeVeldkampLinesTableWithLines(
 		  const VeldkampLines<NbrPointsPerLine>& vLines,
 		  const std::vector<std::bitset<NbrPoints>>& vPoints,
 		  const std::vector<HyperplaneTableEntry>& points_table
@@ -786,7 +786,7 @@ namespace segre {
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
-	std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>
+	std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>>
 	  PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::makeVeldkampLinesTableWithLines(
 	    const VeldkampLines<NbrPointsPerLine>& vLines,
 	    const std::vector<std::bitset<NbrPoints>>& vPoints,
@@ -796,30 +796,30 @@ namespace segre {
 		static_assert(Dimension < 4, "Points type determination only work for Dimension < 4");
 
 		const auto makeEntries =
-		  [&](std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>& entries,
+		  [&](std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>>& entries,
 		      const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines,
 		      bool isProjective) {
 
 			  for (const std::array<unsigned int, NbrPointsPerLine>& line : lines) {
 				  VeldkampLineTableEntry entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
 
-				  const ptrdiff_t pos = std::find_if(entries.begin(), entries.end(), [&entry](const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& oentry){
+				  const ptrdiff_t pos = std::find_if(entries.begin(), entries.end(), [&entry](const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& oentry){
 					  return oentry.entry == entry;
 				  }) - entries.begin();
 				  if (pos >= static_cast<ptrdiff_t>(entries.size())) {
 					  entry.count = 1;
-					  VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine> entrywl(entry);
+					  VeldkampLineTableEntryWithLines<NbrPointsPerLine> entrywl(entry);
 					  entrywl.lines.push_back(line);
 					  entries.push_back(std::move(entrywl));
 				  } else {
-					  using size_type = typename std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>::size_type;
+					  using size_type = typename std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>>::size_type;
 					  ++(entries[static_cast<size_type>(pos)].entry.count);
 					  entries[static_cast<size_type>(pos)].lines.push_back(line);
 				  }
 			  }
 		  };
 
-		std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>> entries;
+		std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> entries;
 		makeEntries(entries, vLines.projectives, true);
 		makeEntries(entries, vLines.exceptional, false);
 		return entries;

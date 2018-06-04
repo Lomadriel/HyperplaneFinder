@@ -62,8 +62,8 @@ int main() {
 		return std::make_tuple(a.isProjective, a.coreNbrPoints, a.coreNbrLines) < std::make_tuple(b.isProjective, b.coreNbrPoints, b.coreNbrLines);
 	});
 
-	std::vector<segre::VeldkampLineTableEntryWithLines<3, PPL>> geometry3_lin_table_with_lines = geometry3.makeVeldkampLinesTableWithLines(vLines3, vPoints3, geometry3_hyp_table);
-	std::sort(geometry3_lin_table_with_lines.begin(), geometry3_lin_table_with_lines.end(), [](const segre::VeldkampLineTableEntryWithLines<3, PPL>& a, const segre::VeldkampLineTableEntryWithLines<3, PPL>& b){
+	std::vector<segre::VeldkampLineTableEntryWithLines<PPL>> geometry3_lin_table_with_lines = geometry3.makeVeldkampLinesTableWithLines(vLines3, vPoints3, geometry3_hyp_table);
+	std::sort(geometry3_lin_table_with_lines.begin(), geometry3_lin_table_with_lines.end(), [](const segre::VeldkampLineTableEntryWithLines<PPL>& a, const segre::VeldkampLineTableEntryWithLines<PPL>& b){
 		return std::make_tuple(a.entry.isProjective, a.entry.coreNbrPoints, a.entry.coreNbrLines) < std::make_tuple(b.entry.isProjective, b.entry.coreNbrPoints, b.entry.coreNbrLines);
 	});
 
