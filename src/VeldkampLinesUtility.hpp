@@ -10,19 +10,81 @@
 // Declarations
 namespace segre {
 
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Apply the permutation number @p permutation_number to the
+	 *             Veldkamp line @p line using the hyperplanes permutation table
+	 *             @p hyp_permutations_table.
+	 *
+	 * @param[in]  line                    The line to permute
+	 * @param[in]  hyp_permutations_table  The hyperplanes permutations table
+	 *                                     (see makePermutationsTable())
+	 * @param[in]  permutation_number      The permutation number
+	 *
+	 * @tparam     Dimension               Dimension of the geometry
+	 * @tparam     NbrPointsPerLine        Number of points per lines of the
+	 *                                     geometry
+	 * @tparam     NbrPoints               Number of points of the geometry
+	 *
+	 * @return     The permuted Veldkamp line.
+	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
-	std::array<unsigned int, NbrPointsPerLine> getPermutation(
+	std::array<unsigned int, NbrPointsPerLine> applyPermutation(
 	  const std::array<unsigned int, NbrPointsPerLine>& line,
 	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table,
 	  size_t permutation_number
 	);
 
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Separate a Veldkamp lines table entry by permutations.
+	 *
+	 * @details    Separation works as follow:
+	 *
+	 *             1. All lines are marked as unchecked
+	 *
+	 *             2. Create a subentry, take the first unchecked line from the
+	 *             entry, apply all possible permutations to this line, the
+	 *             permuted lines generated are equals to lines from the entry,
+	 *             mark these lines as checked and add them to the subentry.
+	 *
+	 *             3. While there is unchecked lines in the entry, do 2
+	 *
+	 *             4. Return the subentries
+	 *
+	 * @param[in]  lines_table_entry       The Veldkamp lines table entry (with
+	 *                                     lines)
+	 * @param[in]  hyp_permutations_table  The hyperplanes permutations table
+	 *                                     (see makePermutationsTable())
+	 *
+	 * @tparam     Dimension               Dimension of the geometry
+	 * @tparam     NbrPointsPerLine        Number of points per lines of the
+	 *                                     geometry
+	 * @tparam     NbrPoints               Number of points of the geometry
+	 *
+	 * @return     The Veldkamp lines table entries resulting of the separation
+	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<VeldkampLineTableEntry> separateByPermutations(
 	  const VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>& lines_table_entry,
 	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table
 	);
 
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Separate entries of a Veldkamp lines table by permutations
+	 *
+	 * @details    See separateByPermutations() on a Veldkamp line table entry
+	 *             for separation method details
+	 *
+	 * @param[in]  lin_table_with_lines    The Veldkamp lines table (with lines)
+	 * @param[in]  hyp_permutations_table  The hyperplanes permutations table
+	 *                                     (see makePermutationsTable())
+	 *
+	 * @tparam     Dimension               Dimension of the geometry
+	 * @tparam     NbrPointsPerLine        Number of points per lines of the
+	 *                                     geometry
+	 * @tparam     NbrPoints               Number of points of the geometry
+	 *
+	 * @return     The Veldkamp lines table resulting of the separation
+	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<VeldkampLineTableEntry> separateByPermutations(
 	  const std::vector<VeldkampLineTableEntryWithLines<Dimension, NbrPointsPerLine>>& lin_table_with_lines,
@@ -34,7 +96,7 @@ namespace segre {
 namespace segre {
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
-	std::array<unsigned int, NbrPointsPerLine> getPermutation(const std::array<unsigned int, NbrPointsPerLine>& line, const std::vector<std::vector<unsigned int>>& hyp_permutations_table, size_t permutation_number) {
+	std::array<unsigned int, NbrPointsPerLine> applyPermutation(const std::array<unsigned int, NbrPointsPerLine>& line, const std::vector<std::vector<unsigned int>>& hyp_permutations_table, size_t permutation_number) {
 		std::array<unsigned int, NbrPointsPerLine> permuted_line;
 		for(size_t i = 0; i < NbrPointsPerLine; ++i){
 			permuted_line[i] = hyp_permutations_table[line[i]][permutation_number];
@@ -63,7 +125,7 @@ namespace segre {
 			VeldkampLineTableEntry table_entry = lines_table_entry.entry;
 			table_entry.count = 1;
 			for(size_t i = 0; i < decltype(makeMultiPermutationsGenerator<Dimension, NbrPointsPerLine>())::getPermutationsNumber(); ++i){
-				std::array<unsigned int, NbrPointsPerLine> permuted_line = getPermutation<Dimension, NbrPointsPerLine>(line, hyp_permutations_table, i);
+				std::array<unsigned int, NbrPointsPerLine> permuted_line = applyPermutation<Dimension, NbrPointsPerLine>(line, hyp_permutations_table, i);
 				std::sort(permuted_line.begin(), permuted_line.end());
 				const size_t pos2 = static_cast<const size_t>(std::find(sorted_lines.cbegin(), sorted_lines.cend(), permuted_line) - sorted_lines.cbegin());
 				if(pos2 < sorted_lines.size()) {
