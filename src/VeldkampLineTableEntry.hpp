@@ -41,9 +41,19 @@ namespace segre {
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	struct VeldkampLineTableEntryWithLines {
 
+		VeldkampLineTableEntryWithLines()
+		  : entry()
+		  , lines() {
+		}
+
 		VeldkampLineTableEntryWithLines(const VeldkampLineTableEntry& entry_)
 		  : entry(entry_)
-		    , lines() {
+		  , lines() {
+		}
+
+		VeldkampLineTableEntryWithLines(const VeldkampLineTableEntry& entry_, const std::vector<std::array<unsigned int, NbrPointsPerLine>>& lines_)
+		  : entry(entry_)
+		  , lines(lines_) {
 		}
 
 		VeldkampLineTableEntry entry;
