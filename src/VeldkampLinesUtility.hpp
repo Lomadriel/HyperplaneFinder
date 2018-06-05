@@ -42,9 +42,9 @@ namespace segre {
 	 *             1. All lines are marked as unchecked
 	 *
 	 *             2. Create a subentry, take the first unchecked line from the
-	 *             entry, apply all possible permutations to this line, the
-	 *             permuted lines generated are equals to lines from the entry,
-	 *             mark these lines as checked and add them to the subentry.
+	 *             entry, apply all permutations to this line, the permuted
+	 *             lines generated are equals to lines from the entry, mark
+	 *             these lines as checked and add them to the subentry.
 	 *
 	 *             3. While there is unchecked lines in the entry, do 2
 	 *
@@ -64,6 +64,33 @@ namespace segre {
 	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::vector<VeldkampLineTableEntry> separateByPermutations(
+	  const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& lines_table_entry,
+	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table,
+	  unsigned int permutations_number
+	);
+
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Separate a Veldkamp lines table entry by permutations.
+	 *             Entries generated contains the Veldcamp lines.
+	 *
+	 * @details    For informations about separation method see
+	 *             separateByPermutations()
+	 *
+	 * @param[in]  lines_table_entry       The Veldkamp lines table entry (with
+	 *                                     lines)
+	 * @param[in]  hyp_permutations_table  The hyperplanes permutations table
+	 * @param[in]  permutations_number     The permutations number
+	 *
+	 * @tparam     Dimension               Dimension of the geometry
+	 * @tparam     NbrPointsPerLine        Number of points per lines of the
+	 *                                     geometry
+	 * @tparam     NbrPoints               Number of points of the geometry
+	 *
+	 * @return     The Veldkamp lines table entries (with lines) resulting of
+	 *             the separation
+	 */
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> separateByPermutationsWithLines(
 	  const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& lines_table_entry,
 	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table,
 	  unsigned int permutations_number
@@ -133,6 +160,48 @@ namespace segre {
 					if(!flags[pos2]){
 						flags[pos2] = true;
 						++table_entry.count;
+					}
+				}
+				else{
+					IMPOSSIBLE;
+				}
+			}
+			output_table.push_back(std::move(table_entry));
+		}
+
+		return output_table;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
+	std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> separateByPermutationsWithLines(const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& lines_table_entry, const std::vector<std::vector<unsigned int>>& hyp_permutations_table, unsigned int permutations_number) {
+		std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> output_table;
+		std::vector<std::array<unsigned int, NbrPointsPerLine>> sorted_lines(lines_table_entry.lines);
+		std::for_each(sorted_lines.begin(), sorted_lines.end(), [](std::array<unsigned int, NbrPointsPerLine>& line){std::sort(line.begin(), line.end());});
+
+		std::vector<bool> flags;
+		flags.reserve(lines_table_entry.lines.size());
+		for(size_t i = 0; i < lines_table_entry.lines.size(); ++i){
+			flags.push_back(false);
+		}
+		while(true){
+			const size_t pos = static_cast<const size_t>(std::find(flags.cbegin(), flags.cend(), false) - flags.cbegin());
+			if(pos >= flags.size()) {
+				break;
+			}
+			const std::array<unsigned int, NbrPointsPerLine>& line = lines_table_entry.lines[pos];
+			flags[pos] = true;
+			VeldkampLineTableEntryWithLines<NbrPointsPerLine> table_entry(lines_table_entry.entry);
+			table_entry.entry.count = 1;
+			table_entry.lines.push_back(line);
+			for(size_t i = 0; i < permutations_number; ++i){
+				std::array<unsigned int, NbrPointsPerLine> permuted_line = applyPermutation<Dimension, NbrPointsPerLine>(line, hyp_permutations_table, i);
+				std::sort(permuted_line.begin(), permuted_line.end());
+				const size_t pos2 = static_cast<const size_t>(std::find(sorted_lines.cbegin(), sorted_lines.cend(), permuted_line) - sorted_lines.cbegin());
+				if(pos2 < sorted_lines.size()) {
+					if(!flags[pos2]){
+						flags[pos2] = true;
+						++table_entry.entry.count;
+						table_entry.lines.push_back(lines_table_entry.lines[pos2]);
 					}
 				}
 				else{
