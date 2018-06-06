@@ -16,7 +16,7 @@
 using json = nlohmann::json;
 
 constexpr size_t PPL = 4; // Points Per Lines
-constexpr bool CIMPUTE_AND_PRINT_POINTS_ORDER = true;
+constexpr bool COMPUTE_AND_PRINT_POINTS_ORDER = true;
 constexpr bool PRINT_SUBGEOMETRIES = true;
 
 template<int N>
@@ -40,7 +40,7 @@ int main() {
 	VLines<2> vLines2 = geometry2.computeVeldkampLines(vPoints2);
 	geometry2.distinguishVeldkampLines(vLines2, vPoints2, geometry3);
 
-	std::vector<segre::HyperplaneTableEntry> geometry2_hyp_table = geometry2.makeHyperplaneTable<CIMPUTE_AND_PRINT_POINTS_ORDER>(vPoints2);
+	std::vector<segre::HyperplaneTableEntry> geometry2_hyp_table = geometry2.makeHyperplaneTable<COMPUTE_AND_PRINT_POINTS_ORDER>(vPoints2);
 	std::sort(geometry2_hyp_table.begin(), geometry2_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
@@ -53,7 +53,7 @@ int main() {
 	VLines<3> vLines3 = geometry3.computeVeldkampLines(vPoints3);
 	geometry3.distinguishVeldkampLines(vLines3, vPoints3, geometry4);
 
-	std::vector<segre::HyperplaneTableEntry> geometry3_hyp_table = geometry3.makeHyperplaneTable<CIMPUTE_AND_PRINT_POINTS_ORDER>(vPoints3, geometry2_hyp_table);
+	std::vector<segre::HyperplaneTableEntry> geometry3_hyp_table = geometry3.makeHyperplaneTable<COMPUTE_AND_PRINT_POINTS_ORDER>(vPoints3, geometry2_hyp_table);
 	std::sort(geometry3_hyp_table.begin(), geometry3_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
@@ -75,7 +75,7 @@ int main() {
 	std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep_2steps = segre::separateBy2StepsPermutations<3,PPL>(geometry3_lin_table_with_lines, coord_permutation_table, dimension_permutation_table);
 
 	VPoints<4> vPoints4 = geometry3.computeHyperplanesFromVeldkampLines(vPoints3, vLines3.projectives);
-	std::vector<segre::HyperplaneTableEntry> geometry4_hyp_table = geometry4.makeHyperplaneTable<CIMPUTE_AND_PRINT_POINTS_ORDER>(vPoints4, geometry3_hyp_table);
+	std::vector<segre::HyperplaneTableEntry> geometry4_hyp_table = geometry4.makeHyperplaneTable<COMPUTE_AND_PRINT_POINTS_ORDER>(vPoints4, geometry3_hyp_table);
 
 	std::sort(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
@@ -101,13 +101,13 @@ int main() {
 	std::copy(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
 
 	LatexPrinter printer;
-	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(2, geometry2_hyp_table, 0);
+	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(2, geometry2_hyp_table, 0);
 	printer.generateLinesTable(2, geometry2_lin_table, geometry2_hyp_table.size());
-	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(3, geometry3_hyp_table, geometry2_hyp_table.size());
+	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(3, geometry3_hyp_table, geometry2_hyp_table.size());
 	printer.generateLinesTable(3, geometry3_lin_table, geometry3_hyp_table.size());
 	//printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep, geometry3_hyp_table.size());
 	printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep_2steps, geometry3_hyp_table.size());
-	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(4, geometry4_hyp_table, geometry3_hyp_table.size());
+	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(4, geometry4_hyp_table, geometry3_hyp_table.size());
 
 	return EXIT_SUCCESS;
 }
