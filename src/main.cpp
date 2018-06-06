@@ -67,13 +67,17 @@ int main() {
 		return std::make_tuple(a.entry.isProjective, a.entry.coreNbrPoints, a.entry.coreNbrLines) < std::make_tuple(b.entry.isProjective, b.entry.coreNbrPoints, b.entry.coreNbrLines);
 	});
 
-	std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep = segre::separateByPermutations<3,PPL>(geometry3_lin_table_with_lines, segre::makePermutationsTable<3, PPL>(vPoints3));
+	//std::vector<std::vector<unsigned int>> permutations_table = segre::makePermutationsTable<3, PPL>(vPoints3);
+	//std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep = segre::separateByPermutations<3,PPL>(geometry3_lin_table_with_lines, permutations_table);
+
+	std::vector<std::vector<unsigned int>> coord_permutation_table = segre::makeCoordPermutationsTable<3, PPL>(vPoints3);
+	std::vector<std::vector<unsigned int>> dimension_permutation_table = segre::makeDimensionPermutationsTable<3, PPL>(vPoints3);
+	std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep_2steps = segre::separateBy2StepsPermutations<3,PPL>(geometry3_lin_table_with_lines, coord_permutation_table, dimension_permutation_table);
 
 	VPoints<4> vPoints4 = geometry3.computeHyperplanesFromVeldkampLines(vPoints3, vLines3.projectives);
 	std::vector<segre::HyperplaneTableEntry> geometry4_hyp_table = geometry4.makeHyperplaneTable<CIMPUTE_AND_PRINT_POINTS_ORDER>(vPoints4, geometry3_hyp_table);
 
-	std::sort(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a,
-	                                              const segre::HyperplaneTableEntry& b) {
+	std::sort(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
 	});
 
@@ -101,7 +105,8 @@ int main() {
 	printer.generateLinesTable(2, geometry2_lin_table, geometry2_hyp_table.size());
 	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(3, geometry3_hyp_table, geometry2_hyp_table.size());
 	printer.generateLinesTable(3, geometry3_lin_table, geometry3_hyp_table.size());
-	printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep, geometry3_hyp_table.size());
+	//printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep, geometry3_hyp_table.size());
+	printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep_2steps, geometry3_hyp_table.size());
 	printer.generateHyperplanesTable<CIMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(4, geometry4_hyp_table, geometry3_hyp_table.size());
 
 	return EXIT_SUCCESS;
