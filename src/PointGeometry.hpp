@@ -33,7 +33,16 @@ namespace std { // NOLINT
 }
 
 namespace segre {
+	template <std::size_t NbrPoints>
+	struct Hyperplanes {
+		explicit Hyperplanes(
+		  std::vector<std::bitset<NbrPoints>>&& projectives_hyperplanes,
+		  std::vector<std::bitset<NbrPoints>>&& nonprojective_hyperplanes
+		) noexcept;
 
+		std::vector<std::bitset<NbrPoints>> projectives;
+		std::vector<std::bitset<NbrPoints>> nonprojective;
+	};
 	template <std::size_t NbrPointsPerLine>
 	struct VeldkampLines {
 		explicit VeldkampLines(
@@ -107,6 +116,11 @@ namespace segre {
 		  const std::vector<std::array<unsigned int, NbrPointsPerLine>>& pVLines
 		);
 
+		auto computeHyperplanesFromAllVeldkampLines(
+				const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
+				const VeldkampLines<NbrPointsPerLine>& pVLines
+		) -> Hyperplanes<math::pow(NbrPointsPerLine, Dimension + 1)>;
+
 		/**
 		 * Returns the hyperplanes of the given veldkamp line.
 		 * @param veldkampPoints list of all the veldkamp points of the current geometry.
@@ -148,6 +162,12 @@ namespace segre {
 		  const std::vector<HyperplaneTableEntry>& precedent_table
 		) const noexcept;
 
+		template<bool OrderOfPoints>
+		std::vector<HyperplaneTableEntry> makeHyperplaneTable(
+				const Hyperplanes<NbrPoints>& vPoints,
+		const std::vector<HyperplaneTableEntry>& precedent_table
+		) const noexcept;
+
 		VeldkampLineTableEntry makeLinesTableEntry(
 		  bool isProjective,
 		  const std::array<unsigned int, NbrPointsPerLine>& line,
@@ -158,6 +178,19 @@ namespace segre {
 		std::vector<VeldkampLineTableEntry> makeVeldkampLinesTable(
 		  VeldkampLines<NbrPointsPerLine>& vLines,
 		  const std::vector<std::bitset<NbrPoints>>& vPoints,
+		  const std::vector<HyperplaneTableEntry>& points_table
+		) const noexcept;
+
+		VeldkampLineTableEntry makeLinesTableEntry(
+		  bool isProjective,
+		  const std::array<unsigned int, NbrPointsPerLine>& line,
+		  const Hyperplanes<NbrPoints>& vPoints,
+		  const std::vector<HyperplaneTableEntry>& points_table
+		) const noexcept;
+
+		std::vector<VeldkampLineTableEntry> makeVeldkampLinesTable(
+		  VeldkampLines<NbrPointsPerLine>& vLines,
+		  const Hyperplanes<NbrPoints>& vPoints,
 		  const std::vector<HyperplaneTableEntry>& points_table
 		) const noexcept;
 
@@ -202,6 +235,16 @@ namespace segre {
 	) noexcept
 	  : exceptional(std::move(exceptional_lines))
 	  , projectives(std::move(projectives_lines)) {
+
+	}
+
+	template <std::size_t NbrPoints>
+	Hyperplanes<NbrPoints>::Hyperplanes(
+	  std::vector<std::bitset<NbrPoints>>&& projectives_hyperplanes,
+	  std::vector<std::bitset<NbrPoints>>&& nonprojective_hyperplanes
+	) noexcept
+		: projectives(std::move(projectives_hyperplanes))
+		, nonprojective(std::move(nonprojective_hyperplanes)) {
 
 	}
 
@@ -476,6 +519,20 @@ namespace segre {
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
+	auto PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::computeHyperplanesFromAllVeldkampLines(
+			const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
+			const VeldkampLines<NbrPointsPerLine>& pVLines
+	) -> Hyperplanes<math::pow(NbrPointsPerLine, Dimension + 1)> {
+		constexpr size_t NewNbrPoints = math::pow(NbrPointsPerLine, Dimension + 1);
+
+		auto projective_lines = computeHyperplanesFromVeldkampLines(veldkampPoints, pVLines.projectives);
+		auto non_projectives_lines = computeHyperplanesFromVeldkampLines(veldkampPoints, pVLines.exceptional);
+
+		return Hyperplanes<NewNbrPoints>{std::move(projective_lines),
+		                                 std::move(non_projectives_lines)};
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
 	std::array<std::bitset<NbrPoints>, NbrPointsPerLine> PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::getHyperplanesOfTheVeldkampLine(
 	  const std::vector<std::bitset<NbrPoints>>& veldkampPoints,
 	  const std::array<unsigned int, NbrPointsPerLine>& veldkampLine
@@ -711,6 +768,46 @@ namespace segre {
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
+	template<bool OrderOfPoints>
+	std::vector<HyperplaneTableEntry> PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::makeHyperplaneTable(
+			const Hyperplanes<NbrPoints>& vPoints,
+			const std::vector<HyperplaneTableEntry>& precedent_table
+	) const noexcept {
+
+		std::vector<HyperplaneTableEntry> entries;
+
+		for (const auto& vPoint : vPoints.projectives) {
+			HyperplaneTableEntry entry = getHyperplaneTableEntry<OrderOfPoints>(vPoint, precedent_table);
+			entry.projective = std::find(vPoints.nonprojective.cbegin(), vPoints.nonprojective.cend(), vPoint) == vPoints.nonprojective.cend();
+
+			// Check if entry already exist
+			std::vector<HyperplaneTableEntry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+			if (it == entries.end()) {
+				entry.count = 1;
+				entries.push_back(entry);
+			} else {
+				++(it->count);
+			}
+		}
+
+		/*for (const auto& vPoint : vPoints.nonprojective) {
+			HyperplaneTableEntry entry = getHyperplaneTableEntry<OrderOfPoints>(vPoint, precedent_table);
+			entry.projective = false;
+
+			// Check if entry already exist
+			std::vector<HyperplaneTableEntry>::iterator it = std::find(entries.begin(), entries.end(), entry);
+			if (it == entries.end()) {
+				entry.count = 1;
+				entries.push_back(entry);
+			} else {
+				++(it->count);
+			}
+		}*/
+
+		return entries;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
 	VeldkampLineTableEntry PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::makeLinesTableEntry(
 	  bool isProjective,
 	  const std::array<unsigned int, NbrPointsPerLine>& line,
@@ -770,6 +867,82 @@ namespace segre {
 
 				typename std::vector<VeldkampLineTableEntry>::iterator
 				  it = std::find(entries.begin(), entries.end(), entry);
+				if (it == entries.end()) {
+					entry.count = 1;
+					entries.push_back(entry);
+				} else {
+					++(it->count);
+				}
+			}
+		};
+
+		std::vector<VeldkampLineTableEntry> entries;
+		makeEntries(entries, vLines.projectives, true);
+		makeEntries(entries, vLines.exceptional, false);
+		return entries;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
+	VeldkampLineTableEntry PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::makeLinesTableEntry(
+			bool isProjective,
+			const std::array<unsigned int, NbrPointsPerLine>& line,
+			const Hyperplanes<NbrPoints>& vPoints,
+			const std::vector<HyperplaneTableEntry>& points_table
+	) const noexcept {
+
+		VeldkampLineTableEntry entry;
+		entry.isProjective = isProjective;
+
+		std::bitset<NbrPoints> kernel = vPoints.projectives[line[0]] & vPoints.projectives[line[1]];
+		entry.coreNbrPoints = kernel.count();
+		entry.coreNbrLines = 0;
+		for (const std::bitset<NbrPoints>& geometryLine : m_geometryLines) {
+			if ((kernel & geometryLine) == geometryLine) {
+				++entry.coreNbrLines;
+			}
+		}
+
+
+		for (unsigned int i = 0; i < NbrPointsPerLine; ++i) {
+			const size_t nbr_points = vPoints.projectives[line[i]].count();
+			bool projective = std::find(vPoints.nonprojective.cbegin(), vPoints.nonprojective.cend(), vPoints.projectives[line[i]]) == vPoints.nonprojective.cend();
+			std::vector<HyperplaneTableEntry>::const_iterator it = std::find_if(
+					points_table.begin(),
+					points_table.end(),
+					[&nbr_points, &projective](const HyperplaneTableEntry& e) {
+						return e.projective == projective && e.nbrPoints == nbr_points;
+					}
+			);
+
+			if (it == points_table.end()) {
+				IMPOSSIBLE;
+			} else {
+				++entry.pointsType[static_cast<long long int>(std::distance(points_table.cbegin(), it))];
+			}
+		}
+
+		return entry;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrLines, size_t NbrPoints, size_t TensorSize>
+	std::vector<VeldkampLineTableEntry> PointGeometry<Dimension, NbrPointsPerLine, NbrLines, NbrPoints, TensorSize>::makeVeldkampLinesTable(
+			VeldkampLines<NbrPointsPerLine>& vLines,
+			const Hyperplanes<NbrPoints>& vPoints,
+			const std::vector<HyperplaneTableEntry>& points_table
+	) const noexcept {
+
+		static_assert(Dimension < 4, "Points type determination only work for Dimension < 4");
+
+		const auto makeEntries = [&](
+				std::vector<VeldkampLineTableEntry>& entries,
+				const std::vector<std::array<unsigned int, NbrPointsPerLine>> lines,
+				bool isProjective
+		) {
+			for (const std::array<unsigned int, NbrPointsPerLine>& line : lines) {
+				VeldkampLineTableEntry entry = makeLinesTableEntry(isProjective, line, vPoints, points_table);
+
+				typename std::vector<VeldkampLineTableEntry>::iterator
+						it = std::find(entries.begin(), entries.end(), entry);
 				if (it == entries.end()) {
 					entry.count = 1;
 					entries.push_back(entry);

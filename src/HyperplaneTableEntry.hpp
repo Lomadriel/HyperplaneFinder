@@ -16,7 +16,8 @@ namespace segre{
 		  , nbrLines{0}
 		  , pointsOfOrder{}
 		  , subgeometries{}
-		  , count{0} {
+		  , count{0}
+		  , projective{true} {
 		}
 
 		template <typename Map>
@@ -25,6 +26,9 @@ namespace segre{
 		}
 
 		bool operator==(const HyperplaneTableEntry& oentry) const {
+			if (projective != oentry.projective) {
+				return false;
+			}
 
 			if(nbrPoints != oentry.nbrPoints)
 				return false;
@@ -66,6 +70,7 @@ namespace segre{
 		std::map<unsigned int, unsigned int> pointsOfOrder;
 		std::vector<std::map<long long int, std::size_t>> subgeometries;
 		size_t count;
+		bool projective;
 	};
 
 	inline std::ostream& operator<<(std::ostream& os, const HyperplaneTableEntry& entry) {
