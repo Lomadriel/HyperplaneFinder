@@ -100,7 +100,15 @@ namespace segre {
 	 * @brief      Separate a Veldkamp lines table entry by 2 steps
 	 *             permutations.
 	 *
-	 * @details    TODO: 2 steps permutations method explanation.
+	 * @details    2 steps separation works as follow:
+	 *
+	 *             1. Step 1: Separates lines by coord permutation (see
+	 *             separateByPermutationsWithLines() for details)
+	 *
+	 *             2. Step 2: For each line of each subentry, apply all
+	 *             dimensions permutation to the line, if the permuted line is
+	 *             in the same subentry, do nothing, if the permuted line is in
+	 *             another subentry, join/merge the two subentries
 	 *
 	 * @param[in]  lines_table_entry                 The Veldkamp lines table
 	 *                                               entry (with lines)
