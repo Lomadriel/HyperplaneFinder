@@ -46,7 +46,7 @@ namespace segre {
 		  , lines() {
 		}
 
-		VeldkampLineTableEntryWithLines(const VeldkampLineTableEntry& entry_)
+		explicit VeldkampLineTableEntryWithLines(const VeldkampLineTableEntry& entry_)
 		  : entry(entry_)
 		  , lines() {
 		}
