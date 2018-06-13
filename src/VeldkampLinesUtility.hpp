@@ -25,13 +25,29 @@ namespace segre {
 	 *                                     geometry
 	 * @tparam     NbrPoints               Number of points of the geometry
 	 *
-	 * @return     The permuted Veldkamp line.
+	 * @return     The permuted Veldkamp line
 	 */
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
 	std::array<unsigned int, NbrPointsPerLine> applyPermutation(
 	  const std::array<unsigned int, NbrPointsPerLine>& line,
 	  const std::vector<std::vector<unsigned int>>& hyp_permutations_table,
 	  size_t permutation_number
+	);
+
+	/*------------------------------------------------------------------------*//**
+	 * @brief      Generate Veldkamp lines table entries without lines from
+	 *             Veldkamp lines table entries with lines.
+	 *
+	 * @param[in]  lin_table_with_lines  The Veldkamp lines table (with lines)
+	 *
+	 * @tparam     NbrPointsPerLine      Number of points per lines of the
+	 *                                   geometry
+	 *
+	 * @return     The Veldkamp lines table entries without lines
+	 */
+	template<size_t NbrPointsPerLine>
+	std::vector<VeldkampLineTableEntry> withoutLines(
+	  const std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> lin_table_with_lines
 	);
 
 	/*------------------------------------------------------------------------*//**
@@ -249,6 +265,16 @@ namespace segre {
 			permuted_line[i] = hyp_permutations_table[line[i]][permutation_number];
 		}
 		return permuted_line;
+	}
+
+	template<size_t NbrPointsPerLine>
+	std::vector<VeldkampLineTableEntry> withoutLines(const std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> lin_table_with_lines){
+		std::vector<VeldkampLineTableEntry> output_table;
+		output_table.reserve(lin_table_with_lines.size());
+		for(const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& entry : lin_table_with_lines){
+			output_table.push_back(entry.entry);
+		}
+		return output_table;
 	}
 
 	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints>
