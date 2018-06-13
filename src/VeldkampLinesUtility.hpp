@@ -133,6 +133,36 @@ namespace segre {
 	);
 
 	/*------------------------------------------------------------------------*//**
+	 * @brief      Separate a Veldkamp lines table entry by 2 steps
+	 *             permutations.
+	 *
+	 * @details    For informations about separation method see
+	 *             separateBy2StepsPermutations().
+	 *
+	 * @param[in]  lines_table_entry                 The Veldkamp lines table
+	 *                                               entry (with lines)
+	 * @param[in]  hyp_coord_permutations_table      The hyperplanes coordinates
+	 *                                               permutations table
+	 * @param[in]  hyp_dimension_permutations_table  The hyperplanes dimensions
+	 *                                               permutations table
+	 *
+	 * @tparam     Dimension                         Dimension of the geometry
+	 * @tparam     NbrPointsPerLine                  Number of points per lines
+	 *                                               of the geometry
+	 * @tparam     NbrPoints                         Number of points of the
+	 *                                               geometry
+	 *
+	 * @return     The Veldkamp lines table entries (with lines) resulting of
+	 *             the separation
+	 */
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> separateBy2StepsPermutationsWithLines(
+	  const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& lines_table_entry,
+	  const std::vector<std::vector<unsigned int>>& hyp_coord_permutations_table,
+	  const std::vector<std::vector<unsigned int>>& hyp_dimension_permutations_table
+	);
+
+	/*------------------------------------------------------------------------*//**
 	 * @brief      Separate entries of a Veldkamp lines table by permutations
 	 *
 	 * @details    See separateByPermutations() on a Veldkamp line table entry
@@ -319,6 +349,81 @@ namespace segre {
 				entry_is_joined[i_entry] = true;
 				entry_output_table_pos[i_entry] = static_cast<unsigned int>(output_table.size());
 				output_table.push_back(coord_permuted_entries[i_entry].entry);
+			}
+
+			for(const std::array<unsigned int, NbrPointsPerLine> line : entry.lines){
+				for(size_t i_permutation = 0; i_permutation < PermutationGenerator<Dimension>::getPermutationsNumber(); ++i_permutation){
+					std::array<unsigned int, NbrPointsPerLine> permuted_line = applyPermutation<Dimension, NbrPointsPerLine>(line, hyp_dimension_permutations_table, i_permutation);
+					std::sort(permuted_line.begin(), permuted_line.end());
+
+					bool found = false;
+					for(unsigned int i_search_entry = 0; i_search_entry < coord_permuted_entries.size(); ++i_search_entry){
+						const size_t found_pos = static_cast<const size_t>(std::find(entries_sorted_lines[i_search_entry].begin(), entries_sorted_lines[i_search_entry].end(), permuted_line) - entries_sorted_lines[i_search_entry].begin());
+						if(found_pos < entries_sorted_lines[i_search_entry].size()){
+							if(entry_is_joined[i_search_entry] && entry_output_table_pos[i_search_entry] != entry_output_table_pos[i_entry]){
+								IMPOSSIBLE;
+							}
+							// Join i_search_entry with current entry (i_entry)
+							entry_is_joined[i_search_entry] = true;
+							entry_output_table_pos[i_search_entry] = entry_output_table_pos[i_entry];
+							found = true;
+							break;
+						}
+					}
+					if(!found){
+						IMPOSSIBLE;
+					}
+				}
+			}
+		}
+
+		return output_table;
+	}
+
+	template<size_t Dimension, size_t NbrPointsPerLine, size_t NbrPoints = math::pow(NbrPointsPerLine, Dimension)>
+	std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> separateBy2StepsPermutationsWithLines(
+	  const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& lines_table_entry,
+	  const std::vector<std::vector<unsigned int>>& hyp_coord_permutations_table,
+	  const std::vector<std::vector<unsigned int>>& hyp_dimension_permutations_table
+	){
+		// Separate by coord permutations
+		std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> coord_permuted_entries =
+		separateByPermutationsWithLines<Dimension, NbrPointsPerLine>(
+		  lines_table_entry,
+			hyp_coord_permutations_table,
+			decltype(makeCoordPermutationsGenerator<Dimension, NbrPointsPerLine>())::getPermutationsNumber()
+		);
+
+		// Prepare table of sorted entries lines
+		std::vector<std::vector<std::array<unsigned int, NbrPointsPerLine>>> entries_sorted_lines;
+		entries_sorted_lines.resize(coord_permuted_entries.size());
+		for(unsigned int i_entry = 0; i_entry < coord_permuted_entries.size(); ++i_entry){
+			entries_sorted_lines[i_entry].reserve(coord_permuted_entries[i_entry].lines.size());
+			for(unsigned int i_line = 0; i_line < coord_permuted_entries[i_entry].lines.size(); ++i_line){
+				std::array<unsigned int, NbrPointsPerLine> sorted_line = coord_permuted_entries[i_entry].lines[i_line];
+				std::sort(sorted_line.begin(), sorted_line.end());
+				entries_sorted_lines[i_entry].push_back(std::move(sorted_line));
+			}
+		}
+
+		// Prepare processed entries joined flags and output table position
+		std::vector<bool> entry_is_joined;
+		std::vector<unsigned int> entry_output_table_pos;
+		entry_is_joined.resize(coord_permuted_entries.size(), false);
+		entry_output_table_pos.resize(coord_permuted_entries.size(), 0);
+
+		// Process entries: join with dimensions permutations
+		std::vector<VeldkampLineTableEntryWithLines<NbrPointsPerLine>> output_table;
+		for(unsigned int i_entry = 0; i_entry < coord_permuted_entries.size(); ++i_entry){
+			const VeldkampLineTableEntryWithLines<NbrPointsPerLine>& entry = coord_permuted_entries[i_entry];
+			if(entry_is_joined[i_entry]){
+				output_table[entry_output_table_pos[i_entry]].entry.count += coord_permuted_entries[i_entry].entry.count;
+				std::move(coord_permuted_entries[i_entry].lines.begin(), coord_permuted_entries[i_entry].lines.end(), output_table[entry_output_table_pos[i_entry]].lines.end());
+			}
+			else{
+				entry_is_joined[i_entry] = true;
+				entry_output_table_pos[i_entry] = static_cast<unsigned int>(output_table.size());
+				output_table.push_back(coord_permuted_entries[i_entry]);
 			}
 
 			for(const std::array<unsigned int, NbrPointsPerLine> line : entry.lines){
