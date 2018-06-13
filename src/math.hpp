@@ -12,10 +12,10 @@ namespace math {
 	}
 
 	template<unsigned int val>
-	constexpr unsigned int facorial = val * facorial<val - 1>;
+	constexpr unsigned int factorial = val * factorial<val - 1>;
 
 	template<>
-	constexpr unsigned int facorial<1> = 1;
+	constexpr unsigned int factorial<1> = 1;
 }
 
 

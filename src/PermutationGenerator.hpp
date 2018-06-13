@@ -142,7 +142,7 @@ namespace segre {
 		}
 
 		static constexpr unsigned int getPermutationsNumber(){
-			return math::facorial<nbrElements>;
+			return math::factorial<nbrElements>;
 		}
 
 	private:
