@@ -1,0 +1,130 @@
+%!TEX program = xelatex
+\PassOptionsToPackage{table,svgnames}{xcolor}
+\PassOptionsToPackage{english}{translator}
+\documentclass[aspectratio=169,11pt]{beamer}
+
+%----------------------------------------
+% Packages
+%----------------------------------------
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel} % Second language = main language
+\usepackage{translator}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage[justification=centering]{caption}
+\usepackage{float}
+\usepackage{standalone}
+\usepackage{import}
+% PGF-TikZ
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{pgf-umlsd}
+\usepackage{pgfgantt}
+
+%----------------------------------------
+% Theme
+%----------------------------------------
+
+% \usetheme{boxes}
+% \useoutertheme{infolines}
+% \usecolortheme{whale}%beaver
+% \usecolortheme{seagull}
+
+\usetheme[illustration=cover]{utbm}
+%\usetheme{utbm}
+
+% remove bottom line
+%\setbeamertemplate{footline}{}
+
+% remove navigation symbols.
+\beamertemplatenavigationsymbolsempty{}
+
+%\setbeamercovered{transparent}
+
+%----------------------------------------
+% Informations
+%----------------------------------------
+
+\title{Generation of the hyperplanes of  \texorpdfstring{$S_k(3)$}{S\_k(3)} }
+\subtitle{TX52}
+\author{Jérôme Boulmier, Maxime Pinard}
+\institute[UTBM]{Université de Technologie de Belfort Montbéliard}
+\date[2018-06-29]{29 June 2018}
+
+%\keywords{}
+\subject{TX52, Generation of the geometric hyperplanes of  \texorpdfstring{$S_k(3)$}{S\_k(3)}}
+%\logo{\includegraphics[width=0.12\textwidth]{cover}}
+
+%----------------------------------------
+% Configurations
+%----------------------------------------
+
+\graphicspath{{figures/}}
+
+% \AtBeginSection
+% {
+% 	\begin{frame}<beamer>
+% 		\vfill{}
+% 		\centering
+% 		\begin{beamercolorbox}[sep=8pt,center]{title}
+% 			\Huge\insertsectionhead\par%
+% 		\end{beamercolorbox}
+% 		\vfill{}
+% 	\end{frame}
+% }
+
+\AtBeginSection
+{
+	\begin{frame}[plain]
+		\utbmtitle{\insertsectionhead}
+	\end{frame}
+}
+
+\makeatletter
+\let\@@magyar@captionfix\relax
+\makeatother
+
+%----------------------------------------
+% Figures configuration
+%----------------------------------------
+
+\input{figures/figures_common}
+
+%---------------------------------
+% Colors
+\colorlet{points_boder_color}{black}%
+\colorlet{points_color}{white}%
+\colorlet{in_points_color}{black}%
+\colorlet{lines_color}{gray}%
+
+%---------------------------------
+% Sizes
+\pgfmathsetmacro\pointssep{100}%
+\pgfmathsetmacro\pointssize{10}%
+\pgfmathsetmacro\lineswidth{1}%
+
+\newcommand{\inPoints}{}
+
+%----------------------------------------
+% Document
+%----------------------------------------
+\begin{document}
+	\begin{frame}[plain,noframenumbering]
+		\titlepage
+	\end{frame}
+	\begin{frame}{Table of contents}
+		\tableofcontents
+	\end{frame}
+	\begin{frame}[plain]
+		\utbmclosingframe{Questions?}
+	\end{frame}
+\end{document}
