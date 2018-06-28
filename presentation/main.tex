@@ -21,6 +21,7 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage[justification=centering]{caption}
+\usepackage[nomessages]{fp}
 \usepackage{float}
 \usepackage{standalone}
 \usepackage{import}
@@ -98,6 +99,7 @@
 %----------------------------------------
 
 \input{figures/figures_common}
+\pgfmathsetmacro\pointsPerLine{4}
 
 %---------------------------------
 % Colors
@@ -121,18 +123,10 @@
 	\begin{frame}[plain,noframenumbering]
 		\titlepage
 	\end{frame}
-	\begin{frame}{Table of contents}
-		\tableofcontents
-	\end{frame}
-	\section{Working space: \texorpdfstring{$S_k(3)$}{S\_k(3)}}
-		\input{frame1}
-		\input{frame2}
-		\input{frame3}
-	\section{Hyperplanes}
-		\subsection{Definition}
-			\input{frame4}
-		\subsection{Generation of \texorpdfstring{$S_2(3)$}{S\_2(3)} hyperplanes}
-			\input{frame5}
+	% \begin{frame}{Table of contents}
+	% 	\tableofcontents
+	% \end{frame}
+	\input{frame_hyperplane_definition}
 	\begin{frame}[plain]
 		\utbmclosingframe{Questions?}
 	\end{frame}
