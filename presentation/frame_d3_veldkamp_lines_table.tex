@@ -1,0 +1,150 @@
+%!TEX root = ./main.tex
+
+\begin{frame}
+	\frametitle{Dimension 3 Veldkamp lines table}
+	\FPeval{\pointsTypeNumber}{clip(5)}%
+	\FPeval{\clineEnd}{clip(5+4)}%
+	\noindent\centering
+	\only<1>{%
+		\resizebox{!}{0.43\textheight}{%
+			\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+				\hline
+				\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal}\\
+				\cline{3-\clineEnd}
+				 & & Points & Lines & H1 & H2 & H3 & H4 & H5 & \\
+				\hline
+				\hline
+				1 & false & 0 & 0 &  0 &  0 &  0 &  0 &  4 & 324\\
+				\hline
+				2 & false & 4 & 1 &  0 &  0 &  0 &  4 &  0 & 576\\
+				\hline
+				3 & false & 8 & 2 &  0 &  0 &  4 &  0 &  0 & 1296\\
+				\hline
+				4 & false & 16 & 8 &  0 &  4 &  0 &  0 &  0 & 72\\
+				\hline
+				5 & true & 0 & 0 &  0 &  0 &  0 &  0 &  4 & 756\\
+				\hline
+				6 & true & 1 & 0 &  0 &  0 &  0 &  1 &  3 & 2304\\
+				\hline
+				7 & true & 2 & 0 &  0 &  0 &  0 &  2 &  2 & 10368\\
+				\hline
+				8 & true & 3 & 0 &  0 &  0 &  1 &  1 &  2 & 13824\\
+				\hline
+				9 & true & 4 & 0 &  0 &  1 &  0 &  0 &  3 & 1728\\
+				\hline
+				10 & true & 4 & 0 &  0 &  0 &  0 &  4 &  0 & 4032\\
+				\hline
+				11 & true & 4 & 0 &  0 &  0 &  2 &  0 &  2 & 31104\\
+				\hline
+				12 & true & 4 & 0 &  0 &  0 &  1 &  2 &  1 & 34560\\
+				\hline
+				13 & true & 4 & 1 &  0 &  0 &  0 &  4 &  0 & 1728\\
+				\hline
+				14 & true & 5 & 0 &  0 &  0 &  2 &  1 &  1 & 103680\\
+				\hline
+				15 & true & 5 & 0 &  0 &  0 &  1 &  3 &  0 & 20736\\
+				\hline
+				16 & true & 6 & 0 &  0 &  1 &  0 &  2 &  1 & 10368\\
+				\hline
+				17 & true & 6 & 0 &  0 &  0 &  3 &  0 &  1 & 69120\\
+				\hline
+				18 & true & 6 & 0 &  0 &  0 &  2 &  2 &  0 & 69120\\
+				\hline
+				19 & true & 6 & 0 &  0 &  1 &  1 &  0 &  2 & 10368\\
+				\hline
+				20 & true & 6 & 1 &  0 &  0 &  2 &  2 &  0 & 20736\\
+				\hline
+				21 & true & 7 & 0 &  0 &  1 &  1 &  1 &  1 & 41472\\
+				\hline
+				22 & true & 7 & 0 &  0 &  0 &  3 &  1 &  0 & 71424\\
+				\hline
+				23 & true & 7 & 1 &  0 &  1 &  0 &  3 &  0 & 2304\\
+				\hline
+				24 & true & 7 & 1 &  0 &  0 &  3 &  1 &  0 & 41472\\
+				\hline
+				25 & true & 8 & 0 &  0 &  2 &  0 &  0 &  2 & 3888\\
+				\hline
+				26 & true & 8 & 0 &  0 &  1 &  1 &  2 &  0 & 31104\\
+				\hline
+				27 & true & 8 & 0 &  0 &  0 &  4 &  0 &  0 & 5184\\
+				\hline
+				28 & true & 8 & 0 &  0 &  1 &  2 &  0 &  1 & 31104\\
+				\hline
+				29 & true & 8 & 1 &  0 &  0 &  4 &  0 &  0 & 62208\\
+				\hline
+				30 & true & 8 & 2 &  0 &  0 &  4 &  0 &  0 & 3888\\
+				\hline
+				31 & true & 9 & 0 &  1 &  0 &  1 &  0 &  2 & 6912\\
+				\hline
+				32 & true & 9 & 0 &  1 &  0 &  0 &  2 &  1 & 6912\\
+				\hline
+				33 & true & 9 & 1 &  0 &  1 &  2 &  1 &  0 & 20736\\
+				\hline
+				34 & true & 9 & 2 &  0 &  1 &  2 &  1 &  0 & 41472\\
+				\hline
+				35 & true & 10 & 0 &  1 &  0 &  1 &  1 &  1 & 6912\\
+				\hline
+				36 & true & 10 & 1 &  0 &  2 &  0 &  2 &  0 & 3456\\
+				\hline
+				37 & true & 10 & 1 &  0 &  1 &  3 &  0 &  0 & 13824\\
+				\hline
+				38 & true & 10 & 2 &  0 &  1 &  3 &  0 &  0 & 24192\\
+				\hline
+				39 & true & 10 & 3 &  1 &  0 &  0 &  3 &  0 & 256\\
+				\hline
+				40 & true & 12 & 2 &  1 &  0 &  2 &  1 &  0 & 20736\\
+				\hline
+				41 & true & 12 & 2 &  0 &  2 &  2 &  0 &  0 & 2592\\
+				\hline
+				42 & true & 12 & 3 &  0 &  2 &  2 &  0 &  0 & 20736\\
+				\hline
+				43 & true & 13 & 3 &  0 &  3 &  0 &  1 &  0 & 2304\\
+				\hline
+				44 & true & 13 & 3 &  1 &  1 &  0 &  2 &  0 & 3456\\
+				\hline
+				45 & true & 13 & 3 &  1 &  0 &  3 &  0 &  0 & 6912\\
+				\hline
+				46 & true & 13 & 4 &  1 &  0 &  3 &  0 &  0 & 3456\\
+				\hline
+				47 & true & 15 & 4 &  1 &  1 &  2 &  0 &  0 & 10368\\
+				\hline
+				48 & true & 16 & 4 &  0 &  4 &  0 &  0 &  0 & 72\\
+				\hline
+				49 & true & 16 & 8 &  0 &  4 &  0 &  0 &  0 & 216\\
+				\hline
+				50 & true & 18 & 6 &  2 &  0 &  2 &  0 &  0 & 864\\
+				\hline
+				51 & true & 19 & 9 &  1 &  3 &  0 &  0 &  0 & 384\\
+				\hline
+				52 & true & 22 & 10 &  2 &  2 &  0 &  0 &  0 & 864\\
+				\hline
+				53 & true & 28 & 15 &  4 &  0 &  0 &  0 &  0 & 48\\
+				\hline
+			\end{tabular}
+		}%
+	}%
+	\only<2->{%
+		\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+			\hline
+			\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal}\\
+			\cline{3-\clineEnd}
+			 & & Points & Lines & H1 & H2 & H3 & H4 & H5 & \\
+			\hline
+			\hline
+			1 & false & 0 & 0 &  0 &  0 &  0 &  0 &  4 & 324\\
+			\hline
+			2 & false & 4 & 1 &  0 &  0 &  0 &  4 &  0 & 576\\
+			\hline
+			3 & false & 8 & 2 &  0 &  0 &  4 &  0 &  0 & 1296\\
+			\hline
+			\ldots & \ldots & \ldots & \ldots &  \ldots &  \ldots &  \ldots &  \ldots &  \ldots & \ldots\\
+			\hline
+			51 & true & 19 & 9 &  1 &  3 &  0 &  0 &  0 & 384\\
+			\hline
+			52 & true & 22 & 10 &  2 &  2 &  0 &  0 &  0 & 864\\
+			\hline
+			53 & true & 28 & 15 &  4 &  0 &  0 &  0 &  0 & 48\\
+			\hline
+		\end{tabular}
+	}%
+\end{frame}
