@@ -1,0 +1,143 @@
+%!TEX root = ./main.tex
+
+\begin{frame}
+	%---------------------------------
+	% Geometry
+	\pgfmathsetmacro\dimension{2}% in [0,3]
+	\pgfmathsetmacro\pointsPerLine{3}% in [1,\infty[
+
+	%---------------------------------
+	% Auto config
+	\pgfmathsetmacro\xdim{\dimension>0}%
+	\pgfmathsetmacro\ydim{\dimension>1}%
+	\pgfmathsetmacro\zdim{\dimension>2}%
+	\pgfmathsetmacro\pointsPerLineMinusOne{\pointsPerLine-1}%
+	\pgfmathsetmacro\xnbr{\pointsPerLineMinusOne*\xdim}%
+	\pgfmathsetmacro\ynbr{\pointsPerLineMinusOne*\ydim}%
+	\pgfmathsetmacro\znbr{\pointsPerLineMinusOne*\zdim}%
+
+	\resizebox{\textwidth}{!}{
+		\begin{tikzpicture}[x={(1pt,0pt)},y={(0pt,1pt)},z={(0.45pt,0.35pt)},>=Latex]
+			\tikzset{point/.style={
+				draw,
+				circle,
+				minimum size=\pointsize,
+				inner sep=0,
+			}}
+
+			% Coordinates
+			\foreach \x in {0,...,\xnbr}
+			{
+				\foreach \y in {0,...,\ynbr}
+				{
+					\foreach \z in {0,...,\znbr}
+					{
+						\pgfmathsetmacro\num{int(\x+(\pointsPerLine*\y)+(\pointsPerLine*\pointsPerLine*\z))}
+						\coordinate (point\num) at (\pointssep*\x,\pointssep*\y,\pointssep*\z) {};
+						\coordinate (point_\x_\y_\z) at (\pointssep*\x,\pointssep*\y,\pointssep*\z) {};
+					}
+				}
+			}
+
+			% Lines
+			\foreach \x in {0,...,\xnbr}
+			{
+				\foreach \y in {0,...,\ynbr}
+				{
+					\foreach \z in {0,...,\znbr}
+					{
+						\ifthenelse{\x=0}{}{
+							\pgfmathsetmacro\lastx{int(\x-1)}
+							\draw[line width=\lineswidth,lines_color] (point_\lastx_\y_\z) -- (point_\x_\y_\z);
+						}
+						\ifthenelse{\y=0}{}{
+							\pgfmathsetmacro\lasty{int(\y-1)}
+							\draw[line width=\lineswidth,lines_color] (point_\x_\lasty_\z) -- (point_\x_\y_\z);
+						}
+						\ifthenelse{\z=0}{}{
+							\pgfmathsetmacro\lastz{int(\z-1)}
+							\draw[line width=\lineswidth,lines_color] (point_\x_\y_\lastz) -- (point_\x_\y_\z);
+						}
+					}
+				}
+			}
+
+			% Points and numbers
+			\foreach \x in {0,...,\xnbr}
+			{
+				\foreach \y in {0,...,\ynbr}
+				{
+					\foreach \z in {0,...,\znbr}
+					{
+						% Config
+						\pgfmathsetmacro\num{int(\x+(\pointsPerLine*\y)+(\pointsPerLine*\pointsPerLine*\z))}
+						\pgfmathsetmacro\pointsize{\pointssize*5/(5+\z+1)}
+
+						% Draw point
+						\node[
+							point,
+							points_boder_color,
+							fill=points_color
+						] at (point_\x_\y_\z.center) {};
+
+						% Number
+						\pgfmathsetmacro\num{int(\x+(\pointsPerLine*\y)+(\pointsPerLine*\pointsPerLine*\z))}
+						\uncover<1>{
+							\node[below right=3pt] at (point_\x_\y_\z.center) {(\x, \y)};
+						}
+						\uncover<2->{
+							\node[below right=3pt] at (point_\x_\y_\z.center) {$\x e_0 + \y e_1$};
+						}
+					}
+				}
+			}
+
+			\uncover<1>{
+				\draw[->,thick,blue] (point_0_0_0.center) -- node[above] {x} (point_1_0_0.center);
+				\draw[->,thick,blue] (point_0_0_0.center) -- node[right] {y} (point_0_1_0.center);
+			}
+			\uncover<2>{
+				\draw[->,thick,blue] (point_0_0_0.center) -- node[above] {$e_0$} (point_1_0_0.center);
+				\draw[->,thick,blue] (point_0_0_0.center) -- node[right] {$e_1$} (point_0_1_0.center);
+			}
+			\uncover<3->{
+				\draw[->,thick,red] (point_0_0_0.center) -- node[above right] {$e_0$} (point_2_0_0.center);
+				\draw[->,thick,green] (point_0_0_0.center) -- node[above right] {$e_1$} (point_0_2_0.center);
+				\draw[->,thick,blue] (point_0_0_0.center) -- node[above left] {$e_0 + e_1$} (point_2_2_0.center);
+				\draw[->,thick,purple] (point_0_0_0.center) to[out=22.5,in=-90] node[below right] {$2 e_0 + e_1$} (point_2_1_0.center) to[out=90,in=0] (point_1_2_0.center);
+			}
+
+			\node[anchor=center] at (3.5*\pointssep, \pointssep) {
+				\begin{minipage}{120pt}
+					\centering%
+					$GF(3) \otimes GF(3)$\\
+					\uncover<2->{
+						$\alpha e_0 + \beta e_1,\ (\alpha, \beta) \in \mathbb{F}_3$\\
+					}
+					\hfil\\
+					\uncover<3->{
+						4 directions:
+						\begin{itemize}
+							\item $e_0$
+							\item $e_1$
+							\item $e_0 + e_1$
+							\item $2 e_0 + e_1$
+						\end{itemize}
+						\hfil\\
+						\hfil\\
+						$P(GF(3) \times GF(3))$\\
+					}
+					\uncover<4->{
+						$=$\\
+						$PG(1,3)$\\
+					}
+				\end{minipage}
+			};
+
+			\node at (4.5*\pointssep, \pointssep) {};
+		\end{tikzpicture}
+	}%
+	\begin{tikzpicture}[remember picture,overlay,x={(1pt,0pt)},y={(0pt,1pt)}]
+		\node[anchor=south east] at ($(current page.south east)+(-3,10)$) {\tiny\textit{$GF(3) = \mathbb{F}_3$, GF stands for Gallois Field}};
+	\end{tikzpicture}
+\end{frame}
