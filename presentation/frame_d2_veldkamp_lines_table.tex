@@ -1,0 +1,26 @@
+%!TEX root = ./main.tex
+
+\begin{frame}
+	\frametitle{Dimension 2 Veldkamp lines table}
+	\FPeval{\pointsTypeNumber}{clip(2)}%
+	\FPeval{\clineEnd}{clip(2+4)}%
+	\noindent\centering
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\multirow{2}{*}{Id} & \multirow{2}{*}{Projective} & \multicolumn{2}{c|}{Core} & \multicolumn{\pointsTypeNumber}{c|}{Composition} & \multirow{2}{*}{cardinal}\\
+		\cline{3-\clineEnd}
+		 & & Points & Lines & H1 & H2 & \\
+		\hline
+		\hline
+		1 & false & 0 & 0 &  0 &  4 & 6\\
+		\hline
+		2 & true & 0 & 0 &  0 &  4 & 18\\
+		\hline
+		3 & true & 1 & 0 &  1 &  3 & 32\\
+		\hline
+		4 & true & 2 & 0 &  2 &  2 & 72\\
+		\hline
+		5 & true & 4 & 1 &  4 &  0 & 8\\
+		\hline
+	\end{tabular}
+\end{frame}
