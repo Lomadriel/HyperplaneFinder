@@ -1,0 +1,36 @@
+%!TEX root = ./main.tex
+
+\begin{frame}
+	\frametitle{Dimension 3 hyperplanes table}
+	\FPeval{\geometryDimension}{clip(3)}%
+	\FPeval{\ordersNumber}{clip(4)}%
+	\FPeval{\divNumber}{clip(9)}%
+	\FPeval{\subDimensionsNumber}{clip(3)}%
+	\FPeval{\subGeometriesNumber}{clip(2)}%
+	\FPeval{\subGeometriesNumberPlusOne}{clip(\subGeometriesNumber+1)}%
+	\FPeval{\clineStart}{clip(4+4)}%
+	\FPeval{\clineEnd}{clip(3+9+4)}%
+	\noindent
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+			\hline
+			\multirow{3}{*}{Id} & \multicolumn{2}{c|}{\multirow{2}{*}{Composition}} & \multicolumn{\ordersNumber}{c|}{\multirow{2}{*}{Points order}} & \multicolumn{\divNumber}{c|}{Sub-geometries} & \multirow{3}{*}{cardinal}\\
+			\cline{\clineStart-\clineEnd}
+			& \multicolumn{2}{c|}{} & \multicolumn{\ordersNumber}{c|}{} &  \multicolumn{\subGeometriesNumberPlusOne}{c|}{D1} &  \multicolumn{\subGeometriesNumberPlusOne}{c|}{D2} &  \multicolumn{\subGeometriesNumberPlusOne}{c|}{D3} & \\
+			\cline{2-\clineEnd}
+			& Points & Lines & 0 & 1 & 2 & 3 & H1 & H2 & Full & H1 & H2 & Full & H1 & H2 & Full & \\
+			\hline
+			\hline
+			1 & 37 & 21 & 0 & 0 & 27 & 10 & 3 & 0 & 1 & 3 & 0 & 1 & 3 & 0 & 1 & 64\\
+			\hline
+			2 & 28 & 12 & 0 & 12 & 12 & 4 & 0 & 3 & 1 & 4 & 0 & 0 & 4 & 0 & 0 & 288\\
+			\hline
+			3 & 22 & 6 & 4 & 12 & 6 & 0 & 2 & 2 & 0 & 2 & 2 & 0 & 2 & 2 & 0 & 1728\\
+			\hline
+			4 & 19 & 3 & 9 & 9 & 0 & 1 & 1 & 3 & 0 & 1 & 3 & 0 & 1 & 3 & 0 & 768\\
+			\hline
+			5 & 16 & 0 & 16 & 0 & 0 & 0 & 0 & 4 & 0 & 0 & 4 & 0 & 0 & 4 & 0 & 432\\
+			\hline
+		\end{tabular}
+	}
+\end{frame}
