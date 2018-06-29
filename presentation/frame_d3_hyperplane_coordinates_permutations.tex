@@ -1,0 +1,14 @@
+%!TEX root = ./main.tex
+
+\begin{frame}
+	\frametitle{Coordinates permutations}
+	\pgfmathsetmacro\dimension{3}%
+	\centering%
+	\renewcommand{\inPoints}{3,6,9,12,18,23,25,28,32,36,40,41,42,43,44,49,53,57,60,61,62,63}%
+	\renewcommand{\thePoints}{12,28,44,60,40,36,32}%
+	\resizebox{0.47\textwidth}{!}{\input{figures/geometry_print_points}}
+	\hspace{10pt}%
+	\renewcommand{\inPoints}{3,6,8,13,18,23,24,29,33,37,40,41,42,43,45,48,52,56,60,61,62,63}%
+	\renewcommand{\thePoints}{13,29,45,61,41,37,33}%
+	\resizebox{0.47\textwidth}{!}{\input{figures/geometry_print_points}}
+\end{frame}
