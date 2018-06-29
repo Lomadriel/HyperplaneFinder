@@ -1,0 +1,174 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{lstalgorithms}
+  [14/06/2018 V1.1, Maxime Pinard, algorithms listings styles]
+
+\RequirePackage{listings}
+\RequirePackage{caption}
+\RequirePackage{xcolor}
+
+\lstdefinestyle{default_style}{
+  %=======================================================================================================
+  %=================================================== Space and placement ===============================
+  %=======================================================================================================
+  %aboveskip=\medskipamount{},                       % Define the space above displayed listings.
+  %belowskip=\medskipamount{},                       % Define the space below displayed listings.
+  %lineskip=0pt,                                     % Specifies additional space between lines in listings.
+  %=======================================================================================================
+  %=================================================== The printed range =================================
+  %=======================================================================================================
+  %showlines=false,                                  % If true, the package prints empty lines at the end of listings. Otherwise these lines are dropped (but they count for line numbering).
+  %emptylines=[*]<number>,                           % Sets the maximum of empty lines allowed. If there is a block of more than <number> empty lines, only <number> ones are printed. With the star, the lines keep their original numbers.
+  %=======================================================================================================
+  %=================================================== Languages and styles ==============================
+  %=======================================================================================================
+  %style=style,                                      % Activates the key=value list stored with \lstdefinestyle.
+  %language=[<dialect>]<language>,                   % Activates a (dialect of a) programming language.
+  %alsolanguage=[<dialect>]<language>,               % Activates a (dialect of a) programming language in addition to the current active one.
+  %=======================================================================================================
+  %=================================================== Figure out the appearance =========================
+  %=======================================================================================================
+  %basicstyle={},                                    % Global code style.
+  %identifierstyle={},                               % Identifiers style.
+  %commentstyle=\itshape,                            % Comments style.
+  %stringstyle={},                                   % Strings style.
+  %keywordstyle=[<number>][*]\textbf,                % Keywords style. The optional <number> argument is the class number to which the style should be applied. If you use the optional star after the (optional) class number, the keywords are printed uppercase.
+  %classoffset=0,                                    % Is added to all class numbers before the styles, keywords, identifiers, etc. are assigned.
+  %emph=[<number>]{<identifier list>},               % Define the <identifier list> from `emphasize class <number>'.
+  %moreemph=[<number>]{<identifier list>},           % Add the <identifier list> from `emphasize class <number>'.
+  %deleteemph=[<number>]{<identifier list>},         % Remove the <identifier list> from `emphasize class <number>'.
+  %emphstyle=[<number>]{<style>},                    % Define the style for the `emphasize class <number>'.
+  %=======================================================================================================
+  %=================================================== Getting all characters right ======================
+  %=======================================================================================================
+  extendedchars=true,                                % Allows or prohibits extended characters in listings, that means (national) characters of codes 128-255.
+  %inputencoding=utf8,                               % Determines the input encoding. The usage of this key requires the inputenc package; nothing happens if it's not loaded.
+  tabsize=4,                                         % Number of spaces indented when discovering a tab.
+  showtabs=false,                                    % Make tabulators visible or invisible within strings adding particular underscores.
+  %tab=<tokens>,                                     % <tokens> is used to print a visible tabulator. You might want to use $\to$, $\mapsto$ or $\dashv$.
+  showspaces=false,                                  % Show spaces adding particular underscores.
+  showstringspaces=false,                            % Underline spaces within strings.
+  %=======================================================================================================
+  %=================================================== Line numbers ======================================
+  %=======================================================================================================
+  %numbers=<none|left|right>,                        % Makes the package either print no line numbers, or put them on the left or the right side of a listing.
+  %stepnumber=<number>,                              % All lines with "line number = 0 modulo <number>" get a line number.
+  %numberstyle={},                                   % Determines the font and size of the numbers.
+  %numbersep=10pt,                                   % Distance between number and listing.
+  %numberblanklines=true,                            % If this is set to false, blank lines get no printed line number.
+  %=======================================================================================================
+  %=================================================== Captions ==========================================
+  %=======================================================================================================
+  %captionpos=t,                                     % Specifies the positions of the caption: top and/or bottom of the listing.
+  %abovecaptionskip=\smallskipamount{},              % Is the vertical space above each caption.
+  %belowcaptionskip=\smallskipamount{},              % Is the vertical space below each caption.
+  %=======================================================================================================
+  %=================================================== Margins and line shape ============================
+  %=======================================================================================================
+  %linewidth=\linewidth{},                           % Defines the base line width for listings. The following three keys are taken into account additionally.
+  %xrightmargin=0pt,                                 % Dimensions used as extra margins on the right.
+  %xleftmargin=0pt,                                  % Dimensions used as extra margins on the left.
+  breaklines=true,                                   % Sets automatic line breaking.
+  breakatwhitespace=false,                           % If true, it allows line breaks only at white space.
+  %prebreak=--,                                      % Appear at the end of the current broken part of the line.
+  %postbreak=--,                                     % Appear at the beginning of the next broken part of the line.
+  %breakindent=20pt,                                 % The indention of the second, third,... line of broken lines.
+  %breakautoindent=true,                             % Activates or deactivates automatic indention of broken lines.
+  %=======================================================================================================
+  %=================================================== Frames ============================================
+  %=======================================================================================================
+  %frame=none,                                       % Draws either no frame, a single line on the left, at the top, at the bottom, at the top and bottom, a whole single frame, or a shadowbox.
+  %frame=<subset of trblTRBL>,                       % The characters trblTRBL designate lines at the top and bottom of a listing and to lines on the right and left. Upper case characters are used to draw double rules.
+  %frameround=<t|f><t|f><t|f><t|f>,                  % The four letters designate the top right, bottom right, bottom left and top left corner. In this order. t makes the according corner round.
+  %framesep=3pt,                                     % The size of the quarter circles.
+  %rulesep=2pt,                                      % Control the space between frame and listing and between double rules.
+  %framerule=0.4pt,                                  % Controls the width of the rules.
+  %framexleftmargin=0pt,                             % Dimension which are used additionally to framesep to make up the margin of a frame.
+  %framexrightmargin=0pt,                            % Dimension which are used additionally to framesep to make up the margin of a frame.
+  %framextopmargin=0pt,                              % Dimension which are used additionally to framesep to make up the margin of a frame.
+  %framexbottommargin=0pt,                           % Dimension which are used additionally to framesep to make up the margin of a frame.
+  %backgroundcolor=<color command>,                  % Specify the color of the background.
+  %rulecolor=<color command>,                        % Specify the color of the rules.
+  %fillcolor=<color command>,                        % Specify the color of the space between `text box'and first rule.
+  %rulesepcolor=<color command>,                     % Specify the color of the space between two rules.
+  %=======================================================================================================
+  %=================================================== Column alignment ==================================
+  %=======================================================================================================
+  columns=[c]fixed,                                  % Selects the column alignment.
+  %flexiblecolumns=false,                            % Selects the most recently selected exible or fixed column format.
+  keepspaces=true,                                   % Tells the package not to drop spaces to fix column alignment and always converts tabulators to spaces.
+  %basewidth={0.6em,0.45em},                         % Sets the width of a single character box for fixed and exible column mode (both to the same value or individually).
+  %=======================================================================================================
+  %=================================================== Escaping to LATEX =================================
+  %=======================================================================================================
+  %texcl=false,                                      % Activates or deactivates LATEX comment lines. If activated, comment line delimiters are printed as usual, but the comment line text is read as LATEX code and typeset in comment style.
+  %mathescape=true,                                  % Activates or deactivates special behavior of the dollar sign. If activated a dollar sign acts as TEX's text math shift.
+  %escapeinside=<character><character>,              % Is a generalization of escapechar. If the value is not empty, the package escapes to LATEX between the first and second character.
+  %escapebegin=<tokens>,                             % The tokens are executed at the beginning of each escape, in particular for texcl.
+  %escapeend=<tokens>,                               % The tokens are executed at the end of each escape, in particular for texcl.
+  %=======================================================================================================
+  %=================================================== Non ASCII symbols =================================
+  %=======================================================================================================
+  literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\euro}}1 {£}{{\pounds}}1 {«}{{\guillemotleft}}1
+  {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
+  % for complete UTF8 use \usepackage{listingsutf8} but this will only work for \lstinputlisting{...}.
+}
+
+\lstdefinestyle{default_algo_style}{
+  style=default_style,
+  basicstyle=\small\normalfont\sffamily,
+  keywordstyle=\textbf,
+  keywordstyle=[2]\ttfamily\itshape,
+  keywordstyle=[3]\underline,
+  mathescape=true,
+  stringstyle=\ttfamily,
+  literate=
+    {:=}{{$\gets$}}1
+    {<=}{{$\leq$}}1
+    {>=}{{$\geq$}}1
+    {!=}{{$\neq$}}1
+    {<>}{{$\neq$}}1
+    {*}{{$\times$}}1
+}
+
+\lstdefinestyle{algo_style}{
+  style=default_algo_style,
+  captionpos=t,
+  xleftmargin=10pt,
+  framexleftmargin=10pt,
+  framexrightmargin=17pt,
+  framexbottommargin=5pt,
+  framextopmargin=5pt,
+  belowskip=1em,
+  aboveskip=1em,
+  abovecaptionskip=0pt,
+  belowcaptionskip=7pt,
+}
+
+% A way to color digits can be found here: http://tex.stackexchange.com/a/40546
+
+\renewcommand{\lstlistingname}{Algorithm}
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}
+
+\DeclareCaptionFormat{algo}{\rule{\dimexpr\textwidth+17pt\relax}{0.4pt}\par\vskip1pt\textbf{#1#2}#3}
+
+% Require the algo language definition (available in the package file AlgorithmDefinition.sty)
+\newcommand{\lstinputalgo}[2][]{%
+  \captionsetup[lstlisting]{format=algo,singlelinecheck=false, margin=0pt, font={sf},labelsep=colon,labelfont=bf}
+  \lstinputlisting[language=algo, style=algo_style, #1]{#2}
+  \clearcaptionsetup{lstlisting}
+}
+
+\endinput

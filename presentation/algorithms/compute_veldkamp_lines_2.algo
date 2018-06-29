@@ -1,0 +1,15 @@
+		foreach combination {$h_a$, $h_b$} in $L$ do
+			$intersection_{ab}$ := $h_a \cap h_b$
+
+			if $intersection_{12}$ = $intersection_{ab}$ then
+				if $\#L$ = $2$ then
+					$PL$ := $PL \cup \{h_1, h_2, h_a, h_b\}$
+				else
+					$SNPL$ := $SNPL \cup \{h_1, h_2, h_a, h_b\}$
+				end
+			end
+		end
+	end
+
+	return $PL$, $SNPL$
+end

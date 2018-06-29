@@ -1,0 +1,20 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{AlgorithmDefinition}
+  [14/05/2017 V1.1, listings language file for Algorithm]
+
+\RequirePackage{listings}
+
+\lstalias{algo}{Algorithm}
+\lstalias{Algorithm}{Algorithm}
+\lstdefinelanguage{Algorithm}{
+  morekeywords={and, as, assert, break, class, continue, def, del, do, elif, else, end, except, exec, finally, for, each, foreach, from, function, global, if, import, in, is, lambda, not, or, pass, print, raise, return, then, to, try, return, while, with, yield},
+  morekeywords=[2]{true, false},
+  morekeywords=[3]{integer, int, character, char, boolean, bool, real, float, array},
+  sensitive=false,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+}[keywords,comments,strings]
+
+\endinput

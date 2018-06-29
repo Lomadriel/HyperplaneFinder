@@ -1,0 +1,18 @@
+// $PL$ is a set of projectives veldkamp lines
+// $SNPL$ is a set of supposed non projectives veldkamp lines
+function compute_all_veldkamp_lines($hyperplanes$):
+	$PL$ := $\{\varnothing\}$
+	$SNPL$ := $\{\varnothing\}$
+	foreach combination {$h_1$, $h_2$} in $hyperplanes$ do
+		$L$ := $\{\varnothing\}$
+		$intersection_{12}$ := $h_1 \cap h_2$
+
+		foreach $h_i$ in $hyperplanes$ do
+			$intersection_{1i}$ := $h_1 \cap h_i$
+			$intersection_{2i}$ := $h_2 \cap h_i$
+
+			if $intersection_{12}$ = $intersection_{1i}$ and
+				$intersection_{12}$ = $intersection_{2i}$ then
+				$L$ := $L \cup h_i$
+			end
+		end
