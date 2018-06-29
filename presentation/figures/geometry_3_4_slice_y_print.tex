@@ -1,0 +1,114 @@
+%---------------------------------
+% Geometry
+\pgfmathsetmacro\dimension{3}% in [0,3]
+\pgfmathsetmacro\pointsPerLine{4}% in [1,\infty[
+
+%---------------------------------
+% Colors
+\colorlet{color0}{red}%
+\colorlet{color1}{green}%
+\colorlet{color2}{blue}%
+\colorlet{color3}{orange}%
+
+%---------------------------------
+% Auto config
+\pgfmathsetmacro\xdim{\dimension>0}%
+\pgfmathsetmacro\ydim{\dimension>1}%
+\pgfmathsetmacro\zdim{\dimension>2}%
+\pgfmathsetmacro\pointsPerLineMinusOne{\pointsPerLine-1}%
+\pgfmathsetmacro\xnbr{\pointsPerLineMinusOne*\xdim}%
+\pgfmathsetmacro\ynbr{\pointsPerLineMinusOne*\ydim}%
+\pgfmathsetmacro\znbr{\pointsPerLineMinusOne*\zdim}%
+
+%---------------------------------
+% Figure
+\begin{tikzpicture}[x={(1pt,0pt)},y={(0pt,1pt)},z={(0.45pt,0.35pt)}]
+	\tikzset{point/.style={
+		draw,
+		circle,
+		minimum size=\pointsize,
+		inner sep=0,
+	}}
+
+	% Coordinates
+	\foreach \x in {0,...,\xnbr}
+	{
+		\foreach \y in {0,...,\ynbr}
+		{
+			\foreach \z in {0,...,\znbr}
+			{
+				\pgfmathsetmacro\num{int(\x+(\pointsPerLine*\y)+(\pointsPerLine*\pointsPerLine*\z))}
+				\coordinate (point\num) at (\pointssep*\x,\pointssep*\y,\pointssep*\z) {};
+				\coordinate (point_\x_\y_\z) at (\pointssep*\x,\pointssep*\y,\pointssep*\z) {};
+			}
+		}
+	}
+
+	% Slices
+	\begin{scope}[blend group=screen]
+		\foreach \y in {0,...,\ynbr}
+		{
+			\filldraw[color\y,fill=color\y,opacity=0.3] (point_0_\y_0.center) -- (point_3_\y_0.center) -- (point_3_\y_3.center) -- (point_0_\y_3.center) -- cycle;
+		}
+	\end{scope}
+
+	% Lines
+	\foreach \x in {0,...,\xnbr}
+	{
+		\foreach \y in {0,...,\ynbr}
+		{
+			\foreach \z in {0,...,\znbr}
+			{
+				\ifthenelse{\x=0}{}{
+					\pgfmathsetmacro\lastx{int(\x-1)}
+					\draw[line width=\lineswidth,lines_color] (point_\lastx_\y_\z) -- (point_\x_\y_\z);
+				}
+				\ifthenelse{\y=0}{}{
+					\pgfmathsetmacro\lasty{int(\y-1)}
+					\draw[line width=\lineswidth,lines_color] (point_\x_\lasty_\z) -- (point_\x_\y_\z);
+				}
+				\ifthenelse{\z=0}{}{
+					\pgfmathsetmacro\lastz{int(\z-1)}
+					\draw[line width=\lineswidth,lines_color] (point_\x_\y_\lastz) -- (point_\x_\y_\z);
+				}
+			}
+		}
+	}
+
+	% Points and numbers
+	\foreach \x in {0,...,\xnbr}
+	{
+		\foreach \y in {0,...,\ynbr}
+		{
+			\foreach \z in {0,...,\znbr}
+			{
+				% Config
+				\pgfmathsetmacro\num{int(\x+(\pointsPerLine*\y)+(\pointsPerLine*\pointsPerLine*\z))}
+				\pgfmathsetmacro\pointsize{\pointssize*5/(5+\z+1)}
+
+				% Draw point
+				\node[
+					point,
+					points_boder_color,
+					fill=points_color
+				] at (point_\x_\y_\z.center) {};
+
+				% Fill point if is in
+				\foreach \i in \inPoints
+				{
+					\ifthenelse{\num=\i}{
+						\node[
+							point,
+							points_boder_color,
+							fill=in_points_color
+						] at (point\i.center) {};
+					}{}
+				}
+
+				% Number
+				\pgfmathsetmacro\num{int(\x+(\pointsPerLine*\y)+(\pointsPerLine*\pointsPerLine*\z))}
+				\node[below right=3pt] at (point_\x_\y_\z.center) {\small\num};
+			}
+		}
+	}
+\end{tikzpicture}
