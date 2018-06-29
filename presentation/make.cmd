@@ -6,7 +6,7 @@ set DOCUMENTS_NAMES=main
 set NEEDS_BIBTEX=
 set NEEDS_MAKEGLOSSARIES=
 
-set PACKAGES_REQUIRED[main]=fontenc translator babel lmodern hyperref xcolor listings amsmath amssymb mathrsfs array tabularx multirow caption float standalone import pgf tikz pgf-umlsd pgfgantt beamercolorthemeutbm beamerinnerthemeutbm beamerouterthemeutbm beamerthemeutbm
+set PACKAGES_REQUIRED[main]=fontenc translator babel lmodern hyperref xcolor listings amsmath amssymb mathrsfs array tabularx multirow caption fp float standalone import pgf tikz pgf-umlsd pgfgantt beamercolorthemeutbm beamerinnerthemeutbm beamerouterthemeutbm beamerthemeutbm algorithms/AlgorithmDefinition algorithms/lstalgorithms
 
 rem =============================================================================
 rem Commands variables

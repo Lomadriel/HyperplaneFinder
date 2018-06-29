@@ -5,7 +5,7 @@ DOCUMENTS_NAMES=main
 NEEDS_BIBTEX=
 NEEDS_MAKEGLOSSARIES=
 
-PACKAGES_REQUIRED[main]=amsmath amssymb array caption fancyvrb float fontenc hyperref import inputenc listings lmodern mathrsfs multirow pdflscape pgf scalerel stackengine standalone tabularx textcomp tikz todonotes translator xcolor
+PACKAGES_REQUIRED[main]=fontenc translator babel lmodern hyperref xcolor listings amsmath amssymb mathrsfs array tabularx multirow caption fp float standalone import pgf tikz pgf-umlsd pgfgantt beamercolorthemeutbm beamerinnerthemeutbm beamerouterthemeutbm beamerthemeutbm algorithms/AlgorithmDefinition algorithms/lstalgorithms
 
 #=============================================================================
 # Commands variables

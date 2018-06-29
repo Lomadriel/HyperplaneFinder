@@ -1,0 +1,16 @@
+// $PL$ is a set of projectives veldkamp lines
+// $SNPL$ is a set of supposed non projectives veldkamp lines
+function distinguish_veldkamp_lines($PL$, $SNPL$):
+	foreach $line$ in $SNPL$ do
+		// Compute an hyperplane from a VL
+		$H$ := make_hyperplanes($line$)
+
+		$matrix$ := compute_associated_matrix($H$)
+		if rank($matrix$) < $2^{dimension + 1}$ then
+			$SNPL$ := $SNPL \backslash line$
+			$PL$ := $PL \cup line$
+		end
+	end
+
+	return $PL$, $SNPL$
+end
