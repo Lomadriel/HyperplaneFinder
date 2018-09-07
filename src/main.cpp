@@ -70,7 +70,7 @@ int main() {
 	//std::vector<std::vector<unsigned int>> permutations_table = segre::makePermutationsTable<3, PPL>(vPoints3);
 	//std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep = segre::separateByPermutations<3,PPL>(geometry3_lin_table_with_lines, permutations_table);
 
-	std::vector<std::vector<unsigned int>> coord_permutation_table = segre::makeCoordPermutationsTable<3, PPL>(vPoints3);
+	/*std::vector<std::vector<unsigned int>> coord_permutation_table = segre::makeCoordPermutationsTable<3, PPL>(vPoints3);
 	std::vector<std::vector<unsigned int>> dimension_permutation_table = segre::makeDimensionPermutationsTable<3, PPL>(vPoints3);
 	std::vector<segre::VeldkampLineTableEntry> geometry3_lin_table_sep_2steps = segre::separateBy2StepsPermutations<3,PPL>(geometry3_lin_table_with_lines, coord_permutation_table, dimension_permutation_table);
 
@@ -79,7 +79,7 @@ int main() {
 
 	std::sort(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), [] (const segre::HyperplaneTableEntry& a, const segre::HyperplaneTableEntry& b) {
 		return a.nbrPoints > b.nbrPoints;
-	});
+	});*/
 
 	const auto time_end = std::chrono::system_clock::now();
 	const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start);
@@ -97,8 +97,8 @@ int main() {
 	std::cout << "\nDimension 3 lines:\n";
 	std::copy(geometry3_lin_table.begin(), geometry3_lin_table.end(), std::ostream_iterator<segre::VeldkampLineTableEntry>(std::cout, "\n"));
 
-	std::cout << "\nDimension 4 points:\n";
-	std::copy(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));
+	/*std::cout << "\nDimension 4 points:\n";
+	std::copy(geometry4_hyp_table.begin(), geometry4_hyp_table.end(), std::ostream_iterator<segre::HyperplaneTableEntry>(std::cout, "\n"));*/
 
 	LatexPrinter printer;
 	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(2, geometry2_hyp_table, 0);
@@ -106,8 +106,8 @@ int main() {
 	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(3, geometry3_hyp_table, geometry2_hyp_table.size());
 	printer.generateLinesTable(3, geometry3_lin_table, geometry3_hyp_table.size());
 	//printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep, geometry3_hyp_table.size());
-	printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep_2steps, geometry3_hyp_table.size());
-	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(4, geometry4_hyp_table, geometry3_hyp_table.size());
+	/*printer.generateLinesDiffTable(3, geometry3_lin_table, geometry3_lin_table_sep_2steps, geometry3_hyp_table.size());
+	printer.generateHyperplanesTable<COMPUTE_AND_PRINT_POINTS_ORDER,PRINT_SUBGEOMETRIES>(4, geometry4_hyp_table, geometry3_hyp_table.size());*/
 
 	return EXIT_SUCCESS;
 }

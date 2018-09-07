@@ -249,7 +249,7 @@ namespace segre {
 			std::bitset<NbrPoints> intersection = line & potentialHyperplane;
 			std::size_t intersectionSize = intersection.count();
 
-			if (intersectionSize == 0) {
+			/*if (intersectionSize == 0) {
 				return false;
 			}
 
@@ -257,6 +257,9 @@ namespace segre {
 				if ((line & potentialHyperplane) != line) { // Test if line is included in potentialHyperplane.
 					return false;
 				}
+			}*/
+			if(intersectionSize % 2 == 0){
+				return false;
 			}
 		}
 

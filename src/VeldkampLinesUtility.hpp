@@ -206,7 +206,7 @@ namespace segre {
 			flags.push_back(false);
 		}
 		while(true){
-			const size_t pos = static_cast<const size_t>(std::find(flags.cbegin(), flags.cend(), false) - flags.cbegin());
+			const size_t pos = static_cast<size_t>(std::find(flags.cbegin(), flags.cend(), false) - flags.cbegin());
 			if(pos >= flags.size()) {
 				break;
 			}
@@ -246,7 +246,7 @@ namespace segre {
 			flags.push_back(false);
 		}
 		while(true){
-			const size_t pos = static_cast<const size_t>(std::find(flags.cbegin(), flags.cend(), false) - flags.cbegin());
+			const size_t pos = static_cast<size_t>(std::find(flags.cbegin(), flags.cend(), false) - flags.cbegin());
 			if(pos >= flags.size()) {
 				break;
 			}
