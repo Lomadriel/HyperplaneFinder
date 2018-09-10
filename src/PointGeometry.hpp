@@ -575,7 +575,7 @@ namespace segre {
 
 		std::vector<std::bitset<NbrPoints>> includedLines;
 		for (const std::bitset<NbrPoints>& line : m_geometryLines) {
-			if ((line & hyperplane) == line) {
+			if ((line & hyperplane).count() == 3) {
 				includedLines.push_back(line);
 			}
 		}
