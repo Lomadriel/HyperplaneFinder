@@ -53,6 +53,7 @@ class LatexPrinter{
 		static const std::string LINES_TABLE_OUTPUT_POSTFIX;
 		static const std::string DIFF_LINES_TABLE_OUTPUT_POSTFIX;
 		static const std::string HYPERPLANES_TABLE_OUTPUT_POSTFIX;
+		static const std::string DIFF_HYPERPLANES_TABLE_OUTPUT_POSTFIX;
 		static const std::string TABLES_DOCUMENT_OUTPUT;
 
 		static const std::string HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX;
@@ -94,6 +95,12 @@ public:
 	                              const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table,
 	                              size_t sub_geometries_number);
 
+	template<bool printPointsOrder, bool printSubgeometries>
+	void generateHyperplanesDiffTable(unsigned int geometry_dimension,
+	                                  const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table_old,
+	                                  const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table,
+	                                  size_t sub_geometries_number);
+
 	template<size_t Dimension, size_t NbrPointsPerLine>
 	std::string generateHyperplaneRepresentation(const std::bitset<math::pow(NbrPointsPerLine,Dimension)>& hyperplane);
 
@@ -129,9 +136,11 @@ void LatexPrinter::generateHyperplanesTable(unsigned int geometry_dimension,
 	data["printSubgeometries"] = print_subgeometries;
 	data["printPointsOrder"] = printPointsOrder;
 
+	int counter = Config::COUNT_FROM;
 	std::vector<json> hyperplanes_info;
 	for(const segre::HyperplaneTableEntry& entry : geometry_hyp_table){
 		json hyperplane_info;
+		hyperplane_info["id"] = std::to_string(counter++);
 		hyperplane_info["points"] = entry.nbrPoints;
 		hyperplane_info["lines"] = entry.nbrLines;
 
@@ -177,6 +186,87 @@ void LatexPrinter::generateHyperplanesTable(unsigned int geometry_dimension,
 	                        + Config::TABLES_OUTPUT_PREFIX
 	                        + std::to_string(geometry_dimension)
 	                        + Config::HYPERPLANES_TABLE_OUTPUT_POSTFIX;
+	m_environment.write(document, data, file_path);
+
+	m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_path);
+}
+
+template<bool printPointsOrder, bool printSubgeometries>
+void LatexPrinter::generateHyperplanesDiffTable(unsigned int geometry_dimension,
+                                                const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table_old,
+                                                const std::vector<segre::HyperplaneTableEntry>& geometry_hyp_table,
+                                                size_t sub_geometries_number) {
+	json data;
+	data["geometryDimension"] = geometry_dimension;
+	data["ordersNumber"] = geometry_dimension + 1;
+	data["subDimensionsNumber"] = geometry_dimension;
+	data["subGeometriesNumber"] = sub_geometries_number;
+	data["divNumber"] = geometry_dimension * (sub_geometries_number + 1);
+
+	const bool print_subgeometries = printSubgeometries && (sub_geometries_number > 0);
+	data["printSubgeometries"] = print_subgeometries;
+	data["printPointsOrder"] = printPointsOrder;
+
+	size_t counter = static_cast<size_t>(Config::COUNT_FROM);
+	size_t counter_old = static_cast<size_t>(Config::COUNT_FROM);
+	size_t hyperplanes_counter = 0;
+	std::vector<segre::HyperplaneTableEntry>::const_iterator old_it = geometry_hyp_table_old.cbegin();
+	std::vector<json> hyperplanes_info;
+	for(const segre::HyperplaneTableEntry& entry : geometry_hyp_table){
+		hyperplanes_counter += entry.count;
+		if(hyperplanes_counter > old_it->count){
+			hyperplanes_counter -= old_it->count;
+			++old_it;
+			++counter_old;;
+		}
+
+		json hyperplane_info;
+		hyperplane_info["id"] = std::to_string(counter++) + '/' + std::to_string(counter_old);
+		hyperplane_info["points"] = entry.nbrPoints;
+		hyperplane_info["lines"] = entry.nbrLines;
+
+		if(print_subgeometries){
+			std::vector<std::vector<size_t>> subgeometries_by_dimensions;
+			subgeometries_by_dimensions.reserve(geometry_dimension);
+			for(size_t i = 0; i < geometry_dimension; ++i){
+				std::vector<size_t> subgeometries;
+				subgeometries.reserve(sub_geometries_number+1);
+				for(size_t j = 0; j < sub_geometries_number; ++j){
+					const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometries[i].find(static_cast<long long int>(j));
+					subgeometries.push_back(it == entry.subgeometries[i].end() ? 0 : it->second);
+				}
+				const std::map<long long int, std::size_t>::const_iterator it = entry.subgeometries[i].find(-1);
+				subgeometries.push_back(it == entry.subgeometries[i].end() ? 0 : it->second);
+
+				subgeometries_by_dimensions.push_back(std::move(subgeometries));
+			}
+			hyperplane_info["subgeometries"] = std::move(subgeometries_by_dimensions);
+		}
+
+		if constexpr(printPointsOrder){
+			std::vector<unsigned int> points_order;
+			points_order.reserve(geometry_dimension + 1);
+			for(unsigned int i = 0; i <= geometry_dimension; ++i){
+				const std::map<unsigned int, unsigned int>::const_iterator it = entry.pointsOfOrder.find(i);
+				points_order.push_back(it == entry.pointsOfOrder.end() ? 0 : it->second);
+			}
+			hyperplane_info["pointsOrder"] = std::move(points_order);
+		};
+
+		hyperplane_info["cardinal"] = entry.count;
+
+		hyperplanes_info.push_back(std::move(hyperplane_info));
+	}
+	data["hyperplanes"] = std::move(hyperplanes_info);
+
+	inja::Template document = m_environment.parse_template(
+	  Config::TABLES_TEMPLATE_FOLDER
+	  + Config::HYPERPLANES_TABLE_TEMPLATE
+	);
+	std::string file_path = Config::TABLES_OUTPUT_FOLDER
+	                        + Config::TABLES_OUTPUT_PREFIX
+	                        + std::to_string(geometry_dimension)
+	                        + Config::DIFF_HYPERPLANES_TABLE_OUTPUT_POSTFIX;
 	m_environment.write(document, data, file_path);
 
 	m_generated_tables.emplace_back("Dimension " + std::to_string(geometry_dimension) + " hyperplanes", file_path);

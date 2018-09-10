@@ -35,6 +35,7 @@ const std::string LatexPrinter::Config::TABLES_OUTPUT_PREFIX = "dimension_";
 const std::string LatexPrinter::Config::LINES_TABLE_OUTPUT_POSTFIX = "_lines_table.tex";
 const std::string LatexPrinter::Config::DIFF_LINES_TABLE_OUTPUT_POSTFIX = "_diff_lines_table.tex";
 const std::string LatexPrinter::Config::HYPERPLANES_TABLE_OUTPUT_POSTFIX = "_hyperplanes_table.tex";
+const std::string LatexPrinter::Config::DIFF_HYPERPLANES_TABLE_OUTPUT_POSTFIX = "_diff_hyperplanes_table.tex";
 const std::string LatexPrinter::Config::TABLES_DOCUMENT_OUTPUT = "tables.tex";
 
 const std::string LatexPrinter::Config::HYPERPLANE_REPRESENTATION_OUTPUT_PREFIX = "hyperplane_representation_";

@@ -35,7 +35,7 @@
 		\hline
 		\hline
 <* for hyp in hyperplanes *>
-		<<count(index)>> & <<hyp/points>> & <<hyp/lines>> & <* if printPointsOrder *><* for order in hyp/pointsOrder*><<order>> & <* endfor *><* endif *><* if printSubgeometries *><* for dim in hyp/subgeometries *><* for val in dim *><<val>> & <* endfor *><* endfor *><* endif *><<hyp/cardinal>> & <<double(hyp/cardinal)>>\\
+		<<hyp/id>> & <<hyp/points>> & <<hyp/lines>> & <* if printPointsOrder *><* for order in hyp/pointsOrder*><<order>> & <* endfor *><* endif *><* if printSubgeometries *><* for dim in hyp/subgeometries *><* for val in dim *><<val>> & <* endfor *><* endfor *><* endif *><<hyp/cardinal>> & <<double(hyp/cardinal)>>\\
 		\hline
 <* endfor *>
 	\end{tabular}
